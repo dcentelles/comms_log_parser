@@ -6,270 +6,898 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>489</width>
-    <height>402</height>
+    <width>1220</width>
+    <height>707</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>DCComms Log Parser</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QLineEdit" name="txFileLineEdit">
+   <widget class="QGroupBox" name="groupBox_5">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>30</y>
-      <width>381</width>
-      <height>26</height>
+      <y>340</y>
+      <width>1191</width>
+      <height>381</height>
      </rect>
     </property>
-    <property name="readOnly">
-     <bool>true</bool>
+    <property name="title">
+     <string>Data-Link Layer</string>
     </property>
+    <widget class="QLabel" name="label_20">
+     <property name="geometry">
+      <rect>
+       <x>700</x>
+       <y>220</y>
+       <width>211</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Total fallos (errores+pérdidas): </string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="dl_parseTimesButton">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>150</y>
+       <width>111</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Parse Times</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="geometry">
+      <rect>
+       <x>280</x>
+       <y>190</y>
+       <width>241</width>
+       <height>105</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>RX time</string>
+     </property>
+     <widget class="QComboBox" name="dl_rxT0ComboBox">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>30</y>
+        <width>181</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_14">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>31</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>T0:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_15">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>60</y>
+        <width>31</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>T1:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="dl_rxT1ComboBox">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>60</y>
+        <width>181</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QLabel" name="label_18">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>90</y>
+       <width>59</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>RX:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_16">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>59</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>TX:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_22">
+     <property name="geometry">
+      <rect>
+       <x>700</x>
+       <y>180</y>
+       <width>151</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Paquetes perdidos:</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="dl_rxFileLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>541</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_17">
+     <property name="geometry">
+      <rect>
+       <x>700</x>
+       <y>60</y>
+       <width>151</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Paquetes transmitidos:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_21">
+     <property name="geometry">
+      <rect>
+       <x>700</x>
+       <y>100</y>
+       <width>151</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Paquetes recibidos:</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="dl_txFileLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>541</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_4">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>190</y>
+       <width>261</width>
+       <height>105</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>TX time</string>
+     </property>
+     <widget class="QComboBox" name="dl_txT0ComboBox">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>30</y>
+        <width>201</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_23">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>31</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>T0:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_24">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>60</y>
+        <width>31</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>T1:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="dl_txT1ComboBox">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>60</y>
+        <width>201</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QLabel" name="label_19">
+     <property name="geometry">
+      <rect>
+       <x>700</x>
+       <y>140</y>
+       <width>151</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Paquetes con errores:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_13">
+     <property name="geometry">
+      <rect>
+       <x>700</x>
+       <y>260</y>
+       <width>181</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>RX IPG (Inter-Packet-Gap):</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="dl_rxBrowseButton">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>110</y>
+       <width>80</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Browse</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="dl_txBrowseButton">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>60</y>
+       <width>80</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Browse</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="dl_errLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>910</x>
+       <y>140</y>
+       <width>113</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="dl_sendLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>910</x>
+       <y>60</y>
+       <width>113</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="dl_lostLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>910</x>
+       <y>180</y>
+       <width>113</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="dl_gapLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>910</x>
+       <y>260</y>
+       <width>113</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="dl_failsLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>910</x>
+       <y>220</y>
+       <width>113</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="dl_recvLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>910</x>
+       <y>100</y>
+       <width>113</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_49">
+     <property name="geometry">
+      <rect>
+       <x>1070</x>
+       <y>30</y>
+       <width>111</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>TX Data Rate:</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="dl_txDataRate">
+     <property name="geometry">
+      <rect>
+       <x>1070</x>
+       <y>60</y>
+       <width>113</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_50">
+     <property name="geometry">
+      <rect>
+       <x>1070</x>
+       <y>100</y>
+       <width>111</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>RX Data Rate:</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="dl_rxDataRate">
+     <property name="geometry">
+      <rect>
+       <x>1070</x>
+       <y>130</y>
+       <width>113</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QToolButton" name="dl_computeButton">
+     <property name="geometry">
+      <rect>
+       <x>830</x>
+       <y>30</y>
+       <width>101</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Compute</string>
+     </property>
+    </widget>
    </widget>
-   <widget class="QPushButton" name="txBrowseButton">
+   <widget class="QGroupBox" name="groupBox_6">
     <property name="geometry">
      <rect>
-      <x>400</x>
-      <y>30</y>
-      <width>80</width>
-      <height>26</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Browse</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
+      <x>10</x>
       <y>10</y>
-      <width>59</width>
-      <height>18</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>TX:</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>60</y>
-      <width>59</width>
-      <height>18</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>RX:</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="rxFileLineEdit">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>80</y>
-      <width>381</width>
-      <height>26</height>
-     </rect>
-    </property>
-    <property name="readOnly">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="rxBrowseButton">
-    <property name="geometry">
-     <rect>
-      <x>400</x>
-      <y>80</y>
-      <width>80</width>
-      <height>26</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Browse</string>
-    </property>
-   </widget>
-   <widget class="QToolButton" name="computeIPGButton">
-    <property name="geometry">
-     <rect>
-      <x>110</x>
-      <y>280</y>
-      <width>91</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>IPG</string>
-    </property>
-   </widget>
-   <widget class="QToolButton" name="computeDataButton">
-    <property name="geometry">
-     <rect>
-      <x>210</x>
-      <y>280</y>
-      <width>71</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Data</string>
-    </property>
-   </widget>
-   <widget class="QToolButton" name="computePacketLossButton">
-    <property name="geometry">
-     <rect>
-      <x>290</x>
-      <y>280</y>
-      <width>71</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Packet
-Loss</string>
-    </property>
-   </widget>
-   <widget class="QGroupBox" name="groupBox">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>160</y>
-      <width>231</width>
-      <height>105</height>
+      <width>1191</width>
+      <height>311</height>
      </rect>
     </property>
     <property name="title">
-     <string>TX time</string>
+     <string>Application Layer</string>
     </property>
-    <widget class="QComboBox" name="txT0ComboBox">
+    <widget class="QLabel" name="label_37">
      <property name="geometry">
       <rect>
-       <x>50</x>
+       <x>720</x>
+       <y>220</y>
+       <width>194</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Total fallos (errores+pérdidas): </string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="app_parseTimesButton">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>150</y>
+       <width>111</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Parse Times</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_9">
+     <property name="geometry">
+      <rect>
+       <x>290</x>
+       <y>190</y>
+       <width>251</width>
+       <height>105</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>RX time</string>
+     </property>
+     <widget class="QComboBox" name="app_rxT0ComboBox">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>30</y>
+        <width>191</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_38">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>31</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>T0:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_39">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>60</y>
+        <width>31</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>T1:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="app_rxT1ComboBox">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>60</y>
+        <width>191</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QLabel" name="label_40">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>90</y>
+       <width>59</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>RX:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_41">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>40</y>
+       <width>59</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>TX:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_42">
+     <property name="geometry">
+      <rect>
+       <x>720</x>
+       <y>180</y>
+       <width>134</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Imágenes perdidas:</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="app_rxFileLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>541</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_43">
+     <property name="geometry">
+      <rect>
+       <x>720</x>
+       <y>60</y>
+       <width>134</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Imágenes transmitidos:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_44">
+     <property name="geometry">
+      <rect>
+       <x>720</x>
+       <y>100</y>
+       <width>134</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Imágenes recibidas:</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="app_txFileLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>541</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_10">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>190</y>
+       <width>271</width>
+       <height>105</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>TX time</string>
+     </property>
+     <widget class="QComboBox" name="app_txT0ComboBox">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>30</y>
+        <width>211</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_45">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>31</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>T0:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_46">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>60</y>
+        <width>31</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>T1:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="app_txT1ComboBox">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>60</y>
+        <width>211</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QLabel" name="label_47">
+     <property name="geometry">
+      <rect>
+       <x>720</x>
+       <y>140</y>
+       <width>134</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Imágenes con errores:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_48">
+     <property name="geometry">
+      <rect>
+       <x>720</x>
+       <y>260</y>
+       <width>154</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>RX IIG (Inter-Image-Gap):</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="app_rxBrowseButton">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>110</y>
+       <width>85</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Browse</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="app_txBrowseButton">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>60</y>
+       <width>85</width>
+       <height>26</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Browse</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="app_sendLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>920</x>
+       <y>60</y>
+       <width>96</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="app_recvLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>920</x>
+       <y>100</y>
+       <width>96</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="app_errLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>920</x>
+       <y>140</y>
+       <width>96</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="app_lostLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>920</x>
+       <y>180</y>
+       <width>96</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="app_failsLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>920</x>
+       <y>220</y>
+       <width>96</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="app_gapLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>920</x>
+       <y>260</y>
+       <width>96</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QToolButton" name="app_computeButton">
+     <property name="geometry">
+      <rect>
+       <x>810</x>
        <y>30</y>
-       <width>161</width>
+       <width>84</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Compute</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_52">
+     <property name="geometry">
+      <rect>
+       <x>1080</x>
+       <y>30</y>
+       <width>94</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>TX Data Rate:</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="app_txDataRate">
+     <property name="geometry">
+      <rect>
+       <x>1080</x>
+       <y>60</y>
+       <width>96</width>
        <height>22</height>
       </rect>
      </property>
     </widget>
-    <widget class="QLabel" name="label_3">
+    <widget class="QLabel" name="label_51">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>30</y>
-       <width>31</width>
-       <height>21</height>
+       <x>1080</x>
+       <y>100</y>
+       <width>94</width>
+       <height>16</height>
       </rect>
      </property>
      <property name="text">
-      <string>T0:</string>
+      <string>RX Data Rate:</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_4">
+    <widget class="QLineEdit" name="app_rxDataRate">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>60</y>
-       <width>31</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>T1:</string>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="txT1ComboBox">
-     <property name="geometry">
-      <rect>
-       <x>50</x>
-       <y>60</y>
-       <width>161</width>
+       <x>1080</x>
+       <y>130</y>
+       <width>96</width>
        <height>22</height>
       </rect>
      </property>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="groupBox_2">
-    <property name="geometry">
-     <rect>
-      <x>250</x>
-      <y>160</y>
-      <width>231</width>
-      <height>105</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>RX time</string>
-    </property>
-    <widget class="QComboBox" name="rxT0ComboBox">
-     <property name="geometry">
-      <rect>
-       <x>50</x>
-       <y>30</y>
-       <width>161</width>
-       <height>22</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_5">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>30</y>
-       <width>31</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>T0:</string>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_6">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>60</y>
-       <width>31</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>T1:</string>
-     </property>
-    </widget>
-    <widget class="QComboBox" name="rxT1ComboBox">
-     <property name="geometry">
-      <rect>
-       <x>50</x>
-       <y>60</y>
-       <width>161</width>
-       <height>22</height>
-      </rect>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QPushButton" name="parseTimesButton">
-    <property name="geometry">
-     <rect>
-      <x>190</x>
-      <y>120</y>
-      <width>111</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Parse Times</string>
-    </property>
-   </widget>
+   <zorder>groupBox_5</zorder>
+   <zorder>groupBox_6</zorder>
+   <zorder>groupBox_6</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>489</width>
+     <width>1220</width>
      <height>19</height>
     </rect>
    </property>
