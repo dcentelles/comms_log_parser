@@ -148,6 +148,17 @@ void MainWindow::on_app_computeButton_clicked()
     ui->app_sendLineEdit->clear();
     ui->app_sendLineEdit->insert(QString::number(transmittedImages.count ()));
 
+    float txGap, txGapSd;
+
+    DataRegister::GetGapData (transmittedImages,
+                              txGap, txGapSd);
+
+    ui->app_txGapLineEdit->clear();
+    ui->app_txGapLineEdit->insert(QString::number(txGap));
+
+    ui->app_txGapSdLineEdit->clear();
+    ui->app_txGapSdLineEdit->insert(QString::number(txGapSd));
+
     //RX
     auto rxt0 = QDateTime::fromString (ui->app_rxT0ComboBox->currentText(),
                                     DataRegister::timeFormat);
@@ -171,6 +182,17 @@ void MainWindow::on_app_computeButton_clicked()
 
     ui->app_lostLineEdit->clear();
     ui->app_lostLineEdit->insert(QString::number(appTotalFallos - errors.count()));
+
+    float rxGap, rxGapSd;
+
+    DataRegister::GetGapData (receivedImages,
+                              rxGap, rxGapSd);
+
+    ui->app_rxGapLineEdit->clear();
+    ui->app_rxGapLineEdit->insert(QString::number(rxGap));
+
+    ui->app_rxGapSdLineEdit->clear();
+    ui->app_rxGapSdLineEdit->insert(QString::number(rxGapSd));
 }
 
 void MainWindow::on_dl_txBrowseButton_clicked()
@@ -229,6 +251,17 @@ void MainWindow::on_dl_computeButton_clicked()
   ui->dl_sendLineEdit->clear();
   ui->dl_sendLineEdit->insert(QString::number(transmittedPackets.count ()));
 
+  float txGap, txGapSd;
+
+  DataRegister::GetGapData (transmittedPackets,
+                            txGap, txGapSd);
+
+  ui->dl_txGapLineEdit->clear();
+  ui->dl_txGapLineEdit->insert(QString::number(txGap));
+
+  ui->dl_txGapSdLineEdit->clear();
+  ui->dl_txGapSdLineEdit->insert(QString::number(txGapSd));
+
   //RX
   auto rxt0 = QDateTime::fromString (ui->dl_rxT0ComboBox->currentText(),
                                   DataRegister::timeFormat);
@@ -253,5 +286,15 @@ void MainWindow::on_dl_computeButton_clicked()
   ui->dl_lostLineEdit->clear();
   ui->dl_lostLineEdit->insert(QString::number(dlTotalFallos - errors.count()));
 
+  float rxGap, rxGapSd;
+
+  DataRegister::GetGapData (receivedPackets,
+                            rxGap, rxGapSd);
+
+  ui->dl_rxGapLineEdit->clear();
+  ui->dl_rxGapLineEdit->insert(QString::number(rxGap));
+
+  ui->dl_rxGapSdLineEdit->clear();
+  ui->dl_rxGapSdLineEdit->insert(QString::number(rxGapSd));
 
 }

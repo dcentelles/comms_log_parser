@@ -31,6 +31,9 @@ public:
       QDateTime t0,
       QDateTime t1);
 
+  static void GetGapData(QList<DataRegisterPtr> data, float & gap,
+                                                      float & gapSd);
+
   static const QString timeFormat;
   DataRegister();
   DataRegister(int size, const QString & time);

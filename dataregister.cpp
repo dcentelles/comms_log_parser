@@ -1,5 +1,5 @@
 #include "dataregister.h"
-
+#include <qmath.h>
 
 const QString DataRegister::timeFormat =  "yyyy-MM-dd HH:mm:ss.zzz";
 
@@ -100,3 +100,32 @@ QList<DataRegisterPtr> DataRegister::GetInterval(QList<DataRegisterPtr> data, QD
   return result;
 }
 
+void DataRegister::GetGapData(QList<DataRegisterPtr> data, float & gap,
+                                                   float & gapSd)
+{
+    gap = 0;
+    gapSd = 0;
+
+    if(data.count() > 0)
+    {
+        auto t0 = data[0]->GetDateTime ();
+        for (auto reg : data)
+        {
+          auto t1 = reg->GetDateTime ();
+          gap += t0.msecsTo (t1);
+          t0 = t1;
+        }
+        gap = gap / data.count();
+
+        t0 = data[0]->GetDateTime ();
+        for (auto reg : data)
+        {
+          auto t1 = reg->GetDateTime ();
+          auto _gap = t0.msecsTo (t1);
+          auto diff = _gap-gap;
+          gapSd += diff*diff;
+          t0 = t1;
+        }
+        gapSd = qSqrt (gapSd/data.count());
+    }
+}

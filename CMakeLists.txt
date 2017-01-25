@@ -28,6 +28,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+add_definitions(-std=c++11)
 
 set(${PROJECT_NAME}_LIB ${PROJECT_NAME}_lib)
 
