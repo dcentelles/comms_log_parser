@@ -51,12 +51,18 @@ private:
   Ui::MainWindow *ui;
   QString appTxFileName, appRxFileName,
   dlTxFileName, dlRxFileName;
-  QRegularExpression dlTxPattern, appTxPattern, dlRxPattern, appRxPattern;
+  QRegularExpression
+  dlTxPattern, appTxPattern,
+  dlErrPattern,appErrPattern,
+  dlRxPattern, appRxPattern;
+
   QList<QString> appTxList;
   QString appDefaultPath;
   QString logTimeFormat;
-  QList<DataRegisterPtr> appTxDataList, appRxDataList,
-  dlRxDataList, dlTxDataList;
+  QList<DataRegisterPtr>
+  appTxDataList, appRxDataList,
+  dlRxDataList, dlTxDataList,
+  appErrDataList, dlErrDataList;
 
 };
 

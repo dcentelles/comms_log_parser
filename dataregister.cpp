@@ -73,25 +73,30 @@ QList<DataRegisterPtr> DataRegister::GetInterval(QList<DataRegisterPtr> data, QD
   for(idx0 = 0; idx0 < data.count(); idx0++)
     {
       auto datetime =  data.at(idx0)->GetDateTime ();
-       if(datetime > t0)
+       if(t0 < datetime)
        {
          idx0 -= 1;
          break;
        }
     }
 
+  if(idx0 == -1)
+    idx0 = 0;
+
   int idx1;
   for(idx1 = idx0; idx1 < data.count(); idx1++)
     {
       auto datetime =  data.at(idx1)->GetDateTime ();
-      if(datetime > t1)
+      if(t1 < datetime)
         {
           idx1 -= 1;
           break;
         }
     }
-  auto result = data.mid(idx0, idx1 - idx0);
-  return result;
+  QList<DataRegisterPtr> result;
+  if(idx0 <= idx1)
+    result = data.mid(idx0, idx1 - idx0);
 
+  return result;
 }
 

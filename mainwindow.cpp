@@ -29,12 +29,21 @@ void MainWindow::init()
     "RX: received frame without errors \\(FS: (\\d+)\\)"
       ));
 
+
+  dlErrPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
+    "RX: received frame with errors. Frame will be discarded \\(FS: (\\d+)\\)"
+      ));
+
   appTxPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
     "TX: image transmission completed"
       ));
 
   appRxPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
     "RX: the received trunk is the last of an image"
+      ));
+
+  appErrPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
+    "RX: image received with errors... (some packets were lost)"
       ));
 }
 
@@ -86,15 +95,19 @@ void MainWindow::parseTimes(QList<DataRegisterPtr> & coll,
             coll.append(dataRegister);
           }
         }
-      t0->clear ();
-      t1->clear ();
-
-      for(auto it = coll.begin ();
-          it != coll.end();
-          it++)
+      if(t0 != NULL && t1 != NULL)
         {
-          t0->addItem ((*it)->GetDateTimeAsString ());
-          t1->addItem ((*it)->GetDateTimeAsString ());
+          t0->clear ();
+          t1->clear ();
+
+          for(auto it = coll.begin ();
+              it != coll.end();
+              it++)
+            {
+
+              t0->addItem ((*it)->GetDateTimeAsString ());
+              t1->addItem ((*it)->GetDateTimeAsString ());
+            }
         }
     }
   data.close();
@@ -113,10 +126,18 @@ void MainWindow::on_app_parseTimesButton_clicked()
               appRxPattern,
               ui->app_rxT0ComboBox,
               ui->app_rxT1ComboBox);
+
+  parseTimes (appErrDataList,
+              appRxFileName,
+              appErrPattern,
+              NULL,
+              NULL);
+
 }
 
 void MainWindow::on_app_computeButton_clicked()
 {
+   //TX
    auto txt0 = QDateTime::fromString (ui->app_txT0ComboBox->currentText(),
                                    DataRegister::timeFormat);
    auto txt1 = QDateTime::fromString (ui->app_txT1ComboBox->currentText(),
@@ -127,6 +148,7 @@ void MainWindow::on_app_computeButton_clicked()
     ui->app_sendLineEdit->clear();
     ui->app_sendLineEdit->insert(QString::number(transmittedImages.count ()));
 
+    //RX
     auto rxt0 = QDateTime::fromString (ui->app_rxT0ComboBox->currentText(),
                                     DataRegister::timeFormat);
     auto rxt1 = QDateTime::fromString (ui->app_rxT1ComboBox->currentText(),
@@ -137,6 +159,18 @@ void MainWindow::on_app_computeButton_clicked()
     ui->app_recvLineEdit->clear();
     ui->app_recvLineEdit->insert(QString::number(receivedImages.count()));
 
+    auto appTotalFallos = transmittedImages.count() - receivedImages.count();
+
+    ui->app_failsLineEdit->clear();
+    ui->app_failsLineEdit->insert(QString::number(appTotalFallos));
+
+    auto errors = DataRegister::GetInterval (appErrDataList, rxt0, rxt1);
+
+    ui->app_errLineEdit->clear();
+    ui->app_errLineEdit->insert(QString::number(errors.count()));
+
+    ui->app_lostLineEdit->clear();
+    ui->app_lostLineEdit->insert(QString::number(appTotalFallos - errors.count()));
 }
 
 void MainWindow::on_dl_txBrowseButton_clicked()
@@ -173,11 +207,18 @@ void MainWindow::on_dl_parseTimesButton_clicked()
               ui->dl_rxT0ComboBox,
               ui->dl_rxT1ComboBox);
 
+  parseTimes (dlErrDataList,
+              dlRxFileName,
+              dlErrPattern,
+              NULL,
+              NULL);
+
 
 }
 
 void MainWindow::on_dl_computeButton_clicked()
 {
+  //TX
   auto txt0 = QDateTime::fromString (ui->dl_txT0ComboBox->currentText(),
                                   DataRegister::timeFormat);
   auto txt1 = QDateTime::fromString (ui->dl_txT1ComboBox->currentText(),
@@ -188,6 +229,7 @@ void MainWindow::on_dl_computeButton_clicked()
   ui->dl_sendLineEdit->clear();
   ui->dl_sendLineEdit->insert(QString::number(transmittedPackets.count ()));
 
+  //RX
   auto rxt0 = QDateTime::fromString (ui->dl_rxT0ComboBox->currentText(),
                                   DataRegister::timeFormat);
   auto rxt1 = QDateTime::fromString (ui->dl_rxT1ComboBox->currentText(),
@@ -197,4 +239,19 @@ void MainWindow::on_dl_computeButton_clicked()
 
   ui->dl_recvLineEdit->clear();
   ui->dl_recvLineEdit->insert(QString::number(receivedPackets.count ()));
+
+  auto dlTotalFallos = transmittedPackets.count() - receivedPackets.count();
+
+  ui->dl_failsLineEdit->clear();
+  ui->dl_failsLineEdit->insert(QString::number(dlTotalFallos));
+
+  auto errors = DataRegister::GetInterval (dlErrDataList, rxt0, rxt1);
+
+  ui->dl_errLineEdit->clear();
+  ui->dl_errLineEdit->insert(QString::number(errors.count()));
+
+  ui->dl_lostLineEdit->clear();
+  ui->dl_lostLineEdit->insert(QString::number(dlTotalFallos - errors.count()));
+
+
 }
