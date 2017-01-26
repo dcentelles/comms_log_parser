@@ -39,7 +39,7 @@ void MainWindow::init()
       ));
 
   appRxPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
-    "RX: the received trunk is the last of an image"
+    "RX: the received trunk is (the last of an image|also the last of an image)"
       ));
 
   appErrPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
@@ -137,62 +137,84 @@ void MainWindow::on_app_parseTimesButton_clicked()
 
 void MainWindow::on_app_computeButton_clicked()
 {
-   //TX
-   auto txt0 = QDateTime::fromString (ui->app_txT0ComboBox->currentText(),
-                                   DataRegister::timeFormat);
-   auto txt1 = QDateTime::fromString (ui->app_txT1ComboBox->currentText(),
-                                   DataRegister::timeFormat);
+    QList<DataRegisterPtr> txDataListFiltered,
+                           rxDataListFiltered;
+    computeData(
+                ui->app_txT0,
+                ui->app_txT1,
+                ui->app_rxT0,
+                ui->app_rxT1,
 
-    auto transmittedImages = DataRegister::GetInterval (appTxDataList, txt0, txt1);
+                ui->app_sendLineEdit,
 
-    ui->app_sendLineEdit->clear();
-    ui->app_sendLineEdit->insert(QString::number(transmittedImages.count ()));
+                ui->app_txGapLineEdit,
+                ui->app_txGapSdLineEdit,
 
-    float txGap, txGapSd;
+                ui->app_recvLineEdit,
+                ui->app_failsLineEdit,
+                ui->app_errLineEdit,
+                ui->app_lostLineEdit,
 
-    DataRegister::GetGapData (transmittedImages,
-                              txGap, txGapSd);
+                ui->app_rxGapLineEdit,
+                ui->app_rxGapSdLineEdit,
 
-    ui->app_txGapLineEdit->clear();
-    ui->app_txGapLineEdit->insert(QString::number(txGap));
+                ui->app_rxDataRate,
+                ui->app_txDataRate,
 
-    ui->app_txGapSdLineEdit->clear();
-    ui->app_txGapSdLineEdit->insert(QString::number(txGapSd));
+                appTxDataList,
+                appRxDataList,
 
-    //RX
-    auto rxt0 = QDateTime::fromString (ui->app_rxT0ComboBox->currentText(),
-                                    DataRegister::timeFormat);
-    auto rxt1 = QDateTime::fromString (ui->app_rxT1ComboBox->currentText(),
-                                    DataRegister::timeFormat);
+                appErrDataList,
 
-    auto receivedImages = DataRegister::GetInterval (appRxDataList, rxt0, rxt1);
+                txDataListFiltered,
+                rxDataListFiltered
+                );
+}
 
-    ui->app_recvLineEdit->clear();
-    ui->app_recvLineEdit->insert(QString::number(receivedImages.count()));
 
-    auto appTotalFallos = transmittedImages.count() - receivedImages.count();
+void MainWindow::on_dl_computeButton_clicked()
+{
+    QList<DataRegisterPtr> txDataListFiltered,
+                           rxDataListFiltered;
+    computeData(
+                ui->dl_txT0,
+                ui->dl_txT1,
+                ui->dl_rxT0,
+                ui->dl_rxT1,
 
-    ui->app_failsLineEdit->clear();
-    ui->app_failsLineEdit->insert(QString::number(appTotalFallos));
+                ui->dl_sendLineEdit,
 
-    auto errors = DataRegister::GetInterval (appErrDataList, rxt0, rxt1);
+                ui->dl_txGapLineEdit,
+                ui->dl_txGapSdLineEdit,
 
-    ui->app_errLineEdit->clear();
-    ui->app_errLineEdit->insert(QString::number(errors.count()));
+                ui->dl_recvLineEdit,
+                ui->dl_failsLineEdit,
+                ui->dl_errLineEdit,
+                ui->dl_lostLineEdit,
 
-    ui->app_lostLineEdit->clear();
-    ui->app_lostLineEdit->insert(QString::number(appTotalFallos - errors.count()));
+                ui->dl_rxGapLineEdit,
+                ui->dl_rxGapSdLineEdit,
 
-    float rxGap, rxGapSd;
+                ui->dl_rxDataRate,
+                ui->dl_txDataRate,
 
-    DataRegister::GetGapData (receivedImages,
-                              rxGap, rxGapSd);
+                dlTxDataList,
+                dlRxDataList,
 
-    ui->app_rxGapLineEdit->clear();
-    ui->app_rxGapLineEdit->insert(QString::number(rxGap));
+                dlErrDataList,
 
-    ui->app_rxGapSdLineEdit->clear();
-    ui->app_rxGapSdLineEdit->insert(QString::number(rxGapSd));
+                txDataListFiltered,
+                rxDataListFiltered
+                );
+
+    float pduSize, pduSizeSd;
+    DataRegister::GetPDUSize(txDataListFiltered, pduSize, pduSizeSd);
+
+    ui->dl_packetSizeLineEdit->clear();
+    ui->dl_packetSizeLineEdit->insert(QString::number(pduSize));
+
+    ui->dl_packetSizeSdLineEdit->clear();
+    ui->dl_packetSizeSdLineEdit->insert(QString::number(pduSizeSd));
 }
 
 void MainWindow::on_dl_txBrowseButton_clicked()
@@ -238,63 +260,183 @@ void MainWindow::on_dl_parseTimesButton_clicked()
 
 }
 
-void MainWindow::on_dl_computeButton_clicked()
+
+void MainWindow::computeData(QLineEdit * txT0,
+                             QLineEdit * txT1,
+                             QLineEdit * rxT0,
+                             QLineEdit * rxT1,
+
+                             QLineEdit * sendLineEdit,
+
+                             QLineEdit * txGapLineEdit,
+                             QLineEdit * txGapSdLineEdit,
+
+                             QLineEdit * recvLineEdit,
+                             QLineEdit * failsLineEdit,
+                             QLineEdit * errLineEdit,
+                             QLineEdit * lostLineEdit,
+
+                             QLineEdit * rxGapLineEdit,
+                             QLineEdit * rxGapSdLineEdit,
+
+                             QLineEdit * rxDataRateLineEdit,
+                             QLineEdit * txDataRateLineEdit,
+
+                             QList<DataRegisterPtr> & txDataList,
+                             QList<DataRegisterPtr> & rxDataList,
+
+                             QList<DataRegisterPtr> & errDataList,
+
+                             QList<DataRegisterPtr> & txDataListFiltered,
+                             QList<DataRegisterPtr> & rxDataListFiltered
+                             )
 {
   //TX
-  auto txt0 = QDateTime::fromString (ui->dl_txT0ComboBox->currentText(),
+  auto txt0 = QDateTime::fromString (txT0->text(),
                                   DataRegister::timeFormat);
-  auto txt1 = QDateTime::fromString (ui->dl_txT1ComboBox->currentText(),
+  auto txt1 = QDateTime::fromString (txT1->text(),
                                   DataRegister::timeFormat);
 
-  auto transmittedPackets = DataRegister::GetInterval (dlTxDataList, txt0, txt1);
+  txDataListFiltered = DataRegister::GetInterval (txDataList, txt0, txt1);
 
-  ui->dl_sendLineEdit->clear();
-  ui->dl_sendLineEdit->insert(QString::number(transmittedPackets.count ()));
+  sendLineEdit->clear();
+  sendLineEdit->insert(QString::number(txDataListFiltered.count ()));
 
   float txGap, txGapSd;
 
-  DataRegister::GetGapData (transmittedPackets,
+  DataRegister::GetGapData (txDataListFiltered,
                             txGap, txGapSd);
 
-  ui->dl_txGapLineEdit->clear();
-  ui->dl_txGapLineEdit->insert(QString::number(txGap));
+  txGapLineEdit->clear();
+  txGapLineEdit->insert(QString::number(txGap));
 
-  ui->dl_txGapSdLineEdit->clear();
-  ui->dl_txGapSdLineEdit->insert(QString::number(txGapSd));
+  txGapSdLineEdit->clear();
+  txGapSdLineEdit->insert(QString::number(txGapSd));
 
   //RX
-  auto rxt0 = QDateTime::fromString (ui->dl_rxT0ComboBox->currentText(),
+  auto rxt0 = QDateTime::fromString (rxT0->text(),
                                   DataRegister::timeFormat);
-  auto rxt1 = QDateTime::fromString (ui->dl_rxT1ComboBox->currentText(),
+  auto rxt1 = QDateTime::fromString (rxT1->text(),
                                   DataRegister::timeFormat);
 
-  auto receivedPackets = DataRegister::GetInterval (dlRxDataList, rxt0, rxt1);
+  rxDataListFiltered = DataRegister::GetInterval (rxDataList, rxt0, rxt1);
 
-  ui->dl_recvLineEdit->clear();
-  ui->dl_recvLineEdit->insert(QString::number(receivedPackets.count ()));
+  recvLineEdit->clear();
+  recvLineEdit->insert(QString::number(rxDataListFiltered.count ()));
 
-  auto dlTotalFallos = transmittedPackets.count() - receivedPackets.count();
+  auto totalFallos = txDataListFiltered.count() - rxDataListFiltered.count();
 
-  ui->dl_failsLineEdit->clear();
-  ui->dl_failsLineEdit->insert(QString::number(dlTotalFallos));
+  failsLineEdit->clear();
+  failsLineEdit->insert(QString::number(totalFallos));
 
-  auto errors = DataRegister::GetInterval (dlErrDataList, rxt0, rxt1);
+  auto errors = DataRegister::GetInterval (errDataList, rxt0, rxt1);
 
-  ui->dl_errLineEdit->clear();
-  ui->dl_errLineEdit->insert(QString::number(errors.count()));
+  errLineEdit->clear();
+  errLineEdit->insert(QString::number(errors.count()));
 
-  ui->dl_lostLineEdit->clear();
-  ui->dl_lostLineEdit->insert(QString::number(dlTotalFallos - errors.count()));
+  lostLineEdit->clear();
+  lostLineEdit->insert(QString::number(totalFallos - errors.count()));
 
   float rxGap, rxGapSd;
 
-  DataRegister::GetGapData (receivedPackets,
+  DataRegister::GetGapData (rxDataListFiltered,
                             rxGap, rxGapSd);
 
-  ui->dl_rxGapLineEdit->clear();
-  ui->dl_rxGapLineEdit->insert(QString::number(rxGap));
+  rxGapLineEdit->clear();
+  rxGapLineEdit->insert(QString::number(rxGap));
 
-  ui->dl_rxGapSdLineEdit->clear();
-  ui->dl_rxGapSdLineEdit->insert(QString::number(rxGapSd));
+  rxGapSdLineEdit->clear();
+  rxGapSdLineEdit->insert(QString::number(rxGapSd));
 
+  //DATA RATE
+
+  float rxDataRate, txDataRate;
+
+  DataRegister::GetDataRate(txDataListFiltered, txDataRate);
+  DataRegister::GetDataRate(rxDataListFiltered, rxDataRate);
+
+  rxDataRateLineEdit->clear();
+  rxDataRateLineEdit->insert(QString::number(rxDataRate));
+
+  txDataRateLineEdit->clear();
+  txDataRateLineEdit->insert(QString::number(txDataRate));
+
+}
+
+void MainWindow::on_app_txT0ComboBox_currentIndexChanged(const QString &arg1)
+{
+    ui->app_txT0->clear();
+    ui->app_txT0->insert(arg1);
+}
+
+void MainWindow::on_app_txT1ComboBox_currentIndexChanged(const QString &arg1)
+{
+    ui->app_txT1->clear();
+    ui->app_txT1->insert(arg1);
+}
+
+void MainWindow::on_app_rxT0ComboBox_currentIndexChanged(const QString &arg1)
+{
+    ui->app_rxT0->clear();
+    ui->app_rxT0->insert(arg1);
+}
+
+void MainWindow::on_app_rxT1ComboBox_currentIndexChanged(const QString &arg1)
+{
+    ui->app_rxT1->clear();
+    ui->app_rxT1->insert(arg1);
+}
+
+void MainWindow::on_dl_txT0ComboBox_currentIndexChanged(const QString &arg1)
+{
+    ui->dl_txT0->clear();
+    ui->dl_txT0->insert(arg1);
+}
+
+void MainWindow::on_dl_txT1ComboBox_currentIndexChanged(const QString &arg1)
+{
+    ui->dl_txT1->clear();
+    ui->dl_txT1->insert(arg1);
+}
+
+void MainWindow::on_dl_rxT0ComboBox_currentIndexChanged(const QString &arg1)
+{
+    ui->dl_rxT0->clear();
+    ui->dl_rxT0->insert(arg1);
+}
+
+void MainWindow::on_dl_rxT1ComboBox_currentIndexChanged(const QString &arg1)
+{
+    ui->dl_rxT1->clear();
+    ui->dl_rxT1->insert(arg1);
+}
+
+void MainWindow::on_setIntervalButton_clicked()
+{
+   auto t0 = ui->t0LineEdit->text();
+   auto t1 = ui->t1LineEdit->text();
+
+   ui->app_txT0->clear();
+   ui->app_txT0->insert(t0);
+
+   ui->app_txT1->clear();
+   ui->app_txT1->insert(t1);
+
+   ui->app_rxT0->clear();
+   ui->app_rxT0->insert(t0);
+
+   ui->app_rxT1->clear();
+   ui->app_rxT1->insert(t1);
+
+   ui->dl_txT0->clear();
+   ui->dl_txT0->insert(t0);
+
+   ui->dl_txT1->clear();
+   ui->dl_txT1->insert(t1);
+
+   ui->dl_rxT0->clear();
+   ui->dl_rxT0->insert(t0);
+
+   ui->dl_rxT1->clear();
+   ui->dl_rxT1->insert(t1);
 }

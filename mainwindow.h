@@ -40,6 +40,24 @@ private slots:
 
   void on_dl_computeButton_clicked();
 
+  void on_app_txT0ComboBox_currentIndexChanged(const QString &arg1);
+
+  void on_app_txT1ComboBox_currentIndexChanged(const QString &arg1);
+
+  void on_app_rxT0ComboBox_currentIndexChanged(const QString &arg1);
+
+  void on_app_rxT1ComboBox_currentIndexChanged(const QString &arg1);
+
+  void on_dl_txT0ComboBox_currentIndexChanged(const QString &arg1);
+
+  void on_dl_txT1ComboBox_currentIndexChanged(const QString &arg1);
+
+  void on_dl_rxT0ComboBox_currentIndexChanged(const QString &arg1);
+
+  void on_dl_rxT1ComboBox_currentIndexChanged(const QString &arg1);
+
+  void on_setIntervalButton_clicked();
+
 private:
   void init();
   void parseTimes(QList<DataRegisterPtr> & data,
@@ -48,6 +66,35 @@ private:
                   QComboBox * t0,
                   QComboBox * t1
                   );
+  void computeData(QLineEdit * txT0,
+                               QLineEdit * txT1,
+                               QLineEdit * rxT0,
+                               QLineEdit * rxT1,
+
+                               QLineEdit * sendLineEdit,
+
+                               QLineEdit * txGapLineEdit,
+                               QLineEdit * txGapSdLineEdit,
+
+                               QLineEdit * recvLineEdit,
+                               QLineEdit * failsLineEdit,
+                               QLineEdit * errLineEdit,
+                               QLineEdit * lostLineEdit,
+
+                               QLineEdit * rxGapLineEdit,
+                               QLineEdit * rxGapSdLineEdit,
+
+                               QLineEdit * rxDataRateLineEdit,
+                               QLineEdit * txDataRateLineEdit,
+
+                               QList<DataRegisterPtr> & txDataList,
+                               QList<DataRegisterPtr> & rxDataList,
+
+                               QList<DataRegisterPtr> & errDataList,
+
+                               QList<DataRegisterPtr> & txDataListFiltered,
+                               QList<DataRegisterPtr> & rxDataListFiltered
+                               );
   Ui::MainWindow *ui;
   QString appTxFileName, appRxFileName,
   dlTxFileName, dlRxFileName;

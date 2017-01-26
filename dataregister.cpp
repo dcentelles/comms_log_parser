@@ -129,3 +129,49 @@ void DataRegister::GetGapData(QList<DataRegisterPtr> data, float & gap,
         gapSd = qSqrt (gapSd/data.count());
     }
 }
+
+void DataRegister::GetDataRate(QList<DataRegisterPtr> data, float & dataRate)
+{
+    dataRate = 0;
+
+    if(data.count() > 1)
+    {
+        auto tini = data[0]->GetDateTime ();
+        auto tend = data[data.count()-1]->GetDateTime ();
+        auto elapsed = tini.msecsTo (tend);
+
+        for (auto reg : data)
+        {
+          dataRate += reg->GetDataSize ();
+        }
+
+        float elapsedSec = elapsed / 1000.;
+
+        dataRate = dataRate*8 / elapsedSec; //to bps
+        dataRate = dataRate / 1000; //to kbps
+    }
+}
+
+void DataRegister::GetPDUSize(QList<DataRegisterPtr> data, float & pduSize,
+                                                        float & pduSizeSd)
+{
+    pduSize = 0;
+    pduSizeSd = 0;
+
+    if(data.count() > 0)
+    {
+        for (auto reg : data)
+        {
+            pduSize += reg->GetDataSize ();
+        }
+        pduSize = pduSize / data.count();
+
+        for (auto reg : data)
+        {
+          auto _pduSize = reg->GetDataSize();
+          auto diff = _pduSize - pduSize;
+          pduSizeSd += diff*diff;
+        }
+        pduSizeSd = qSqrt (pduSizeSd/data.count());
+    }
+}
