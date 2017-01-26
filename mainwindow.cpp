@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QFileDialog>
 #include <QDebug>
+#include <dataplotwindow.h>
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -439,4 +440,27 @@ void MainWindow::on_setIntervalButton_clicked()
 
    ui->dl_rxT1->clear();
    ui->dl_rxT1->insert(t1);
+}
+
+void MainWindow::on_dl_plotButton_clicked()
+{
+
+    DataPlotWindow * dwRx;
+
+    dwRx = new DataPlotWindow();
+
+    dwRx->show();
+
+    auto rxt0 = QDateTime::fromString (ui->dl_rxT0->text(),
+                                    DataRegister::timeFormat);
+    auto rxt1 = QDateTime::fromString (ui->dl_rxT1->text(),
+                                    DataRegister::timeFormat);
+
+    dwRx->Plot(dlTxDataList,
+               dlRxDataList,
+               dlErrDataList,
+               rxt0,
+               rxt0
+                );
+
 }

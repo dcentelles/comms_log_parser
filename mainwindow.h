@@ -58,6 +58,8 @@ private slots:
 
   void on_setIntervalButton_clicked();
 
+  void on_dl_plotButton_clicked();
+
 private:
   void init();
   void parseTimes(QList<DataRegisterPtr> & data,

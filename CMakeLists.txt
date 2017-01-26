@@ -37,6 +37,10 @@ set(${PROJECT_NAME}_LIB ${PROJECT_NAME}_lib)
 add_library(${${PROJECT_NAME}_LIB}
 	mainwindow.cpp
 	dataregister.cpp
+
+        dataplotwindow.cpp
+
+        qcustomplot.cpp
 	)
 
 
