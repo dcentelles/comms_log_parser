@@ -22,7 +22,7 @@ SET(CMAKE_AUTOUIC ON)
 # Find the QtWidgets library
 find_package(Qt5Widgets)
 find_package(Qt5Core)
-
+find_package(Qt5PrintSupport)
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
@@ -42,7 +42,8 @@ add_library(${${PROJECT_NAME}_LIB}
 
 set(QT_DEPS 
 	Qt5::Widgets
-	Qt5::Core
+        Qt5::Core
+        Qt5::PrintSupport
 	)
 
 target_link_libraries(${${PROJECT_NAME}_LIB}  ${QT_DEPS}  ${catkin_LIBRARIES})
