@@ -112,6 +112,15 @@ void MainWindow::parseTimes(QList<DataRegisterPtr> & coll,
         }
     }
   data.close();
+
+  if(coll.count() > 1 && t0 != NULL && t1 != NULL)
+  {
+      //auto idx0 = t0->findData(coll[0]->GetDateTimeAsString ());
+      //auto idx1 = t1->findData (coll[coll.count()-1]->GetDateTimeAsString ());
+
+      t0->setCurrentIndex (0);
+      t1->setCurrentIndex (coll.count()-1);
+  }
 }
 
 void MainWindow::on_app_parseTimesButton_clicked()
