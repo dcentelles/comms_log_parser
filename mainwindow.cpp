@@ -56,7 +56,7 @@ void MainWindow::on_app_txBrowseButton_clicked()
             tr("All files (*)"));
 
     qDebug() << "App Tx File Name: " << appTxFileName;
-    ui->app_rxFileLineEdit->clear();
+    ui->app_txFileLineEdit->clear();
     ui->app_txFileLineEdit->insert(appTxFileName);
 }
 
@@ -455,12 +455,27 @@ void MainWindow::on_dl_plotButton_clicked()
                                     DataRegister::timeFormat);
     auto rxt1 = QDateTime::fromString (ui->dl_rxT1->text(),
                                     DataRegister::timeFormat);
+    auto txt0 = QDateTime::fromString (ui->dl_txT0->text(),
+                                    DataRegister::timeFormat);
+    auto txt1 = QDateTime::fromString (ui->dl_txT1->text(),
+                                    DataRegister::timeFormat);
+
+    //Escogemos el intervalo mayor que engloba a todas las muestras de interés:
+    QDateTime t0, t1;
+    t0 = txt0 <= rxt0 ? txt0 : rxt0;
+    t1 = rxt1 >= txt1 ? rxt1 : txt1;
+
+    /*
+     * Pasamos todas las muestras del log, pero con el intervalo obtenido para visualizar
+     * ese intervalo primero. El usuario podrá interactuar en la línea de tiempo del plot
+     * para ver otras muestras que esten fuera del intervalo
+     */
 
     dwRx->Plot(dlTxDataList,
                dlRxDataList,
                dlErrDataList,
-               rxt0,
-               rxt0
+               t0,
+               t1
                 );
 
 }

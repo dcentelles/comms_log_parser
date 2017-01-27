@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <dataregister.h>
+#include <qcustomplot.h>
 
 namespace Ui {
 class DataPlotWindow;
@@ -21,8 +22,20 @@ public:
              QList<DataRegisterPtr> errors,
              QDateTime tini, QDateTime tend);
 
+private slots:
+   void on_tickStepSpinBox_valueChanged(int arg1);
+
+   void on_blockXToggle_toggled(bool checked);
+
+   void on_blockYToggle_toggled(bool checked);
 
 private:
+    void setDRsToTimeGraph(
+                          double msT0,
+                          QCPGraph * graph,
+                          QList<DataRegisterPtr> drs);
+    void updateZoomSettingsFromUi();
+
     Ui::DataPlotWindow *ui;
 };
 
