@@ -39,23 +39,10 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
           QList<DataRegisterPtr> errors,
           QDateTime tini, QDateTime tend)
 {
+    //INICIALIZAR PLOT
+
     QCustomPlot * plot = ui->plotWidget;
     plot->setLocale (QLocale(QLocale::Spanish, QLocale::Spain));
-
-    // create graph and assign data to it:
-    plot->addGraph ();
-    plot->xAxis->setLabel("Time");
-    plot->yAxis->setLabel("PDU size (bytes)");
-
-    auto graph = plot->graph (0);
-
-    if(txPdus.count() == 0)
-        return;
-
-    //msT0 es el momento en que se transmitió la primera PDU en el Log
-    auto msT0 = txPdus[0]->GetDateTime ().toMSecsSinceEpoch ();
-
-    setDRsToTimeGraph (msT0, graph, txPdus);
 
     QSharedPointer<QCPAxisTickerTime> dateTicker(new QCPAxisTickerTime);
     dateTicker->setTimeFormat ("%m:%s.%z");
@@ -63,8 +50,11 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
     plot->xAxis->setTicker(dateTicker);
     plot->xAxis->setTickLabelRotation (45);
 
-    QSpinBox * sb = ui->tickStepSpinBox;
-    sb->setValue (plot->xAxis->ticker ()->tickCount ());
+    if(txPdus.count() == 0)
+        return;
+
+    //msT0 es el momento en que se transmitió la primera PDU en el Log
+    auto msT0 = txPdus[0]->GetDateTime ().toMSecsSinceEpoch ();
 
     // set a more compact font size for bottom and left axis tick labels:
     plot->xAxis->setTickLabelFont(QFont(QFont().family(), 6));
@@ -80,13 +70,47 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
     plot->legend->setVisible(true);
     plot->legend->setBrush(QColor(255, 255, 255, 150));
 
+
     plot->setInteraction (QCP::iRangeDrag, true);
     plot->setInteraction (QCP::iRangeZoom, true);
     updateZoomSettingsFromUi ();
+
+    plot->xAxis->setLabel("Time");
+    plot->yAxis->setLabel("PDU size (bytes)");
+
+    //CREAR GRAFICOS Y ASIGNAR DATOS
+
+    // create graph and assign data to it:
+    plot->addGraph (); //Paquetes enviados
+    plot->addGraph (); //Paquetes recibidos
+    plot->addGraph (); //Paquetes recibidos con error
+
+
+    auto txGraph = plot->graph (0);
+    txGraph->setName ("PDUs enviadas");
+    auto rxGraph = plot->graph (1);
+    rxGraph->setName ("PDUs recibidas");
+    auto errGraph = plot->graph (2);
+    errGraph->setName ("PDUs recibidas con error");
+
+    setDRsToTimeGraph (msT0, txGraph, txPdus);
+    setDRsToTimeGraph (msT0, rxGraph, rxPdus);
+    setDRsToTimeGraph (msT0, errGraph, errors);
+
+    QPen pen;
+    pen.setColor (QColor(0,0,255));
+    txGraph->setPen(pen);
+    pen.setColor (QColor(0,255,0));
+    rxGraph->setPen(pen);
+    pen.setColor (QColor(255,0,0));
+    errGraph->setPen(pen);
+
+
+    //DIBUJAR
     plot->replot();
 
-
-
+    QSpinBox * sb = ui->tickStepSpinBox;
+    sb->setValue (plot->xAxis->ticker ()->tickCount ());
 }
 
 void DataPlotWindow::on_tickStepSpinBox_valueChanged(int arg1)
