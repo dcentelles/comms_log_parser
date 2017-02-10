@@ -31,6 +31,8 @@ public:
       QDateTime t0,
       QDateTime t1);
 
+  static void ComputeLinks(QList<DataRegisterPtr> txl,
+                           QList<DataRegisterPtr> rxl);
   static void GetGapData(QList<DataRegisterPtr> data, float & gap,
                                                       float & gapSd);
 
@@ -48,16 +50,27 @@ public:
   void SetDateTimeAsString(const QString &);
   void SetDateTime(const QDateTime &);
 
+  void SetRxDateTime(const QDateTime &);
+  QDateTime GetRxDateTime();
+
+  void SetNseq(int);
+  int GetNseq(void);
+
   int GetDataSize();
   QString GetDateTimeAsString();
   QDateTime GetDateTime();
 
   QString ToString();
+  DataRegisterPtr GetLinkedRegister();
+  void SetLinkedRegister(DataRegisterPtr);
 
 private:
+  DataRegisterPtr _link;
   void init();
-  QDateTime moment;
+  QDateTime moment,
+    _rxmoment;
   int dataSize;
+  int _nseq;
 
 };
 

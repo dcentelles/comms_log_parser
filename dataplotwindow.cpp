@@ -34,6 +34,44 @@ void DataPlotWindow::setDRsToTimeGraph(double msT0,
     graph->data()->set(dRsGraphData);
 }
 
+void DataPlotWindow::DrawDRsLinksToTimeGraph(
+        double msT0,
+        QCustomPlot * plot,
+        QList<DataRegisterPtr> pdus
+        )
+{
+    auto count = pdus.count();
+    for(int idx = 0; idx < count ; idx++)
+    {
+        auto link = pdus.at(idx);
+        auto linked = link->GetLinkedRegister();
+
+        if(linked)
+        {
+
+            auto linkDate = link->GetDateTime();
+            auto linkedDate = linked->GetDateTime();
+
+            auto linkTime = (linkDate.toMSecsSinceEpoch () - msT0) / 1000.;
+            auto linkedTime = (linkedDate.toMSecsSinceEpoch () - msT0) / 1000.;
+
+            auto linkSize = link->GetDataSize();
+            auto linkedSize = link->GetDataSize();
+
+            QCPItemCurve * curve = new QCPItemCurve(plot);
+
+            curve->start->setCoords(linkTime, linkSize);
+            curve->startDir->setCoords(linkTime, linkSize+20);
+            curve->endDir->setCoords(linkedTime, linkedSize+20);
+            curve->end->setCoords(linkedTime, linkedSize);
+
+            curve->setHead(QCPLineEnding::esNone);
+
+            curve->setVisible (true);
+        }
+    }
+}
+
 void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
           QList<DataRegisterPtr> rxPdus,
           QList<DataRegisterPtr> errors,
@@ -105,6 +143,11 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
     pen.setColor (QColor(255,0,0));
     errGraph->setPen(pen);
 
+    DrawDRsLinksToTimeGraph(
+            msT0,
+            plot,
+            txPdus
+            );
 
     //DIBUJAR
     plot->replot();

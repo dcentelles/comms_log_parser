@@ -27,6 +27,7 @@ DataRegister::DataRegister(int size, const QDateTime &time)
 void DataRegister::init()
 {
 //  timeFormat = "yyyy-MM-dd HH:mm:ss.zzz";
+    _nseq = -1;
 }
 
 void DataRegister::SetDataSize(int size)
@@ -60,6 +61,26 @@ int DataRegister::GetDataSize ()
   return dataSize;
 }
 
+void DataRegister::SetNseq(int nseq)
+{
+    _nseq = nseq;
+}
+
+int DataRegister::GetNseq()
+{
+    return _nseq;
+}
+
+void DataRegister::SetRxDateTime (const QDateTime & datetime)
+{
+    _rxmoment = datetime;
+}
+
+QDateTime DataRegister::GetRxDateTime()
+{
+    return _rxmoment;
+}
+
 QString DataRegister::ToString()
 {
   return QString("%1 => %2 bytes").arg(
@@ -75,13 +96,12 @@ QList<DataRegisterPtr> DataRegister::GetInterval(QList<DataRegisterPtr> data, QD
       auto datetime =  data.at(idx0)->GetDateTime ();
        if(t0 < datetime)
        {
-         idx0 -= 1;
          break;
        }
     }
 
-  if(idx0 == -1)
-    idx0 = 0;
+  if(idx0 > 0)
+    idx0 -= 1;
 
   int idx1;
   for(idx1 = idx0; idx1 < data.count(); idx1++)
@@ -95,9 +115,63 @@ QList<DataRegisterPtr> DataRegister::GetInterval(QList<DataRegisterPtr> data, QD
     }
   QList<DataRegisterPtr> result;
   if(idx0 <= idx1)
-    result = data.mid(idx0, idx1 - idx0);
+    result = data.mid(idx0, idx1 - idx0 + 1);
 
   return result;
+}
+
+DataRegisterPtr DataRegister::GetLinkedRegister()
+{
+    return _link;
+}
+
+void DataRegister::SetLinkedRegister(DataRegisterPtr link)
+{
+    _link = link;
+}
+
+void DataRegister::ComputeLinks(QList<DataRegisterPtr> txl,
+                                QList<DataRegisterPtr> rxl)
+{
+    int idxrx, idxtx = 0;
+    for(idxrx = 0; idxrx < rxl.count(); idxrx++)
+    {
+        auto rx = rxl.at(idxrx);
+        auto nseq = rx->GetNseq ();
+        auto rxTime = rx->GetDateTime();
+        bool foundSender = false;
+
+        DataRegisterPtr tx;
+        int initx = idxtx;
+        while(!foundSender)
+        {
+            tx = txl.at(idxtx);
+            auto txTime = tx->GetDateTime();
+            if(txTime < rxTime)
+            {
+                auto txnseq = tx->GetNseq();
+                if(txnseq == nseq)
+                {
+                    foundSender = true;
+                }
+                idxtx++;
+            }
+            else
+            {
+                break;
+            }
+        }
+        if(foundSender)
+        {
+            rx->SetLinkedRegister(tx);
+            tx->SetLinkedRegister(rx);
+        }
+        else
+        {
+            rx->SetLinkedRegister(DataRegisterPtr(0));
+            idxtx = initx;
+        }
+    }
 }
 
 void DataRegister::GetGapData(QList<DataRegisterPtr> data, float & gap,

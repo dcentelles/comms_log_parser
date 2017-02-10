@@ -35,6 +35,11 @@ private:
                           QCPGraph * graph,
                           QList<DataRegisterPtr> drs);
     void updateZoomSettingsFromUi();
+    void DrawDRsLinksToTimeGraph(
+            double msT0,
+            QCustomPlot * plot,
+            QList<DataRegisterPtr> pdus
+            );
 
     Ui::DataPlotWindow *ui;
 };

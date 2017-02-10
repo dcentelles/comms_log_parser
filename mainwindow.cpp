@@ -19,32 +19,32 @@ MainWindow::~MainWindow()
 
 void MainWindow::init()
 {
-  appDefaultPath = "/home/centelld/Escriptori/HIL_test0_20161214_mati/";
+  appDefaultPath = "/home/centelld/sim";
   logTimeFormat = "\\[(\\d+-\\d+-\\d+ \\d+:\\d+:\\d+\\.\\d+)\\]";
 
   dlTxPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
-    "TX: transmitting frame... \\(FS: (\\d+)\\)"
+    "TX 2->1.*\\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
       ));
 
   dlRxPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
-    "RX: received frame without errors \\(FS: (\\d+)\\)"
+    "RX 1<-2: received frame without errors \\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
       ));
 
 
   dlErrPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
-    "RX: received frame with errors. Frame will be discarded \\(FS: (\\d+)\\)"
+    "asdasd"
       ));
 
   appTxPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
-    "TX: image transmission completed"
+    "asdasd"
       ));
 
   appRxPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
-    "RX: the received trunk is (the last of an image|also the last of an image)"
+    "asdasd"
       ));
 
   appErrPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
-    "RX: image received with errors... (some packets were lost)"
+    ""
       ));
 }
 
@@ -90,9 +90,11 @@ void MainWindow::parseTimes(QList<DataRegisterPtr> & coll,
           if(match.hasMatch ())
           {
             auto moment = match.captured(1);
-            auto size = match.captured(2).toInt();
+            auto nseq = match.captured(2).toInt();
+            auto size = match.captured(3).toInt();
 
             auto dataRegister = DataRegister::Build(size, moment);
+            dataRegister->SetNseq(nseq);
             coll.append(dataRegister);
           }
         }
@@ -480,6 +482,8 @@ void MainWindow::on_dl_plotButton_clicked()
      * para ver otras muestras que esten fuera del intervalo
      */
 
+    DataRegister::ComputeLinks (dlTxDataList,
+                                dlRxDataList);
     dwRx->Plot(dlTxDataList,
                dlRxDataList,
                dlErrDataList,
