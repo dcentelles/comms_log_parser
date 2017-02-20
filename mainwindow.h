@@ -62,6 +62,7 @@ private slots:
 
 private:
   void init();
+  void updateLineEditText(QLineEdit *, const QString & txt);
   void parseTimes(QList<DataRegisterPtr> & data,
                   const QString & fileName,
                   const QRegularExpression & reg,

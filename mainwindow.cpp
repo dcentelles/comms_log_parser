@@ -183,6 +183,11 @@ void MainWindow::on_app_computeButton_clicked()
                 );
 }
 
+void MainWindow::updateLineEditText(QLineEdit * le, const QString & txt)
+{
+    le->clear();
+    le->insert (txt);
+}
 
 void MainWindow::on_dl_computeButton_clicked()
 {
@@ -224,11 +229,8 @@ void MainWindow::on_dl_computeButton_clicked()
     float pduSize, pduSizeSd;
     DataRegister::GetPDUSize(txDataListFiltered, pduSize, pduSizeSd);
 
-    ui->dl_packetSizeLineEdit->clear();
-    ui->dl_packetSizeLineEdit->insert(QString::number(pduSize));
-
-    ui->dl_packetSizeSdLineEdit->clear();
-    ui->dl_packetSizeSdLineEdit->insert(QString::number(pduSizeSd));
+    updateLineEditText (ui->dl_packetSizeLineEdit, QString::number(pduSize));
+    updateLineEditText (ui->dl_packetSizeSdLineEdit, QString::number(pduSizeSd));
 
     //Compute Links
     DataRegister::ComputeLinks (
@@ -242,12 +244,9 @@ void MainWindow::on_dl_computeButton_clicked()
                 rxDataListFiltered,
                 btt,
                 bttSd);
-    ui->dl_transmissionTime->clear();
-    ui->dl_transmissionTime->insert(QString::number(btt));
 
-    ui->dl_transmissionTimeSD->clear();
-    ui->dl_transmissionTimeSD->insert(QString::number(bttSd));
-
+    updateLineEditText(ui->dl_transmissionTime, QString::number(btt));
+    updateLineEditText(ui->dl_transmissionTimeSD, QString::number(bttSd));
 }
 
 void MainWindow::on_dl_txBrowseButton_clicked()
