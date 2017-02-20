@@ -188,6 +188,7 @@ void MainWindow::on_dl_computeButton_clicked()
 {
     QList<DataRegisterPtr> txDataListFiltered,
                            rxDataListFiltered;
+
     computeData(
                 ui->dl_txT0,
                 ui->dl_txT1,
@@ -219,6 +220,7 @@ void MainWindow::on_dl_computeButton_clicked()
                 rxDataListFiltered
                 );
 
+    //PDU Size
     float pduSize, pduSizeSd;
     DataRegister::GetPDUSize(txDataListFiltered, pduSize, pduSizeSd);
 
@@ -227,6 +229,25 @@ void MainWindow::on_dl_computeButton_clicked()
 
     ui->dl_packetSizeSdLineEdit->clear();
     ui->dl_packetSizeSdLineEdit->insert(QString::number(pduSizeSd));
+
+    //Compute Links
+    DataRegister::ComputeLinks (
+                txDataListFiltered,
+                rxDataListFiltered
+                );
+
+    //Transmission time
+    float btt, bttSd;
+    DataRegister::ComputeTransmissionTime (
+                rxDataListFiltered,
+                btt,
+                bttSd);
+    ui->dl_transmissionTime->clear();
+    ui->dl_transmissionTime->insert(QString::number(btt));
+
+    ui->dl_transmissionTimeSD->clear();
+    ui->dl_transmissionTimeSD->insert(QString::number(bttSd));
+
 }
 
 void MainWindow::on_dl_txBrowseButton_clicked()
@@ -482,8 +503,6 @@ void MainWindow::on_dl_plotButton_clicked()
      * para ver otras muestras que esten fuera del intervalo
      */
 
-    DataRegister::ComputeLinks (dlTxDataList,
-                                dlRxDataList);
     dwRx->Plot(dlTxDataList,
                dlRxDataList,
                dlErrDataList,

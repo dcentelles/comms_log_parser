@@ -174,6 +174,47 @@ void DataRegister::ComputeLinks(QList<DataRegisterPtr> txl,
     }
 }
 
+void DataRegister::ComputeTransmissionTime(
+        QList<DataRegisterPtr> rxl,
+        float & btt,
+        float & bttSd)
+{
+    btt = 0;
+    bttSd = 0;
+    int count = 0;
+    for(auto rx : rxl)
+    {
+        auto tx = rx->GetLinkedRegister ();
+        if(tx)
+        {
+            auto txTime = tx->GetDateTime();
+            auto rxTime = rx->GetDateTime();
+            auto gap = txTime.msecsTo (rxTime);
+            tx->_ptt = gap;
+            rx->_ptt = gap;
+            auto psize = tx->GetDataSize ();
+            float _btt = (float) gap / psize;
+            btt += _btt;
+            count++;
+        }
+    }
+
+    btt /= count;
+    for(auto rx : rxl)
+    {
+        auto tx = rx->GetLinkedRegister ();
+        if(tx)
+        {
+            auto gap = rx->_ptt;
+            auto psize = tx->GetDataSize ();
+            float _btt = (float) gap / psize;
+            auto diff = _btt - btt;
+            bttSd += diff*diff;
+        }
+    }
+    bttSd = qSqrt(bttSd / count);
+}
+
 void DataRegister::GetGapData(QList<DataRegisterPtr> data, float & gap,
                                                    float & gapSd)
 {

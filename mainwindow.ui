@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>696</width>
-    <height>749</height>
+    <width>749</width>
+    <height>745</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -67,8 +67,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>676</width>
-         <height>643</height>
+         <width>729</width>
+         <height>639</height>
         </rect>
        </property>
        <property name="minimumSize">
@@ -322,7 +322,7 @@
              <rect>
               <x>20</x>
               <y>350</y>
-              <width>621</width>
+              <width>671</width>
               <height>228</height>
              </rect>
             </property>
@@ -542,15 +542,29 @@
                <item row="2" column="0">
                 <widget class="QLabel" name="label">
                  <property name="text">
-                  <string>Tiempo de transmisión:</string>
+                  <string>Tiempo de transmisión (bytes/ms):</string>
                  </property>
                 </widget>
                </item>
                <item row="2" column="1">
-                <widget class="QLineEdit" name="dl_transmissionTime"/>
+                <widget class="QLineEdit" name="dl_transmissionTime">
+                 <property name="minimumSize">
+                  <size>
+                   <width>70</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                </widget>
                </item>
                <item row="3" column="1">
-                <widget class="QLineEdit" name="dl_transmissionTimeSD"/>
+                <widget class="QLineEdit" name="dl_transmissionTimeSD">
+                 <property name="minimumSize">
+                  <size>
+                   <width>70</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                </widget>
                </item>
                <item row="3" column="0">
                 <widget class="QLabel" name="label_2">
@@ -1090,7 +1104,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>696</width>
+     <width>749</width>
      <height>19</height>
     </rect>
    </property>

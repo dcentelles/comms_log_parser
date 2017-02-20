@@ -41,6 +41,10 @@ public:
   static void GetPDUSize(QList<DataRegisterPtr> data, float & packetSize,
                                                          float & packetSizeSd);
 
+  static void ComputeTransmissionTime(QList<DataRegisterPtr> data,
+                                      float & tt,
+                                      float & ttSd);
+
   static const QString timeFormat;
   DataRegister();
   DataRegister(int size, const QString & time);
@@ -63,6 +67,7 @@ public:
   QString ToString();
   DataRegisterPtr GetLinkedRegister();
   void SetLinkedRegister(DataRegisterPtr);
+  int GetPacketTransmissionTime();
 
 private:
   DataRegisterPtr _link;
@@ -71,6 +76,7 @@ private:
     _rxmoment;
   int dataSize;
   int _nseq;
+  int _ptt;
 
 };
 
