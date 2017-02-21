@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include <QDebug>
 #include <dataplotwindow.h>
+#include <normalplot.h>
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -247,6 +248,13 @@ void MainWindow::on_dl_computeButton_clicked()
 
     updateLineEditText(ui->dl_transmissionTime, QString::number(btt));
     updateLineEditText(ui->dl_transmissionTimeSD, QString::number(bttSd));
+
+    //PLOT
+    //TT
+    NormalPlot * ttPlot = new NormalPlot();
+    ttPlot->show();
+
+    ttPlot->Plot("Transmission Time", btt, bttSd, 100, 0.1, "ms/byte");
 }
 
 void MainWindow::on_dl_txBrowseButton_clicked()
@@ -393,6 +401,19 @@ void MainWindow::computeData(QLineEdit * txT0,
   txDataRateLineEdit->clear();
   txDataRateLineEdit->insert(QString::number(txDataRate));
 
+
+  //PLOT
+  //RX GAP
+  NormalPlot * gapPlot = new NormalPlot();
+  gapPlot->show();
+
+  gapPlot->Plot("RX Time GAP", rxGap, rxGapSd, 2000, 1, "GAP");
+
+  //TX GAP
+  NormalPlot * txGapPlot = new NormalPlot();
+  txGapPlot->show();
+
+  txGapPlot->Plot("TX Time GAP", txGap, txGapSd, 2000, 1, "GAP");
 }
 
 void MainWindow::on_app_txT0ComboBox_currentIndexChanged(const QString &arg1)
