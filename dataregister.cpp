@@ -94,14 +94,11 @@ QList<DataRegisterPtr> DataRegister::GetInterval(QList<DataRegisterPtr> data, QD
   for(idx0 = 0; idx0 < data.count(); idx0++)
     {
       auto datetime =  data.at(idx0)->GetDateTime ();
-       if(t0 < datetime)
+       if(t0 <= datetime)
        {
          break;
        }
     }
-
-  if(idx0 > 0)
-    idx0 -= 1;
 
   int idx1;
   for(idx1 = idx0; idx1 < data.count(); idx1++)
@@ -133,43 +130,69 @@ void DataRegister::SetLinkedRegister(DataRegisterPtr link)
 void DataRegister::ComputeLinks(QList<DataRegisterPtr> txl,
                                 QList<DataRegisterPtr> rxl)
 {
-    int idxrx, idxtx = 0;
-    for(idxrx = 0; idxrx < rxl.count(); idxrx++)
+    if(txl.count() > 0 && rxl.count() > 0)
     {
-        auto rx = rxl.at(idxrx);
-        auto nseq = rx->GetNseq ();
-        auto rxTime = rx->GetDateTime();
-        bool foundSender = false;
-
-        DataRegisterPtr tx;
-        int initx = idxtx;
-        while(!foundSender)
+        int idxtx;
+        auto rxd = rxl.at(0)->GetDateTime ();
+        for(idxtx = 0; idxtx < txl.count(); idxtx++)
         {
-            tx = txl.at(idxtx);
-            auto txTime = tx->GetDateTime();
-            if(txTime < rxTime)
+            auto txd = txl.at (idxtx)->GetDateTime ();
+            if(txd >= rxd)
             {
+                idxtx--;
+                break;
+            }
+        }
+
+        int idxrx;
+        for(idxrx = 0; idxrx < rxl.count(); idxrx++)
+        {
+            auto rx = rxl.at(idxrx);
+            auto nseq = rx->GetNseq ();
+            bool foundSender = false;
+
+            DataRegisterPtr tx;
+            int initx = idxtx;
+            while(!foundSender && idxtx > 0)
+            {
+                tx = txl.at(idxtx);
                 auto txnseq = tx->GetNseq();
                 if(txnseq == nseq)
                 {
                     foundSender = true;
+                    break;
                 }
-                idxtx++;
+                idxtx--;
+            }
+            if(foundSender)
+            {
+                rx->SetLinkedRegister(tx);
+                tx->SetLinkedRegister(rx);
             }
             else
             {
-                break;
+                rx->SetLinkedRegister(DataRegisterPtr(0));
             }
-        }
-        if(foundSender)
-        {
-            rx->SetLinkedRegister(tx);
-            tx->SetLinkedRegister(rx);
-        }
-        else
-        {
-            rx->SetLinkedRegister(DataRegisterPtr(0));
-            idxtx = initx;
+
+            int nrxidx = idxrx + 1;
+            if(nrxidx < rxl.count())
+            {
+                rxd = rxl.at(nrxidx)->GetDateTime ();
+                idxtx = initx;
+                for(; idxtx < txl.count(); idxtx++)
+                {
+                    auto txd = txl.at (idxtx)->GetDateTime ();
+                    if(txd >= rxd)
+                    {
+                        idxtx--;
+                        break;
+                    }
+                }
+            }
+            if(idxtx == txl.count())
+            {
+                idxtx--;
+            }
         }
     }
 }

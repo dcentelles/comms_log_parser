@@ -22,6 +22,11 @@ public:
              QList<DataRegisterPtr> errors,
              QDateTime tini, QDateTime tend);
 
+   void PlotOver(QList<DataRegisterPtr> txPdus,
+             QList<DataRegisterPtr> rxPdus,
+             QList<DataRegisterPtr> errors,
+             QDateTime tini, QDateTime tend);
+
 private slots:
    void on_tickStepSpinBox_valueChanged(int arg1);
 
@@ -29,14 +34,14 @@ private slots:
 
    void on_blockYToggle_toggled(bool checked);
 
+   void on_saveAsPDFButton_clicked();
+
 private:
     void setDRsToTimeGraph(
-                          double msT0,
                           QCPGraph * graph,
                           QList<DataRegisterPtr> drs);
     void updateZoomSettingsFromUi();
     void DrawDRsLinksToTimeGraph(
-            double msT0,
             QCustomPlot * plot,
             QList<DataRegisterPtr> pdus
             );

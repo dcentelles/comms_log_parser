@@ -216,7 +216,11 @@
                   </widget>
                  </item>
                  <item row="2" column="1">
-                  <widget class="QComboBox" name="dl_txT1ComboBox"/>
+                  <widget class="QComboBox" name="dl_txT1ComboBox">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
                  </item>
                  <item row="2" column="0">
                   <widget class="QLabel" name="label_24">
@@ -227,6 +231,9 @@
                  </item>
                  <item row="3" column="1">
                   <widget class="QLineEdit" name="dl_txT1">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="readOnly">
                     <bool>false</bool>
                    </property>
@@ -259,10 +266,17 @@
                   </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QComboBox" name="dl_rxT0ComboBox"/>
+                  <widget class="QComboBox" name="dl_rxT0ComboBox">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
                  </item>
                  <item row="1" column="1">
                   <widget class="QLineEdit" name="dl_rxT0">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="readOnly">
                     <bool>false</bool>
                    </property>
@@ -542,7 +556,7 @@
                <item row="2" column="0">
                 <widget class="QLabel" name="label">
                  <property name="text">
-                  <string>Tiempo de transmisión (bytes/ms):</string>
+                  <string>Tiempo de transmisión (ms/byte):</string>
                  </property>
                 </widget>
                </item>
@@ -603,10 +617,23 @@
              <string>Browse</string>
             </property>
            </widget>
+           <widget class="QCheckBox" name="plotOverCheckBox">
+            <property name="geometry">
+             <rect>
+              <x>570</x>
+              <y>170</y>
+              <width>131</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Plot over existing</string>
+            </property>
+           </widget>
           </widget>
           <widget class="QWidget" name="applicationTab">
            <property name="enabled">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
            <property name="sizePolicy">
             <sizepolicy hsizetype="Maximum" vsizetype="Maximum">

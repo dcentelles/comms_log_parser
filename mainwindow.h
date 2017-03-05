@@ -9,6 +9,7 @@
 #include <QRegularExpression>
 #include <dataregister.h>
 #include <QComboBox>
+#include <dataplotwindow.h>
 
 namespace Ui {
   class MainWindow;
@@ -60,7 +61,13 @@ private slots:
 
   void on_dl_plotButton_clicked();
 
+  void on_plotOverCheckBox_clicked(bool checked);
+
 private:
+  QDateTime _t0,_t1;
+  DataPlotWindow * _lastPlotWindow;
+  bool _plotOver;
+
   void init();
   void updateLineEditText(QLineEdit *, const QString & txt);
   void parseTimes(QList<DataRegisterPtr> & data,

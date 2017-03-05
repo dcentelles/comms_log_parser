@@ -20,20 +20,20 @@ MainWindow::~MainWindow()
 
 void MainWindow::init()
 {
-  appDefaultPath = "/home/centelld/sim";
+  appDefaultPath = "/home/centelld/Escriptori/s100_20170301";
   logTimeFormat = "\\[(\\d+-\\d+-\\d+ \\d+:\\d+:\\d+\\.\\d+)\\]";
 
   dlTxPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
-    "TX 2->1.*\\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
+    "transmitting frame... \\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
       ));
 
   dlRxPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
-    "RX 1<-2: received frame without errors \\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
+    "received frame without errors \\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
       ));
 
 
   dlErrPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
-    "asdasd"
+    "received frame with errors. Frame will be discarded \\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
       ));
 
   appTxPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
@@ -47,6 +47,11 @@ void MainWindow::init()
   appErrPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
     ""
       ));
+
+  _plotOver = false;
+  ui->plotOverCheckBox->setChecked (_plotOver);
+  _lastPlotWindow = NULL;
+
 }
 
 void MainWindow::on_app_txBrowseButton_clicked()
@@ -128,6 +133,7 @@ void MainWindow::parseTimes(QList<DataRegisterPtr> & coll,
 
 void MainWindow::on_app_parseTimesButton_clicked()
 {
+    /*
   parseTimes (appTxDataList,
               appTxFileName,
               appTxPattern,
@@ -145,11 +151,13 @@ void MainWindow::on_app_parseTimesButton_clicked()
               appErrPattern,
               NULL,
               NULL);
+*/
 
 }
 
 void MainWindow::on_app_computeButton_clicked()
 {
+    /*
     QList<DataRegisterPtr> txDataListFiltered,
                            rxDataListFiltered;
     computeData(
@@ -182,6 +190,7 @@ void MainWindow::on_app_computeButton_clicked()
                 txDataListFiltered,
                 rxDataListFiltered
                 );
+    */
 }
 
 void MainWindow::updateLineEditText(QLineEdit * le, const QString & txt)
@@ -254,7 +263,7 @@ void MainWindow::on_dl_computeButton_clicked()
     NormalPlot * ttPlot = new NormalPlot();
     ttPlot->show();
 
-    ttPlot->Plot("Transmission Time", btt, bttSd, 100, 0.1, "ms/byte");
+    ttPlot->Plot("Transmission Time", btt, bttSd, 100, 0.001, "ms/byte");
 }
 
 void MainWindow::on_dl_txBrowseButton_clicked()
@@ -332,12 +341,16 @@ void MainWindow::computeData(QLineEdit * txT0,
                              )
 {
   //TX
-  auto txt0 = QDateTime::fromString (txT0->text(),
+  _t0 = QDateTime::fromString (txT0->text(),
                                   DataRegister::timeFormat);
-  auto txt1 = QDateTime::fromString (txT1->text(),
+  /*auto txt1 = QDateTime::fromString (txT1->text(),
+                                  DataRegister::timeFormat);
+*/
+  _t1 = QDateTime::fromString (rxT1->text(),
                                   DataRegister::timeFormat);
 
-  txDataListFiltered = DataRegister::GetInterval (txDataList, txt0, txt1);
+
+  txDataListFiltered = DataRegister::GetInterval (txDataList, _t0, _t1);
 
   sendLineEdit->clear();
   sendLineEdit->insert(QString::number(txDataListFiltered.count ()));
@@ -354,12 +367,11 @@ void MainWindow::computeData(QLineEdit * txT0,
   txGapSdLineEdit->insert(QString::number(txGapSd));
 
   //RX
-  auto rxt0 = QDateTime::fromString (rxT0->text(),
+  /*auto rxt0 = QDateTime::fromString (rxT0->text(),
                                   DataRegister::timeFormat);
-  auto rxt1 = QDateTime::fromString (rxT1->text(),
-                                  DataRegister::timeFormat);
+                                  */
 
-  rxDataListFiltered = DataRegister::GetInterval (rxDataList, rxt0, rxt1);
+  rxDataListFiltered = DataRegister::GetInterval (rxDataList, _t0, _t1);
 
   recvLineEdit->clear();
   recvLineEdit->insert(QString::number(rxDataListFiltered.count ()));
@@ -369,7 +381,7 @@ void MainWindow::computeData(QLineEdit * txT0,
   failsLineEdit->clear();
   failsLineEdit->insert(QString::number(totalFallos));
 
-  auto errors = DataRegister::GetInterval (errDataList, rxt0, rxt1);
+  auto errors = DataRegister::GetInterval (errDataList, _t0, _t1);
 
   errLineEdit->clear();
   errLineEdit->insert(QString::number(errors.count()));
@@ -496,38 +508,60 @@ void MainWindow::on_setIntervalButton_clicked()
 
 void MainWindow::on_dl_plotButton_clicked()
 {
-
-    DataPlotWindow * dwRx;
-
-    dwRx = new DataPlotWindow();
-
-    dwRx->show();
-
-    auto rxt0 = QDateTime::fromString (ui->dl_rxT0->text(),
-                                    DataRegister::timeFormat);
-    auto rxt1 = QDateTime::fromString (ui->dl_rxT1->text(),
-                                    DataRegister::timeFormat);
-    auto txt0 = QDateTime::fromString (ui->dl_txT0->text(),
-                                    DataRegister::timeFormat);
-    auto txt1 = QDateTime::fromString (ui->dl_txT1->text(),
-                                    DataRegister::timeFormat);
-
-    //Escogemos el intervalo mayor que engloba a todas las muestras de interés:
-    QDateTime t0, t1;
-    t0 = txt0 <= rxt0 ? txt0 : rxt0;
-    t1 = rxt1 >= txt1 ? rxt1 : txt1;
-
-    /*
-     * Pasamos todas las muestras del log, pero con el intervalo obtenido para visualizar
-     * ese intervalo primero. El usuario podrá interactuar en la línea de tiempo del plot
-     * para ver otras muestras que esten fuera del intervalo
-     */
-
-    dwRx->Plot(dlTxDataList,
-               dlRxDataList,
-               dlErrDataList,
-               t0,
-               t1
+    if(_plotOver && _lastPlotWindow != NULL)
+    {
+        _lastPlotWindow->PlotOver
+                (dlTxDataList,
+                 dlRxDataList,
+                 dlErrDataList,
+                 _t0,
+                 _t1
                 );
+    }
+    else
+    {
+        DataPlotWindow * dwRx;
 
+        dwRx = new DataPlotWindow();
+
+        dwRx->show();
+        /*
+        auto rxt0 = QDateTime::fromString (ui->dl_rxT0->text(),
+                                        DataRegister::timeFormat);
+        auto rxt1 = QDateTime::fromString (ui->dl_rxT1->text(),
+                                        DataRegister::timeFormat);
+        auto txt0 = QDateTime::fromString (ui->dl_txT0->text(),
+                                        DataRegister::timeFormat);
+        auto txt1 = QDateTime::fromString (ui->dl_txT1->text(),
+                                        DataRegister::timeFormat);
+
+        //Escogemos el intervalo mayor que engloba a todas las muestras de interés:
+        QDateTime t0, t1;
+        t0 = txt0 <= rxt0 ? txt0 : rxt0;
+        t1 = rxt1 >= txt1 ? rxt1 : txt1;
+        */
+
+        /*
+         * Pasamos todas las muestras del log, pero con el intervalo obtenido para visualizar
+         * ese intervalo primero. El usuario podrá interactuar en la línea de tiempo del plot
+         * para ver otras muestras que esten fuera del intervalo
+         */
+
+        dwRx->Plot(dlTxDataList,
+                   dlRxDataList,
+                   dlErrDataList,
+                   _t0,
+                   _t1
+                    );
+        _lastPlotWindow = dwRx;
+    }
+}
+
+
+void MainWindow::on_plotOverCheckBox_clicked(bool checked)
+{
+    if(checked)
+    {
+       _plotOver = true;
+    }
 }

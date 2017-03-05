@@ -24,6 +24,8 @@ private slots:
 
    void on_blockYToggle_toggled(bool checked);
 
+   void on_saveAsPDFButton_clicked();
+
 private:
     Ui::NormalPlot *ui;
     void updateZoomSettingsFromUi();

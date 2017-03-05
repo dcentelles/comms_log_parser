@@ -32,7 +32,7 @@ void NormalPlot::plot()
     int npoints = (x1-x0)/_inc + 1;
     QVector<double> xd(npoints), yd(npoints);
 
-    float x;
+    double x;
     int i;
     float var = _sd*_sd;
     for(x = x0, i = 0; x <= x1; i++, x+=_inc)
@@ -105,4 +105,12 @@ void NormalPlot::updateZoomSettingsFromUi()
         else
             plot->axisRect ()->setRangeZoomAxes (0, 0);
     }
+}
+
+void NormalPlot::on_saveAsPDFButton_clicked()
+{
+    QString fileName = QFileDialog::getSaveFileName (this,
+                                                     tr("Save plot"), "",
+                                                     tr("PDF (*.pdf);;All Files (*)"));
+    ui->plotWidget->savePdf (fileName);
 }
