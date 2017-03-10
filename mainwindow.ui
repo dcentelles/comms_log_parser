@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>749</width>
-    <height>745</height>
+    <width>912</width>
+    <height>765</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -67,8 +67,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>729</width>
-         <height>639</height>
+         <width>892</width>
+         <height>659</height>
         </rect>
        </property>
        <property name="minimumSize">
@@ -522,7 +522,7 @@
                <item row="0" column="0">
                 <widget class="QLabel" name="label_49">
                  <property name="text">
-                  <string>TX Data Rate:</string>
+                  <string>TX Data Rate (kbps):</string>
                  </property>
                 </widget>
                </item>
@@ -530,7 +530,7 @@
                 <widget class="QLineEdit" name="dl_txDataRate">
                  <property name="minimumSize">
                   <size>
-                   <width>64</width>
+                   <width>81</width>
                    <height>0</height>
                   </size>
                  </property>
@@ -539,7 +539,7 @@
                <item row="1" column="0">
                 <widget class="QLabel" name="label_50">
                  <property name="text">
-                  <string>RX Data Rate:</string>
+                  <string>RX Data Rate (kbps):</string>
                  </property>
                 </widget>
                </item>
@@ -556,7 +556,7 @@
                <item row="2" column="0">
                 <widget class="QLabel" name="label">
                  <property name="text">
-                  <string>Tiempo de transmisión (ms/byte):</string>
+                  <string>T. transmisión + T. propagación (ms/byte):</string>
                  </property>
                 </widget>
                </item>
@@ -628,6 +628,45 @@
             </property>
             <property name="text">
              <string>Plot over existing</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="txTitleLineEdit">
+            <property name="geometry">
+             <rect>
+              <x>660</x>
+              <y>200</y>
+              <width>181</width>
+              <height>22</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>camera -&gt; operator: transmitted PDUs</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="rxTitleLineEdit">
+            <property name="geometry">
+             <rect>
+              <x>660</x>
+              <y>230</y>
+              <width>181</width>
+              <height>22</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>camera -&gt; operator: received PDUs</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="erTitleLineEdit">
+            <property name="geometry">
+             <rect>
+              <x>660</x>
+              <y>260</y>
+              <width>181</width>
+              <height>22</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>camera -&gt; operator: checksum errors</string>
             </property>
            </widget>
           </widget>
@@ -1131,7 +1170,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>749</width>
+     <width>912</width>
      <height>19</height>
     </rect>
    </property>

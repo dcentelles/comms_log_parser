@@ -153,7 +153,7 @@ void DataRegister::ComputeLinks(QList<DataRegisterPtr> txl,
 
             DataRegisterPtr tx;
             int initx = idxtx;
-            while(!foundSender && idxtx > 0)
+            while(!foundSender && idxtx >= 0)
             {
                 tx = txl.at(idxtx);
                 auto txnseq = tx->GetNseq();
@@ -252,6 +252,46 @@ void DataRegister::GetGapData(QList<DataRegisterPtr> data, float & gap,
           auto t1 = reg->GetDateTime ();
           gap += t0.msecsTo (t1);
           t0 = t1;
+        }
+        gap = gap / data.count();
+
+        t0 = data[0]->GetDateTime ();
+        for (auto reg : data)
+        {
+          auto t1 = reg->GetDateTime ();
+          auto _gap = t0.msecsTo (t1);
+          auto diff = _gap-gap;
+          gapSd += diff*diff;
+          t0 = t1;
+        }
+        gapSd = qSqrt (gapSd/data.count());
+    }
+}
+
+void DataRegister::GetRxGapData(QList<DataRegisterPtr> data, float & gap,
+                                                   float & gapSd)
+{
+    gap = 0;
+    gapSd = 0;
+
+    if(data.count() > 0)
+    {
+        auto t0 = data[0]->GetDateTime ();
+        auto seq0 = data[0]->GetNseq ();
+
+        for (auto reg : data)
+        {
+          auto seq1 = reg->GetNseq ();
+          auto next2seq0 = (seq0 + 1) % 255;
+          auto t1 = reg->GetDateTime ();
+
+          if(next2seq0 == seq1)
+          {
+            gap += t0.msecsTo (t1);
+          }
+
+          t0 = t1;
+          seq0 = seq1;
         }
         gap = gap / data.count();
 

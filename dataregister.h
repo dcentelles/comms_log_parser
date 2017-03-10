@@ -36,6 +36,9 @@ public:
   static void GetGapData(QList<DataRegisterPtr> data, float & gap,
                                                       float & gapSd);
 
+  static void GetRxGapData(QList<DataRegisterPtr> data, float & gap,
+                                                      float & gapSd);
+
   static void GetDataRate(QList<DataRegisterPtr> data, float & dataRate);
 
   static void GetPDUSize(QList<DataRegisterPtr> data, float & packetSize,

@@ -121,6 +121,14 @@ private:
   dlRxDataList, dlTxDataList,
   appErrDataList, dlErrDataList;
 
+  float txGap, txGapSd;
+  int totalFallos;
+  QList<DataRegisterPtr> errors;
+  float rxGap, rxGapSd;
+  float rxDataRate, txDataRate;
+  float pduSize, pduSizeSd;
+  float btt, bttSd;
+
 };
 
 #endif // MAINWINDOW_H

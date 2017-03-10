@@ -20,7 +20,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::init()
 {
-  appDefaultPath = "/home/centelld/Escriptori/s100_20170301";
+  appDefaultPath = "/home/centelld/Escriptori/Evologics/parsed/2016-12-14/442";
   logTimeFormat = "\\[(\\d+-\\d+-\\d+ \\d+:\\d+:\\d+\\.\\d+)\\]";
 
   dlTxPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
@@ -133,64 +133,12 @@ void MainWindow::parseTimes(QList<DataRegisterPtr> & coll,
 
 void MainWindow::on_app_parseTimesButton_clicked()
 {
-    /*
-  parseTimes (appTxDataList,
-              appTxFileName,
-              appTxPattern,
-              ui->app_txT0ComboBox,
-              ui->app_txT1ComboBox);
-
-  parseTimes (appRxDataList,
-              appRxFileName,
-              appRxPattern,
-              ui->app_rxT0ComboBox,
-              ui->app_rxT1ComboBox);
-
-  parseTimes (appErrDataList,
-              appRxFileName,
-              appErrPattern,
-              NULL,
-              NULL);
-*/
 
 }
 
 void MainWindow::on_app_computeButton_clicked()
 {
-    /*
-    QList<DataRegisterPtr> txDataListFiltered,
-                           rxDataListFiltered;
-    computeData(
-                ui->app_txT0,
-                ui->app_txT1,
-                ui->app_rxT0,
-                ui->app_rxT1,
 
-                ui->app_sendLineEdit,
-
-                ui->app_txGapLineEdit,
-                ui->app_txGapSdLineEdit,
-
-                ui->app_recvLineEdit,
-                ui->app_failsLineEdit,
-                ui->app_errLineEdit,
-                ui->app_lostLineEdit,
-
-                ui->app_rxGapLineEdit,
-                ui->app_rxGapSdLineEdit,
-
-                ui->app_rxDataRate,
-                ui->app_txDataRate,
-
-                appTxDataList,
-                appRxDataList,
-
-                appErrDataList,
-
-                txDataListFiltered,
-                rxDataListFiltered
-                );
-    */
 }
 
 void MainWindow::updateLineEditText(QLineEdit * le, const QString & txt)
@@ -235,35 +183,6 @@ void MainWindow::on_dl_computeButton_clicked()
                 rxDataListFiltered
                 );
 
-    //PDU Size
-    float pduSize, pduSizeSd;
-    DataRegister::GetPDUSize(txDataListFiltered, pduSize, pduSizeSd);
-
-    updateLineEditText (ui->dl_packetSizeLineEdit, QString::number(pduSize));
-    updateLineEditText (ui->dl_packetSizeSdLineEdit, QString::number(pduSizeSd));
-
-    //Compute Links
-    DataRegister::ComputeLinks (
-                txDataListFiltered,
-                rxDataListFiltered
-                );
-
-    //Transmission time
-    float btt, bttSd;
-    DataRegister::ComputeTransmissionTime (
-                rxDataListFiltered,
-                btt,
-                bttSd);
-
-    updateLineEditText(ui->dl_transmissionTime, QString::number(btt));
-    updateLineEditText(ui->dl_transmissionTimeSD, QString::number(bttSd));
-
-    //PLOT
-    //TT
-    NormalPlot * ttPlot = new NormalPlot();
-    ttPlot->show();
-
-    ttPlot->Plot("Transmission Time", btt, bttSd, 100, 0.001, "ms/byte");
 }
 
 void MainWindow::on_dl_txBrowseButton_clicked()
@@ -337,81 +256,60 @@ void MainWindow::computeData(QLineEdit * txT0,
                              QList<DataRegisterPtr> & errDataList,
 
                              QList<DataRegisterPtr> & txDataListFiltered,
-                             QList<DataRegisterPtr> & rxDataListFiltered
-                             )
+                             QList<DataRegisterPtr> & rxDataListFiltered)
+
 {
-  //TX
   _t0 = QDateTime::fromString (txT0->text(),
                                   DataRegister::timeFormat);
-  /*auto txt1 = QDateTime::fromString (txT1->text(),
-                                  DataRegister::timeFormat);
-*/
   _t1 = QDateTime::fromString (rxT1->text(),
                                   DataRegister::timeFormat);
 
 
   txDataListFiltered = DataRegister::GetInterval (txDataList, _t0, _t1);
 
-  sendLineEdit->clear();
-  sendLineEdit->insert(QString::number(txDataListFiltered.count ()));
+  updateLineEditText(sendLineEdit, QString::number(txDataListFiltered.count ()));
 
-  float txGap, txGapSd;
+  rxDataListFiltered = DataRegister::GetInterval (rxDataList, _t0, _t1);
+
+  updateLineEditText(recvLineEdit, QString::number(rxDataListFiltered.count ()));
+
+  //Compute Links
+  DataRegister::ComputeLinks (
+              txDataListFiltered,
+              rxDataListFiltered
+              );
+
+
 
   DataRegister::GetGapData (txDataListFiltered,
                             txGap, txGapSd);
 
-  txGapLineEdit->clear();
-  txGapLineEdit->insert(QString::number(txGap));
+  updateLineEditText(txGapLineEdit,QString::number(txGap));
+  updateLineEditText(txGapSdLineEdit, QString::number(txGapSd));
 
-  txGapSdLineEdit->clear();
-  txGapSdLineEdit->insert(QString::number(txGapSd));
+  totalFallos = txDataListFiltered.count() - rxDataListFiltered.count();
 
-  //RX
-  /*auto rxt0 = QDateTime::fromString (rxT0->text(),
-                                  DataRegister::timeFormat);
-                                  */
+  updateLineEditText(failsLineEdit, QString::number(totalFallos));
 
-  rxDataListFiltered = DataRegister::GetInterval (rxDataList, _t0, _t1);
+  errors = DataRegister::GetInterval (errDataList, _t0, _t1);
 
-  recvLineEdit->clear();
-  recvLineEdit->insert(QString::number(rxDataListFiltered.count ()));
+  updateLineEditText(errLineEdit, QString::number(errors.count()));
+  updateLineEditText(lostLineEdit, QString::number(totalFallos - errors.count()));
 
-  auto totalFallos = txDataListFiltered.count() - rxDataListFiltered.count();
 
-  failsLineEdit->clear();
-  failsLineEdit->insert(QString::number(totalFallos));
-
-  auto errors = DataRegister::GetInterval (errDataList, _t0, _t1);
-
-  errLineEdit->clear();
-  errLineEdit->insert(QString::number(errors.count()));
-
-  lostLineEdit->clear();
-  lostLineEdit->insert(QString::number(totalFallos - errors.count()));
-
-  float rxGap, rxGapSd;
-
-  DataRegister::GetGapData (rxDataListFiltered,
+  DataRegister::GetRxGapData (rxDataListFiltered,
                             rxGap, rxGapSd);
 
-  rxGapLineEdit->clear();
-  rxGapLineEdit->insert(QString::number(rxGap));
-
-  rxGapSdLineEdit->clear();
-  rxGapSdLineEdit->insert(QString::number(rxGapSd));
+  updateLineEditText(rxGapLineEdit, QString::number(rxGap));
+  updateLineEditText(rxGapSdLineEdit, QString::number(rxGapSd));
 
   //DATA RATE
-
-  float rxDataRate, txDataRate;
 
   DataRegister::GetDataRate(txDataListFiltered, txDataRate);
   DataRegister::GetDataRate(rxDataListFiltered, rxDataRate);
 
-  rxDataRateLineEdit->clear();
-  rxDataRateLineEdit->insert(QString::number(rxDataRate));
-
-  txDataRateLineEdit->clear();
-  txDataRateLineEdit->insert(QString::number(txDataRate));
+  updateLineEditText(rxDataRateLineEdit, QString::number(rxDataRate));
+  updateLineEditText(txDataRateLineEdit, QString::number(txDataRate));
 
 
   //PLOT
@@ -426,6 +324,29 @@ void MainWindow::computeData(QLineEdit * txT0,
   txGapPlot->show();
 
   txGapPlot->Plot("TX Time GAP", txGap, txGapSd, 2000, 1, "GAP");
+
+  //PDU Size
+  DataRegister::GetPDUSize(txDataListFiltered, pduSize, pduSizeSd);
+
+  updateLineEditText (ui->dl_packetSizeLineEdit, QString::number(pduSize));
+  updateLineEditText (ui->dl_packetSizeSdLineEdit, QString::number(pduSizeSd));
+
+
+  //Transmission time
+  DataRegister::ComputeTransmissionTime (
+              rxDataListFiltered,
+              btt,
+              bttSd);
+
+  updateLineEditText(ui->dl_transmissionTime, QString::number(btt));
+  updateLineEditText(ui->dl_transmissionTimeSD, QString::number(bttSd));
+
+  //PLOT
+  //TT
+  NormalPlot * ttPlot = new NormalPlot();
+  ttPlot->show();
+
+  ttPlot->Plot("Transmission Time", btt, bttSd, 100, 0.001, "ms/byte");
 }
 
 void MainWindow::on_app_txT0ComboBox_currentIndexChanged(const QString &arg1)
@@ -508,6 +429,10 @@ void MainWindow::on_setIntervalButton_clicked()
 
 void MainWindow::on_dl_plotButton_clicked()
 {
+    auto txTitle = ui->txTitleLineEdit->text();
+    auto rxTitle = ui->rxTitleLineEdit->text();
+    auto erTitle = ui->erTitleLineEdit->text();
+
     if(_plotOver && _lastPlotWindow != NULL)
     {
         _lastPlotWindow->PlotOver
@@ -515,7 +440,10 @@ void MainWindow::on_dl_plotButton_clicked()
                  dlRxDataList,
                  dlErrDataList,
                  _t0,
-                 _t1
+                 _t1,
+                 txTitle,
+                 rxTitle,
+                 erTitle
                 );
     }
     else
@@ -551,7 +479,10 @@ void MainWindow::on_dl_plotButton_clicked()
                    dlRxDataList,
                    dlErrDataList,
                    _t0,
-                   _t1
+                   _t1,
+                   txTitle,
+                   rxTitle,
+                   erTitle
                     );
         _lastPlotWindow = dwRx;
     }

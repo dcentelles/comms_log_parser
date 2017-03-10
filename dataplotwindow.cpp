@@ -75,7 +75,10 @@ void DataPlotWindow::DrawDRsLinksToTimeGraph(
 void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
           QList<DataRegisterPtr> rxPdus,
           QList<DataRegisterPtr> errors,
-          QDateTime tini, QDateTime tend)
+          QDateTime tini, QDateTime tend,
+          const QString & txtitle,
+          const QString & rxtitle,
+          const QString & errtitle)
 {
     //INICIALIZAR PLOT
 
@@ -123,11 +126,11 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
 
 
     auto txGraph = plot->graph (0);
-    txGraph->setName ("camera -> operator: transmitted PDUs");
+    txGraph->setName (txtitle);
     auto rxGraph = plot->graph (1);
-    rxGraph->setName ("camera -> operator: received PDUs");
+    rxGraph->setName (rxtitle);
     auto errGraph = plot->graph (2);
-    errGraph->setName ("camera -> operator: checksum errors");
+    errGraph->setName (errtitle);
 
     setDRsToTimeGraph (txGraph, txPdus);
     setDRsToTimeGraph (rxGraph, rxPdus);
@@ -156,7 +159,10 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
 void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
           QList<DataRegisterPtr> rxPdus,
           QList<DataRegisterPtr> errors,
-          QDateTime tini, QDateTime tend)
+          QDateTime tini, QDateTime tend,
+          const QString & txtitle,
+          const QString & rxtitle,
+          const QString & errtitle)
 {
     QCustomPlot * plot = ui->plotWidget;
 
@@ -181,11 +187,11 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
     plot->addGraph (); //Paquetes recibidos con error
 
     auto txGraph = plot->graph (3);
-    txGraph->setName ("operator -> camera: transmitted PDUs");
+    txGraph->setName (txtitle);
     auto rxGraph = plot->graph (4);
-    rxGraph->setName ("operator -> camera: received PDUs");
+    rxGraph->setName (rxtitle);
     auto errGraph = plot->graph (5);
-    errGraph->setName ("operator -> camera: checksum errors");
+    errGraph->setName (errtitle);
 
     setDRsToTimeGraph (txGraph, txPdus);
     setDRsToTimeGraph (rxGraph, rxPdus);

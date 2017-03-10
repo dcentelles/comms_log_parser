@@ -20,12 +20,18 @@ public:
    void Plot(QList<DataRegisterPtr> txPdus,
              QList<DataRegisterPtr> rxPdus,
              QList<DataRegisterPtr> errors,
-             QDateTime tini, QDateTime tend);
+             QDateTime tini, QDateTime tend,
+             const QString & txtitle,
+             const QString & rxtitle,
+             const QString & errtitle);
 
    void PlotOver(QList<DataRegisterPtr> txPdus,
              QList<DataRegisterPtr> rxPdus,
              QList<DataRegisterPtr> errors,
-             QDateTime tini, QDateTime tend);
+             QDateTime tini, QDateTime tend,
+             const QString & txtitle,
+             const QString & rxtitle,
+             const QString & errtitle);
 
 private slots:
    void on_tickStepSpinBox_valueChanged(int arg1);
