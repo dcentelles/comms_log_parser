@@ -247,24 +247,28 @@ void DataRegister::GetGapData(QList<DataRegisterPtr> data, float & gap,
     if(data.count() > 0)
     {
         auto t0 = data[0]->GetDateTime ();
-        for (auto reg : data)
+        int count = 0;
+        for (int i = 1; i < data.count(); i++)
         {
+          auto reg = data[i];
           auto t1 = reg->GetDateTime ();
           gap += t0.msecsTo (t1);
           t0 = t1;
+          count++;
         }
-        gap = gap / data.count();
+        gap = gap / count;
 
         t0 = data[0]->GetDateTime ();
-        for (auto reg : data)
+        for (int i = 1; i < data.count(); i++)
         {
+          auto reg = data[i];
           auto t1 = reg->GetDateTime ();
           auto _gap = t0.msecsTo (t1);
           auto diff = _gap-gap;
           gapSd += diff*diff;
           t0 = t1;
         }
-        gapSd = qSqrt (gapSd/data.count());
+        gapSd = qSqrt (gapSd/count);
     }
 }
 
@@ -279,8 +283,10 @@ void DataRegister::GetRxGapData(QList<DataRegisterPtr> data, float & gap,
         auto t0 = data[0]->GetDateTime ();
         auto seq0 = data[0]->GetNseq ();
 
-        for (auto reg : data)
+        int count = 0;
+        for (int i = 1; i < data.count(); i++)
         {
+          auto reg = data[i];
           auto seq1 = reg->GetNseq ();
           auto next2seq0 = (seq0 + 1) % 255;
           auto t1 = reg->GetDateTime ();
@@ -288,23 +294,34 @@ void DataRegister::GetRxGapData(QList<DataRegisterPtr> data, float & gap,
           if(next2seq0 == seq1)
           {
             gap += t0.msecsTo (t1);
+            count++;
           }
 
           t0 = t1;
           seq0 = seq1;
         }
-        gap = gap / data.count();
+        gap = gap / count;
 
         t0 = data[0]->GetDateTime ();
-        for (auto reg : data)
+        seq0 = data[0]->GetNseq ();
+        for (int i = 1; i < data.count(); i++)
         {
-          auto t1 = reg->GetDateTime ();
-          auto _gap = t0.msecsTo (t1);
-          auto diff = _gap-gap;
-          gapSd += diff*diff;
+            auto reg = data[i];
+            auto seq1 = reg->GetNseq ();
+            auto next2seq0 = (seq0 + 1) % 255;
+            auto t1 = reg->GetDateTime ();
+
+            if(next2seq0 == seq1)
+            {
+              auto _gap = t0.msecsTo (t1);
+              auto diff = _gap-gap;
+              gapSd += diff*diff;
+            }
+
           t0 = t1;
+          seq0 = seq1;
         }
-        gapSd = qSqrt (gapSd/data.count());
+        gapSd = qSqrt (gapSd/count);
     }
 }
 
