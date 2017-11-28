@@ -25,14 +25,6 @@ public:
 
 
 private slots:
-  void on_app_txBrowseButton_clicked();
-
-  void on_app_rxBrowseButton_clicked();
-
-  void on_app_parseTimesButton_clicked();
-
-  void on_app_computeButton_clicked();
-
   void on_dl_txBrowseButton_clicked();
 
   void on_dl_rxBrowseButton_clicked();
@@ -40,14 +32,6 @@ private slots:
   void on_dl_parseTimesButton_clicked();
 
   void on_dl_computeButton_clicked();
-
-  void on_app_txT0ComboBox_currentIndexChanged(const QString &arg1);
-
-  void on_app_txT1ComboBox_currentIndexChanged(const QString &arg1);
-
-  void on_app_rxT0ComboBox_currentIndexChanged(const QString &arg1);
-
-  void on_app_rxT1ComboBox_currentIndexChanged(const QString &arg1);
 
   void on_dl_txT0ComboBox_currentIndexChanged(const QString &arg1);
 
@@ -63,12 +47,17 @@ private slots:
 
   void on_plotOverCheckBox_clicked(bool checked);
 
+  void on_pushButton_clicked();
+
+  void on_mainFolderLineEdit_textChanged(const QString &arg1);
+
 private:
   QDateTime _t0,_t1;
   DataPlotWindow * _lastPlotWindow;
   bool _plotOver;
 
   void init();
+  void updateRegex();
   void updateLineEditText(QLineEdit *, const QString & txt);
   void parseTimes(QList<DataRegisterPtr> & data,
                   const QString & fileName,
@@ -109,15 +98,14 @@ private:
   QString appTxFileName, appRxFileName,
   dlTxFileName, dlRxFileName;
   QRegularExpression
-  dlTxPattern, appTxPattern,
-  dlErrPattern,appErrPattern,
-  dlRxPattern, appRxPattern;
+  dlTxPattern,
+  dlErrPattern,
+  dlRxPattern;
 
   QList<QString> appTxList;
   QString appDefaultPath;
   QString logTimeFormat;
   QList<DataRegisterPtr>
-  appTxDataList, appRxDataList,
   dlRxDataList, dlTxDataList,
   appErrDataList, dlErrDataList;
 

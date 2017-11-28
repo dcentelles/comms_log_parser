@@ -18,65 +18,48 @@ MainWindow::~MainWindow()
   delete ui;
 }
 
-void MainWindow::init()
+void MainWindow::updateRegex()
 {
-  appDefaultPath = "/home/centelld/Escriptori/Evologics/parsed/2016-12-14/442";
   logTimeFormat = "\\[(\\d+-\\d+-\\d+ \\d+:\\d+:\\d+\\.\\d+)\\]";
 
+  auto txPattern = ui->txRegexLineEdit->text();
+
   dlTxPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
-    "transmitting frame... \\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
+    //"TX 2->1:.*\\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
+    //"TX: transmitting frame... \\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
+                                                txPattern
       ));
+
+  auto rxPattern = ui->rxRegexLineEdit->text();
 
   dlRxPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
-    "received frame without errors \\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
+    //"RX 1<-2:.*received frame without errors \\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
+    //"RX: received frame without errors \\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
+                                                rxPattern
       ));
 
+  auto errPattern = ui->errRegexLineEdit->text();
 
   dlErrPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
-    "received frame with errors. Frame will be discarded \\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
+    //"RX 1<-2: received frame with errors. Frame will be discarted \\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
+    //"RX: received frame with errors. Frame will be discarded \\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
+                                                 errPattern
       ));
+}
 
-  appTxPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
-    "asdasd"
-      ));
+void MainWindow::init()
+{
+  //appDefaultPath = "/home/centelld/programming/catkin_ws/src/build-dccomms_ros-Desktop-Debug/devel/lib/dccomms_ros";
+  appDefaultPath = ui->mainFolderLineEdit->text();
 
-  appRxPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
-    "asdasd"
-      ));
+  updateRegex();
 
-  appErrPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat,
-    ""
-      ));
-
-  _plotOver = false;
+  _plotOver = true;
   ui->plotOverCheckBox->setChecked (_plotOver);
   _lastPlotWindow = NULL;
 
 }
 
-void MainWindow::on_app_txBrowseButton_clicked()
-{
-    appTxFileName = QFileDialog::getOpenFileName (this,
-            tr("Open App Tx File"),
-            appDefaultPath,
-            tr("All files (*)"));
-
-    qDebug() << "App Tx File Name: " << appTxFileName;
-    ui->app_txFileLineEdit->clear();
-    ui->app_txFileLineEdit->insert(appTxFileName);
-}
-
-void MainWindow::on_app_rxBrowseButton_clicked()
-{
-  appRxFileName = QFileDialog::getOpenFileName (this,
-          tr("Open App Rx File"),
-          appDefaultPath,
-          tr("All files (*)"));
-
-  qDebug() << "App Rx File Name: " << appRxFileName;
-  ui->app_rxFileLineEdit->clear();
-  ui->app_rxFileLineEdit->insert(appRxFileName);
-}
 
 void MainWindow::parseTimes(QList<DataRegisterPtr> & coll,
                             const QString & fileName,
@@ -131,15 +114,6 @@ void MainWindow::parseTimes(QList<DataRegisterPtr> & coll,
   }
 }
 
-void MainWindow::on_app_parseTimesButton_clicked()
-{
-
-}
-
-void MainWindow::on_app_computeButton_clicked()
-{
-
-}
 
 void MainWindow::updateLineEditText(QLineEdit * le, const QString & txt)
 {
@@ -349,30 +323,6 @@ void MainWindow::computeData(QLineEdit * txT0,
   ttPlot->Plot("Transmission Time", btt, bttSd, 100, 0.001, "ms/byte");
 }
 
-void MainWindow::on_app_txT0ComboBox_currentIndexChanged(const QString &arg1)
-{
-    ui->app_txT0->clear();
-    ui->app_txT0->insert(arg1);
-}
-
-void MainWindow::on_app_txT1ComboBox_currentIndexChanged(const QString &arg1)
-{
-    ui->app_txT1->clear();
-    ui->app_txT1->insert(arg1);
-}
-
-void MainWindow::on_app_rxT0ComboBox_currentIndexChanged(const QString &arg1)
-{
-    ui->app_rxT0->clear();
-    ui->app_rxT0->insert(arg1);
-}
-
-void MainWindow::on_app_rxT1ComboBox_currentIndexChanged(const QString &arg1)
-{
-    ui->app_rxT1->clear();
-    ui->app_rxT1->insert(arg1);
-}
-
 void MainWindow::on_dl_txT0ComboBox_currentIndexChanged(const QString &arg1)
 {
     ui->dl_txT0->clear();
@@ -401,18 +351,6 @@ void MainWindow::on_setIntervalButton_clicked()
 {
    auto t0 = ui->t0LineEdit->text();
    auto t1 = ui->t1LineEdit->text();
-
-   ui->app_txT0->clear();
-   ui->app_txT0->insert(t0);
-
-   ui->app_txT1->clear();
-   ui->app_txT1->insert(t1);
-
-   ui->app_rxT0->clear();
-   ui->app_rxT0->insert(t0);
-
-   ui->app_rxT1->clear();
-   ui->app_rxT1->insert(t1);
 
    ui->dl_txT0->clear();
    ui->dl_txT0->insert(t0);
@@ -495,4 +433,18 @@ void MainWindow::on_plotOverCheckBox_clicked(bool checked)
     {
        _plotOver = true;
     }
+    else
+    {
+      _plotOver = false;
+    }
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+  updateRegex();
+}
+
+void MainWindow::on_mainFolderLineEdit_textChanged(const QString &arg1)
+{
+  appDefaultPath = arg1;
 }

@@ -79,7 +79,7 @@
        </property>
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
-         <widget class="QTabWidget" name="tabWidget">
+         <widget class="QTabWidget" name="parserConfTab">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -96,7 +96,7 @@
            </size>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="transportTab">
            <property name="sizePolicy">
@@ -670,490 +670,125 @@
             </property>
            </widget>
           </widget>
-          <widget class="QWidget" name="applicationTab">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
+          <widget class="QWidget" name="tab">
            <attribute name="title">
-            <string>Application</string>
+            <string>Parser settings</string>
            </attribute>
-           <widget class="QToolButton" name="app_computeButton">
+           <widget class="QLineEdit" name="rxRegexLineEdit">
             <property name="geometry">
              <rect>
-              <x>210</x>
-              <y>320</y>
-              <width>161</width>
-              <height>21</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>2. Calcular estadísticas</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="app_parseTimesButton">
-            <property name="geometry">
-             <rect>
-              <x>230</x>
-              <y>120</y>
-              <width>111</width>
+              <x>20</x>
+              <y>130</y>
+              <width>731</width>
               <height>22</height>
              </rect>
             </property>
             <property name="text">
-             <string>1. Parsear Log</string>
+             <string>RX: received frame without errors \(Seq: (\d+)\) \(FS: (\d+)\)</string>
             </property>
            </widget>
-           <widget class="QLineEdit" name="app_rxFileLineEdit">
-            <property name="geometry">
-             <rect>
-              <x>10</x>
-              <y>80</y>
-              <width>541</width>
-              <height>26</height>
-             </rect>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-           <widget class="QLabel" name="label_25">
-            <property name="geometry">
-             <rect>
-              <x>10</x>
-              <y>10</y>
-              <width>59</width>
-              <height>18</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>TX:</string>
-            </property>
-           </widget>
-           <widget class="QWidget" name="layoutWidget">
-            <property name="geometry">
-             <rect>
-              <x>30</x>
-              <y>150</y>
-              <width>531</width>
-              <height>161</height>
-             </rect>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_6">
-             <item>
-              <widget class="QGroupBox" name="groupBox_5">
-               <property name="title">
-                <string>TX time</string>
-               </property>
-               <widget class="QWidget" name="formLayoutWidget_4">
-                <property name="geometry">
-                 <rect>
-                  <x>20</x>
-                  <y>20</y>
-                  <width>231</width>
-                  <height>121</height>
-                 </rect>
-                </property>
-                <layout class="QFormLayout" name="formLayout_5">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_26">
-                   <property name="text">
-                    <string>T0:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QComboBox" name="app_txT0ComboBox"/>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QLineEdit" name="app_txT0">
-                   <property name="readOnly">
-                    <bool>false</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="1">
-                  <widget class="QComboBox" name="app_txT1ComboBox"/>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_27">
-                   <property name="text">
-                    <string>T1:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="1">
-                  <widget class="QLineEdit" name="app_txT1">
-                   <property name="readOnly">
-                    <bool>false</bool>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </widget>
-             </item>
-             <item>
-              <widget class="QGroupBox" name="groupBox_2">
-               <property name="title">
-                <string>RX time</string>
-               </property>
-               <widget class="QWidget" name="layoutWidget_2">
-                <property name="geometry">
-                 <rect>
-                  <x>10</x>
-                  <y>20</y>
-                  <width>211</width>
-                  <height>121</height>
-                 </rect>
-                </property>
-                <layout class="QFormLayout" name="formLayout_6">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="label_28">
-                   <property name="text">
-                    <string>T0:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QComboBox" name="app_rxT0ComboBox"/>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QLineEdit" name="app_rxT0">
-                   <property name="readOnly">
-                    <bool>false</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QLabel" name="label_29">
-                   <property name="text">
-                    <string>T1:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="1">
-                  <widget class="QComboBox" name="app_rxT1ComboBox"/>
-                 </item>
-                 <item row="3" column="1">
-                  <widget class="QLineEdit" name="app_rxT1">
-                   <property name="readOnly">
-                    <bool>false</bool>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-           <widget class="QLineEdit" name="app_txFileLineEdit">
-            <property name="geometry">
-             <rect>
-              <x>10</x>
-              <y>30</y>
-              <width>541</width>
-              <height>26</height>
-             </rect>
-            </property>
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-           <widget class="QWidget" name="layoutWidget_3">
+           <widget class="QLineEdit" name="txRegexLineEdit">
             <property name="geometry">
              <rect>
               <x>20</x>
-              <y>350</y>
-              <width>571</width>
-              <height>228</height>
-             </rect>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_7">
-             <item>
-              <layout class="QFormLayout" name="formLayout_7">
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_30">
-                 <property name="text">
-                  <string>Imágenes transmitidas:</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1">
-                <widget class="QLineEdit" name="app_sendLineEdit">
-                 <property name="readOnly">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_31">
-                 <property name="text">
-                  <string>Imágenes recibidos:</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QLineEdit" name="app_recvLineEdit">
-                 <property name="readOnly">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="0">
-                <widget class="QLabel" name="label_32">
-                 <property name="text">
-                  <string>Imágenes con errores:</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="1">
-                <widget class="QLineEdit" name="app_errLineEdit">
-                 <property name="readOnly">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="label_33">
-                 <property name="text">
-                  <string>Imágenes perdidos:</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="1">
-                <widget class="QLineEdit" name="app_lostLineEdit">
-                 <property name="readOnly">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="0">
-                <widget class="QLabel" name="label_34">
-                 <property name="text">
-                  <string>Total fallos (errores+pérdidas): </string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="1">
-                <widget class="QLineEdit" name="app_failsLineEdit">
-                 <property name="readOnly">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="5" column="0">
-                <widget class="QLabel" name="label_35">
-                 <property name="text">
-                  <string>TX - RX IIG (Inter-Image-Gap):</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="5" column="1">
-                <layout class="QHBoxLayout" name="horizontalLayout_8">
-                 <item>
-                  <widget class="QLineEdit" name="app_txGapLineEdit">
-                   <property name="readOnly">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="app_rxGapLineEdit">
-                   <property name="readOnly">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="6" column="0">
-                <widget class="QLabel" name="label_58">
-                 <property name="text">
-                  <string>TX - RX IIG SD:</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="6" column="1">
-                <layout class="QHBoxLayout" name="horizontalLayout_9">
-                 <item>
-                  <widget class="QLineEdit" name="app_txGapSdLineEdit">
-                   <property name="readOnly">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="app_rxGapSdLineEdit">
-                   <property name="readOnly">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item row="7" column="0">
-                <widget class="QLabel" name="label_59">
-                 <property name="text">
-                  <string>Image size (mean - SD):</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="7" column="1">
-                <layout class="QHBoxLayout" name="horizontalLayout_10">
-                 <item>
-                  <widget class="QLineEdit" name="app_packetSizeLineEdit">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="readOnly">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="app_packetSizeSdLineEdit">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="readOnly">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <layout class="QFormLayout" name="formLayout_8">
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_51">
-                 <property name="text">
-                  <string>TX Data Rate:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1">
-                <widget class="QLineEdit" name="app_txDataRate">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>64</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_52">
-                 <property name="text">
-                  <string>RX Data Rate:</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QLineEdit" name="app_rxDataRate">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>64</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </widget>
-           <widget class="QLabel" name="label_36">
-            <property name="geometry">
-             <rect>
-              <x>10</x>
               <y>60</y>
-              <width>59</width>
-              <height>18</height>
+              <width>731</width>
+              <height>22</height>
              </rect>
             </property>
             <property name="text">
-             <string>RX:</string>
+             <string>TX: transmitting frame... \(Seq: (\d+)\) \(FS: (\d+)\)</string>
             </property>
            </widget>
-           <widget class="QToolButton" name="app_plotButton">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
+           <widget class="QLineEdit" name="errRegexLineEdit">
             <property name="geometry">
              <rect>
-              <x>570</x>
-              <y>190</y>
-              <width>71</width>
-              <height>71</height>
+              <x>20</x>
+              <y>200</y>
+              <width>731</width>
+              <height>22</height>
              </rect>
             </property>
             <property name="text">
-             <string>PLOT</string>
+             <string>RX: received frame with errors. Frame will be discarded \(Seq: (\d+)\) \(FS: (\d+)\)</string>
             </property>
            </widget>
-           <widget class="QPushButton" name="app_rxBrowseButton">
+           <widget class="QLabel" name="label_3">
             <property name="geometry">
              <rect>
-              <x>560</x>
-              <y>80</y>
-              <width>80</width>
-              <height>26</height>
+              <x>20</x>
+              <y>170</y>
+              <width>81</width>
+              <height>16</height>
              </rect>
             </property>
             <property name="text">
-             <string>Browse</string>
+             <string>Error regex:</string>
             </property>
            </widget>
-           <widget class="QPushButton" name="app_txBrowseButton">
+           <widget class="QLabel" name="label_4">
             <property name="geometry">
              <rect>
-              <x>560</x>
+              <x>20</x>
+              <y>100</y>
+              <width>81</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>RX regex:</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_5">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
               <y>30</y>
-              <width>80</width>
-              <height>26</height>
+              <width>81</width>
+              <height>16</height>
              </rect>
             </property>
             <property name="text">
-             <string>Browse</string>
+             <string>TX regex:</string>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="pushButton">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>240</y>
+              <width>80</width>
+              <height>51</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Update</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="mainFolderLineEdit">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>340</y>
+              <width>731</width>
+              <height>22</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>/home/</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_6">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>310</y>
+              <width>81</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Main folder:</string>
             </property>
            </widget>
           </widget>
