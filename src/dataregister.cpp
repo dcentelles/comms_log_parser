@@ -1,4 +1,4 @@
-#include "dataregister.h"
+#include <comms_log_parser/dataregister.h>
 #include <qmath.h>
 
 const QString DataRegister::timeFormat =  "yyyy-MM-dd HH:mm:ss.zzz";

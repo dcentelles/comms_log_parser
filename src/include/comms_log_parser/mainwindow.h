@@ -2,14 +2,12 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <ros/ros.h>
-#include <ros/network.h>
 #include <QList>
 #include <QString>
 #include <QRegularExpression>
-#include <dataregister.h>
+#include <comms_log_parser/dataregister.h>
 #include <QComboBox>
-#include <dataplotwindow.h>
+#include <comms_log_parser/dataplotwindow.h>
 
 namespace Ui {
   class MainWindow;

@@ -1,5 +1,5 @@
-#include "dataplotwindow.h"
-#include "ui_dataplotwindow.h"
+#include <comms_log_parser/dataplotwindow.h>
+#include <ui_dataplotwindow.h>
 
 DataPlotWindow::DataPlotWindow(QWidget *parent) :
     QMainWindow(parent),

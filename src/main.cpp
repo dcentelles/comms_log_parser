@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include <comms_log_parser/mainwindow.h>
 #include <QApplication>
 
 int main(int argc, char *argv[])

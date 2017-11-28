@@ -1,9 +1,9 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include <comms_log_parser/mainwindow.h>
+#include <ui_mainwindow.h>
 #include <QFileDialog>
 #include <QDebug>
-#include <dataplotwindow.h>
-#include <normalplot.h>
+#include <comms_log_parser/dataplotwindow.h>
+#include <comms_log_parser/normalplot.h>
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),

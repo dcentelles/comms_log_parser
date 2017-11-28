@@ -1,5 +1,5 @@
-#include "normalplot.h"
-#include "ui_normalplot.h"
+#include <comms_log_parser/normalplot.h>
+#include <ui_normalplot.h>
 
 NormalPlot::NormalPlot(QWidget *parent) :
     QMainWindow(parent),

@@ -2,7 +2,7 @@
 #define DATAPLOTWINDOW_H
 
 #include <QMainWindow>
-#include <dataregister.h>
+#include <comms_log_parser/dataregister.h>
 #include <qcustomplot.h>
 
 namespace Ui {
