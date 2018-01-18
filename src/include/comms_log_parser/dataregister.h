@@ -36,7 +36,7 @@ public:
   static void GetGapData(QList<DataRegisterPtr> data, float & gap,
                                                       float & gapSd);
 
-  static void GetRxGapData(QList<DataRegisterPtr> data, float & gap,
+  static void GetRxGapAndComputeJitter(QList<DataRegisterPtr> data, float & gap,
                                                       float & gapSd);
 
   static void GetDataRate(QList<DataRegisterPtr> data, float & dataRate);
@@ -72,6 +72,9 @@ public:
   void SetLinkedRegister(DataRegisterPtr);
   int GetPacketTransmissionTime();
 
+  inline double GetJitter(){return _jitter;}
+  inline double JitterValud() {return _jitterValid;}
+
 private:
   DataRegisterPtr _link;
   void init();
@@ -80,6 +83,8 @@ private:
   int dataSize;
   int _nseq;
   int _ptt;
+  double _jitter;
+  double _jitterValid;
 
 };
 

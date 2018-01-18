@@ -28,6 +28,7 @@ void DataRegister::init()
 {
 //  timeFormat = "yyyy-MM-dd HH:mm:ss.zzz";
     _nseq = -1;
+    _jitterValid = false;
 }
 
 void DataRegister::SetDataSize(int size)
@@ -272,7 +273,7 @@ void DataRegister::GetGapData(QList<DataRegisterPtr> data, float & gap,
     }
 }
 
-void DataRegister::GetRxGapData(QList<DataRegisterPtr> data, float & gap,
+void DataRegister::GetRxGapAndComputeJitter(QList<DataRegisterPtr> data, float & gap,
                                                    float & gapSd)
 {
     gap = 0;
@@ -291,11 +292,22 @@ void DataRegister::GetRxGapData(QList<DataRegisterPtr> data, float & gap,
           auto next2seq0 = (seq0 + 1) % 255;
           auto t1 = reg->GetDateTime ();
 
+          auto _gap = t0.msecsTo (t1);
           if(next2seq0 == seq1)
           {
-            gap += t0.msecsTo (t1);
+            gap += _gap;
             count++;
           }
+
+          //jitter graph example in: http://nile.wpi.edu/NS
+          auto seqdiff = seq1 - seq0;
+          if(seqdiff == 0) seqdiff = 1;
+          if(seqdiff > 0)
+          {
+              reg->_jitter = _gap / seqdiff;
+              reg->_jitterValid = true;
+          }
+          else reg->_jitterValid = false;
 
           t0 = t1;
           seq0 = seq1;

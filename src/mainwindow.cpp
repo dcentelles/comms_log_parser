@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <comms_log_parser/dataplotwindow.h>
 #include <comms_log_parser/normalplot.h>
+#include <comms_log_parser/jitterplotwindow.h>
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -271,7 +272,7 @@ void MainWindow::computeData(QLineEdit * txT0,
   updateLineEditText(lostLineEdit, QString::number(totalFallos - errors.count()));
 
 
-  DataRegister::GetRxGapData (rxDataListFiltered,
+  DataRegister::GetRxGapAndComputeJitter (rxDataListFiltered,
                             rxGap, rxGapSd);
 
   updateLineEditText(rxGapLineEdit, QString::number(rxGap));
@@ -286,7 +287,7 @@ void MainWindow::computeData(QLineEdit * txT0,
   updateLineEditText(txDataRateLineEdit, QString::number(txDataRate));
 
 
-  //PLOT
+  //PLOT gaussians
   //RX GAP
   NormalPlot * gapPlot = new NormalPlot();
   gapPlot->show();
@@ -315,12 +316,19 @@ void MainWindow::computeData(QLineEdit * txT0,
   updateLineEditText(ui->dl_transmissionTime, QString::number(btt));
   updateLineEditText(ui->dl_transmissionTimeSD, QString::number(bttSd));
 
-  //PLOT
+  //PLOT gaussian
   //TT
   NormalPlot * ttPlot = new NormalPlot();
   ttPlot->show();
 
   ttPlot->Plot("Transmission Time", btt, bttSd, 100, 0.001, "ms/byte");
+
+  //Plot Jitter
+  JitterPlotWindow * jitterPlot;
+
+  jitterPlot = new JitterPlotWindow();
+  jitterPlot->show();
+  jitterPlot->Plot(rxDataListFiltered, "Jitter", _t0, _t1);
 }
 
 void MainWindow::on_dl_txT0ComboBox_currentIndexChanged(const QString &arg1)
