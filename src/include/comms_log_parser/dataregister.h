@@ -70,7 +70,7 @@ public:
   QString ToString();
   DataRegisterPtr GetLinkedRegister();
   void SetLinkedRegister(DataRegisterPtr);
-  int GetPacketTransmissionTime();
+  inline double GetEnd2EndDelay(){return _end2EndDelay;} //ms
 
   inline double GetJitter(){return _jitter;}
   inline double JitterValud() {return _jitterValid;}
@@ -85,6 +85,7 @@ private:
   int _ptt;
   double _jitter;
   double _jitterValid;
+  double _end2EndDelay;
 
 };
 

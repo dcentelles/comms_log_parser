@@ -219,6 +219,7 @@ void DataRegister::ComputeTransmissionTime(
             auto psize = tx->GetDataSize ();
             float _btt = (float) gap / psize;
             btt += _btt;
+            rx->_end2EndDelay = (double) gap / psize;
             count++;
         }
     }
