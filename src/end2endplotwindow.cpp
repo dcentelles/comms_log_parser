@@ -1,14 +1,14 @@
-#include <comms_log_parser/transmissiontimeplotwindow.h>
+#include <comms_log_parser/end2endplotwindow.h>
 #include <ui_transmissiontimeplotwindow.h>
 
-TransmissionTimePlotWindow::TransmissionTimePlotWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::TransmissionTimePlotWindow) {
+End2EndPlotWindow::End2EndPlotWindow(QWidget *parent)
+    : QMainWindow(parent), ui(new Ui::End2EndPlotWindow) {
   ui->setupUi(this);
 }
 
-TransmissionTimePlotWindow::~TransmissionTimePlotWindow() { delete ui; }
+End2EndPlotWindow::~End2EndPlotWindow() { delete ui; }
 
-void TransmissionTimePlotWindow::Plot(QList<DataRegisterPtr> rxregs,
+void End2EndPlotWindow::Plot(QList<DataRegisterPtr> rxregs,
                                       const QString &title, QDateTime tini,
                                       QDateTime tend) {
   _windowTitle = title;
@@ -43,7 +43,7 @@ void TransmissionTimePlotWindow::Plot(QList<DataRegisterPtr> rxregs,
   updateZoomSettingsFromUi();
 
   plot->xAxis->setLabel("Reception time");
-  plot->yAxis->setLabel("End-End/byte");
+  plot->yAxis->setLabel("end-end delay (ms/byte)");
 
   plot->xAxis->setRange(t0, t1);
 
@@ -75,22 +75,22 @@ void TransmissionTimePlotWindow::Plot(QList<DataRegisterPtr> rxregs,
   sb->setValue(plot->xAxis->ticker()->tickCount());
 }
 
-void TransmissionTimePlotWindow::on_tickStepSpinBox_valueChanged(int arg1) {
+void End2EndPlotWindow::on_tickStepSpinBox_valueChanged(int arg1) {
   QCustomPlot *plot = ui->plotWidget;
   auto graph = plot->graph(0);
   plot->xAxis->ticker()->setTickCount(arg1);
   plot->replot();
 }
 
-void TransmissionTimePlotWindow::on_blockXToggle_toggled(bool checked) {
+void End2EndPlotWindow::on_blockXToggle_toggled(bool checked) {
   updateZoomSettingsFromUi();
 }
 
-void TransmissionTimePlotWindow::on_blockYToggle_toggled(bool checked) {
+void End2EndPlotWindow::on_blockYToggle_toggled(bool checked) {
   updateZoomSettingsFromUi();
 }
 
-void TransmissionTimePlotWindow::updateZoomSettingsFromUi() {
+void End2EndPlotWindow::updateZoomSettingsFromUi() {
   QCustomPlot *plot = ui->plotWidget;
   QCheckBox *blockXT = ui->blockXToggle;
   QCheckBox *blockYT = ui->blockYToggle;
@@ -109,7 +109,7 @@ void TransmissionTimePlotWindow::updateZoomSettingsFromUi() {
   }
 }
 
-void TransmissionTimePlotWindow::on_saveAsPDFButton_clicked() {
+void End2EndPlotWindow::on_saveAsPDFButton_clicked() {
   QString fileName = QFileDialog::getSaveFileName(
       this, tr("Save plot"), "", tr("PDF (*.pdf);;All Files (*)"));
   ui->plotWidget->savePdf(fileName);

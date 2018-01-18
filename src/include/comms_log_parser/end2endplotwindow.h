@@ -1,20 +1,20 @@
-#ifndef TRANSMISSIONTIMEPLOTWINDOW_H
-#define TRANSMISSIONTIMEPLOTWINDOW_H
+#ifndef END2ENDPLOTWINDOW_H
+#define END2ENDPLOTWINDOW_H
 
 #include <QMainWindow>
 #include <comms_log_parser/dataregister.h>
 #include <qcustomplot.h>
 
 namespace Ui {
-class TransmissionTimePlotWindow;
+class End2EndPlotWindow;
 }
 
-class TransmissionTimePlotWindow : public QMainWindow {
+class End2EndPlotWindow : public QMainWindow {
   Q_OBJECT
 
 public:
-  explicit TransmissionTimePlotWindow(QWidget *parent = 0);
-  ~TransmissionTimePlotWindow();
+  explicit End2EndPlotWindow(QWidget *parent = 0);
+  ~End2EndPlotWindow();
   void Plot(QList<DataRegisterPtr> rxregs, const QString &title, QDateTime tini,
             QDateTime tend);
 
@@ -31,7 +31,7 @@ private:
   void updateZoomSettingsFromUi();
   QString _windowTitle;
   QList<DataRegisterPtr> _rxregs;
-  Ui::TransmissionTimePlotWindow *ui;
+  Ui::End2EndPlotWindow *ui;
 };
 
-#endif // TransmissionTimePlotWindow
+#endif // END2ENDPLOTWINDOW_H

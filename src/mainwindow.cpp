@@ -5,7 +5,7 @@
 #include <comms_log_parser/dataplotwindow.h>
 #include <comms_log_parser/normalplot.h>
 #include <comms_log_parser/jitterplotwindow.h>
-#include <comms_log_parser/transmissiontimeplotwindow.h>
+#include <comms_log_parser/end2endplotwindow.h>
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -332,9 +332,9 @@ void MainWindow::computeData(QLineEdit * txT0,
   jitterPlot->Plot(rxDataListFiltered, "Jitter", _t0, _t1);
 
   //Plot end 2 end delay per byte
-  TransmissionTimePlotWindow * e2ePlot;
+  End2EndPlotWindow * e2ePlot;
 
-  e2ePlot = new TransmissionTimePlotWindow();
+  e2ePlot = new End2EndPlotWindow();
   e2ePlot->show();
   e2ePlot->Plot(rxDataListFiltered, "End-End delay per byte", _t0, _t1);
 }
