@@ -53,6 +53,7 @@ private:
   QDateTime _t0,_t1;
   DataPlotWindow * _lastPlotWindow;
   bool _plotOver;
+  uint32_t _packetSizeIndex, _seqNumIndex;
 
   void init();
   void updateRegex();

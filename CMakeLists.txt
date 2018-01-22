@@ -19,7 +19,7 @@ SET(PROJECT_INCLUDE_DIRS
     src/include/comms_log_parser
 )
 
-add_definitions(-std=c++11)
+add_definitions(-std=c++14)
 
 
 set(HW_HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/include/comms_log_parser)

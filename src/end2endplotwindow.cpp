@@ -1,5 +1,5 @@
 #include <comms_log_parser/end2endplotwindow.h>
-#include <ui_transmissiontimeplotwindow.h>
+#include <ui_end2endplotwindow.h>
 
 End2EndPlotWindow::End2EndPlotWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::End2EndPlotWindow) {
