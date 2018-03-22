@@ -85,7 +85,7 @@ void MainWindow::parseTimes(QList<DataRegisterPtr> &coll,
         if(_seqNumIndex != 0)
           nseq = match.captured(_seqNumIndex).toInt();
         size = match.captured(_packetSizeIndex).toInt();
-        auto dataRegister = DataRegister::Build(size, moment);
+        auto dataRegister = DataRegister::Build(size+2, moment);
         dataRegister->SetNseq(nseq);
         coll.append(dataRegister);
       }
@@ -252,7 +252,7 @@ void MainWindow::computeData(
 
   jitterPlot = new JitterPlotWindow();
   jitterPlot->show();
-  jitterPlot->Plot(rxDataListFiltered, "Jitter", _t0, _t1);
+  jitterPlot->Plot(rxDataListFiltered, "Jitter", _t0, _t1, "Jitter", "Reception time");
   // Transmission time
   if (_seqNumIndex != 0) {
     DataRegister::ComputeTransmissionTime(rxDataListFiltered, btt, bttSd);

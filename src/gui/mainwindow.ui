@@ -96,7 +96,7 @@
            </size>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="transportTab">
            <property name="sizePolicy">
@@ -205,9 +205,6 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="0" column="1">
-                  <widget class="QComboBox" name="dl_txT0ComboBox"/>
-                 </item>
                  <item row="1" column="1">
                   <widget class="QLineEdit" name="dl_txT0">
                    <property name="readOnly">
@@ -238,6 +235,9 @@
                     <bool>false</bool>
                    </property>
                   </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QComboBox" name="dl_txT0ComboBox"/>
                  </item>
                 </layout>
                </widget>
@@ -684,7 +684,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>RX: received frame without errors \(Seq: (\d+)\) \(FS: (\d+)\)</string>
+             <string>Packet received!: Seq\. Num: (\d+) ; Size: (\d+)</string>
             </property>
            </widget>
            <widget class="QLineEdit" name="txRegexLineEdit">
@@ -697,7 +697,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>TX: transmitting frame... \(Seq: (\d+)\) \(FS: (\d+)\)</string>
+             <string>Transmitting packet \(Seq\. Num: (\d+) ; Size: (\d+)</string>
             </property>
            </widget>
            <widget class="QLineEdit" name="errRegexLineEdit">
@@ -710,7 +710,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>RX: received frame with errors. Frame will be discarted \(Seq: (\d+)\) \(FS: (\d+)\)</string>
+             <string>Packet received with errors!</string>
             </property>
            </widget>
            <widget class="QLabel" name="label_3">
@@ -775,7 +775,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>/home/</string>
+             <string>/home/centelld/Escriptori/s100_testing</string>
             </property>
            </widget>
            <widget class="QLabel" name="label_6">
@@ -816,7 +816,7 @@
               <string>uint8_t</string>
              </property>
              <property name="checked">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
             </widget>
             <widget class="QRadioButton" name="uint16_t_radioButton">
@@ -830,6 +830,9 @@
              </property>
              <property name="text">
               <string>uint16_t</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
             <widget class="QRadioButton" name="uint32_t_radioButton">
