@@ -28,12 +28,15 @@ private slots:
   void on_blockYToggle_toggled(bool checked);
 
   void on_saveAsPDFButton_clicked();
+  void xAxisChanged(QCPRange range);
+  void yAxisChanged(QCPRange range);
 
 private:
   void updateZoomSettingsFromUi();
   QString _windowTitle;
   QList<DataRegisterPtr> _rxregs;
   Ui::PlotWindow *ui;
+  void updateXAxisRangeFromInput();
 };
 
 #endif // JITTERPLOTWINDOW_H

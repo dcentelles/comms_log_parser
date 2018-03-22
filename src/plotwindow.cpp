@@ -4,12 +4,17 @@
 PlotWindow::PlotWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::PlotWindow) {
   ui->setupUi(this);
+  connect(ui->plotWidget->xAxis, SIGNAL(rangeChanged(QCPRange)), this,
+          SLOT(xAxisChanged(QCPRange)));
+  connect(ui->plotWidget->yAxis, SIGNAL(rangeChanged(QCPRange)), this,
+          SLOT(yAxisChanged(QCPRange)));
 }
 
 PlotWindow::~PlotWindow() { delete ui; }
 
 void PlotWindow::Plot(QList<DataRegisterPtr> rxregs, const QString &title,
-                            QDateTime tini, QDateTime tend, const QString &ylabel, const QString &xlabel) {
+                      QDateTime tini, QDateTime tend, const QString &ylabel,
+                      const QString &xlabel) {
   _windowTitle = title;
   _rxregs = rxregs;
 
@@ -32,6 +37,17 @@ void PlotWindow::Plot(QList<DataRegisterPtr> rxregs, const QString &title,
   auto t0 = (tini.toMSecsSinceEpoch()) / 1000.;
   auto t1 = (tend.toMSecsSinceEpoch()) / 1000.;
 
+  QDateTime max, min;
+  max = tend.addSecs(3600);
+  min = tini.addSecs(-3600);
+  ui->t0dateTimeEdit->setMaximumDateTime(max);
+  ui->t0dateTimeEdit->setMinimumDateTime(min);
+  ui->t0dateTimeEdit->setTime(tini.time());
+  auto msdiff = tini.time().msecsTo(tend.time());
+  QTime tdiff(0, 0);
+  tdiff = tdiff.addMSecs(msdiff);
+  ui->durationDateTimeEdit->setTime(tdiff);
+
   // show legend with slightly transparent background brush:
   plot->legend->setVisible(true);
   plot->legend->setBrush(QColor(255, 255, 255, 150));
@@ -45,6 +61,12 @@ void PlotWindow::Plot(QList<DataRegisterPtr> rxregs, const QString &title,
   plot->yAxis->setLabel(ylabel);
 
   plot->xAxis->setRange(t0, t1);
+
+  auto lower = plot->yAxis->range().lower;
+  auto upper = plot->yAxis->range().upper;
+
+  ui->yLowLineEdit->setText(QString::number(lower));
+  ui->yHighLineEdit->setText(QString::number(upper));
 
   plot->addGraph();
   QCPGraph *graph = plot->graph(0);
@@ -116,9 +138,18 @@ void PlotWindow::on_saveAsPDFButton_clicked() {
   ui->plotWidget->savePdf(fileName);
 }
 
-void PlotWindow::on_fixXPushButton_clicked() {
-
+void PlotWindow::updateXAxisRangeFromInput() {
+  QDateTime t0 = ui->t0dateTimeEdit->dateTime();
+  QDateTime duration = ui->durationDateTimeEdit->dateTime();
+  QTime aux(0, 0);
+  auto ms = aux.msecsTo(duration.time());
+  QDateTime t1 = t0.addMSecs(ms);
+  auto t0sec = (t0.toMSecsSinceEpoch()) / 1000.;
+  auto t1sec = (t1.toMSecsSinceEpoch()) / 1000.;
+  ui->plotWidget->xAxis->setRange(t0sec, t1sec);
+  ui->plotWidget->replot();
 }
+void PlotWindow::on_fixXPushButton_clicked() { updateXAxisRangeFromInput(); }
 
 void PlotWindow::on_fixYPushButton_clicked() {
 
@@ -127,4 +158,24 @@ void PlotWindow::on_fixYPushButton_clicked() {
   auto plot = ui->plotWidget;
   plot->yAxis->setRange(yTop, yBottom);
   plot->replot();
+}
+
+void PlotWindow::xAxisChanged(QCPRange range) {
+  QDateTime t0, t1;
+  auto t0sec = range.lower;
+  auto t1sec = range.upper;
+  t0 = t0.fromMSecsSinceEpoch(t0sec * 1000);
+  t1 = t1.fromMSecsSinceEpoch(t1sec * 1000);
+  auto msdiff = t0.time().msecsTo(t1.time());
+  QTime tdiff(0, 0);
+  tdiff = tdiff.addMSecs(msdiff);
+  ui->t0dateTimeEdit->setTime(t0.time());
+  ui->durationDateTimeEdit->setTime(tdiff);
+}
+
+void PlotWindow::yAxisChanged(QCPRange range) {
+  auto y0 = range.lower;
+  auto y1 = range.upper;
+  ui->yLowLineEdit->setText(QString::number(y0));
+  ui->yHighLineEdit->setText(QString::number(y1));
 }
