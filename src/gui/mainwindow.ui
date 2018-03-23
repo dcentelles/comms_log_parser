@@ -124,14 +124,14 @@
            <widget class="QToolButton" name="dl_computeButton">
             <property name="geometry">
              <rect>
-              <x>210</x>
+              <x>90</x>
               <y>320</y>
-              <width>161</width>
+              <width>281</width>
               <height>21</height>
              </rect>
             </property>
             <property name="text">
-             <string>2. Calcular estadísticas</string>
+             <string>Compute statistics and generate plots</string>
             </property>
            </widget>
            <widget class="QPushButton" name="dl_parseTimesButton">
@@ -144,7 +144,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>1. Parsear Log</string>
+             <string>Parse log files</string>
             </property>
            </widget>
            <widget class="QLabel" name="label_16">
@@ -346,7 +346,7 @@
                <item row="0" column="0">
                 <widget class="QLabel" name="label_17">
                  <property name="text">
-                  <string>Paquetes transmitidos:</string>
+                  <string>Transmitted packets:</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -363,7 +363,7 @@
                <item row="1" column="0">
                 <widget class="QLabel" name="label_21">
                  <property name="text">
-                  <string>Paquetes recibidos:</string>
+                  <string>Received packets:</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -380,7 +380,7 @@
                <item row="2" column="0">
                 <widget class="QLabel" name="label_19">
                  <property name="text">
-                  <string>Paquetes con errores:</string>
+                  <string>Packets with errors:</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -397,7 +397,7 @@
                <item row="3" column="0">
                 <widget class="QLabel" name="label_22">
                  <property name="text">
-                  <string>Paquetes perdidos:</string>
+                  <string>Packets lost:</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -414,7 +414,7 @@
                <item row="4" column="0">
                 <widget class="QLabel" name="label_20">
                  <property name="text">
-                  <string>Total fallos (errores+pérdidas): </string>
+                  <string>Total errors (lost + errors): </string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -556,22 +556,12 @@
                <item row="2" column="0">
                 <widget class="QLabel" name="label">
                  <property name="text">
-                  <string>T. transmisión + T. propagación (ms/byte):</string>
+                  <string>End To End Delay (ms):</string>
                  </property>
                 </widget>
                </item>
                <item row="2" column="1">
                 <widget class="QLineEdit" name="dl_transmissionTime">
-                 <property name="minimumSize">
-                  <size>
-                   <width>70</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="1">
-                <widget class="QLineEdit" name="dl_transmissionTimeSD">
                  <property name="minimumSize">
                   <size>
                    <width>70</width>
@@ -587,6 +577,16 @@
                  </property>
                 </widget>
                </item>
+               <item row="3" column="1">
+                <widget class="QLineEdit" name="dl_transmissionTimeSD">
+                 <property name="minimumSize">
+                  <size>
+                   <width>70</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </item>
             </layout>
@@ -594,14 +594,14 @@
            <widget class="QToolButton" name="dl_plotButton">
             <property name="geometry">
              <rect>
-              <x>570</x>
-              <y>190</y>
-              <width>71</width>
-              <height>71</height>
+              <x>620</x>
+              <y>140</y>
+              <width>191</width>
+              <height>51</height>
              </rect>
             </property>
             <property name="text">
-             <string>PLOT</string>
+             <string>PLOT PACKET TRACE</string>
             </property>
            </widget>
            <widget class="QPushButton" name="dl_rxBrowseButton">
@@ -620,9 +620,9 @@
            <widget class="QCheckBox" name="plotOverCheckBox">
             <property name="geometry">
              <rect>
-              <x>570</x>
-              <y>170</y>
-              <width>131</width>
+              <x>390</x>
+              <y>320</y>
+              <width>151</width>
               <height>20</height>
              </rect>
             </property>
@@ -633,9 +633,9 @@
            <widget class="QLineEdit" name="txTitleLineEdit">
             <property name="geometry">
              <rect>
-              <x>660</x>
+              <x>570</x>
               <y>200</y>
-              <width>181</width>
+              <width>271</width>
               <height>22</height>
              </rect>
             </property>
@@ -646,9 +646,9 @@
            <widget class="QLineEdit" name="rxTitleLineEdit">
             <property name="geometry">
              <rect>
-              <x>660</x>
+              <x>570</x>
               <y>230</y>
-              <width>181</width>
+              <width>271</width>
               <height>22</height>
              </rect>
             </property>
@@ -659,14 +659,43 @@
            <widget class="QLineEdit" name="erTitleLineEdit">
             <property name="geometry">
              <rect>
-              <x>660</x>
+              <x>570</x>
               <y>260</y>
-              <width>181</width>
+              <width>271</width>
               <height>22</height>
              </rect>
             </property>
             <property name="text">
              <string>camera -&gt; operator: checksum errors</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_9">
+            <property name="geometry">
+             <rect>
+              <x>580</x>
+              <y>320</y>
+              <width>67</width>
+              <height>25</height>
+             </rect>
+            </property>
+            <property name="layoutDirection">
+             <enum>Qt::LeftToRight</enum>
+            </property>
+            <property name="text">
+             <string>Tag:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="tagDescriptionLineEdit">
+            <property name="geometry">
+             <rect>
+              <x>650</x>
+              <y>320</y>
+              <width>181</width>
+              <height>25</height>
+             </rect>
             </property>
            </widget>
           </widget>

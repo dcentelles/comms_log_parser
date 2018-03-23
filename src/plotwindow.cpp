@@ -8,15 +8,24 @@ PlotWindow::PlotWindow(QWidget *parent)
           SLOT(xAxisChanged(QCPRange)));
   connect(ui->plotWidget->yAxis, SIGNAL(rangeChanged(QCPRange)), this,
           SLOT(yAxisChanged(QCPRange)));
+
+  colors.append(QColor(0, 0, 255));
+  colors.append(QColor(0, 255, 0));
+  colors.append(QColor(255, 0, 0));
+  colors.append(QColor(255, 255, 0));
+  colors.append(QColor(255, 0, 255));
+  colors.append(QColor(0, 255, 255));
+  colors.append(QColor(255, 255, 255));
+  _relativeDateTime = true;
 }
 
 PlotWindow::~PlotWindow() { delete ui; }
 
-void PlotWindow::Plot(QList<DataRegisterPtr> rxregs, const QString &title,
+void PlotWindow::Plot(QList<DataRegisterPtr> regs, const QString &title,
                       QDateTime tini, QDateTime tend, const QString &ylabel,
-                      const QString &xlabel) {
+                      const QString &xlabel, const QString &tagDesc) {
   _windowTitle = title;
-  _rxregs = rxregs;
+  _rxregs = regs;
 
   setWindowTitle(_windowTitle);
 
@@ -25,7 +34,7 @@ void PlotWindow::Plot(QList<DataRegisterPtr> rxregs, const QString &title,
   plot->setLocale(QLocale(QLocale::Spanish, QLocale::Spain));
 
   QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
-  dateTicker->setDateTimeFormat("HH:mm:ss:zzz");
+  dateTicker->setDateTimeFormat("mm:ss:zzz");
 
   plot->xAxis->setTicker(dateTicker);
   plot->xAxis->setTickLabelRotation(45);
@@ -34,19 +43,42 @@ void PlotWindow::Plot(QList<DataRegisterPtr> rxregs, const QString &title,
   plot->xAxis->setTickLabelFont(QFont(QFont().family(), 6));
   plot->yAxis->setTickLabelFont(QFont(QFont().family(), 8));
 
-  auto t0 = (tini.toMSecsSinceEpoch()) / 1000.;
-  auto t1 = (tend.toMSecsSinceEpoch()) / 1000.;
+  // Set relative or absolute DateTime
+  QDateTime relativeTo;
 
-  QDateTime max, min;
-  max = tend.addSecs(3600);
-  min = tini.addSecs(-3600);
-  ui->t0dateTimeEdit->setMaximumDateTime(max);
-  ui->t0dateTimeEdit->setMinimumDateTime(min);
-  ui->t0dateTimeEdit->setTime(tini.time());
-  auto msdiff = tini.time().msecsTo(tend.time());
-  QTime tdiff(0, 0);
-  tdiff = tdiff.addMSecs(msdiff);
-  ui->durationDateTimeEdit->setTime(tdiff);
+  if (_relativeDateTime) {
+    relativeTo = tini;
+    ui->t0dateTimeEdit->setDisplayFormat("mm:ss:zzz");
+    ui->durationDateTimeEdit->setDisplayFormat("mm:ss:zzz");
+  } else {
+    relativeTo = QDateTime::fromMSecsSinceEpoch(0);
+    ui->t0dateTimeEdit->setDisplayFormat("HH:mm::ss:zzz");
+    ui->durationDateTimeEdit->setDisplayFormat("mm:ss:zzz");
+  }
+
+  auto t0ms = (tini.toMSecsSinceEpoch() - relativeTo.toMSecsSinceEpoch());
+  auto t1ms = (tend.toMSecsSinceEpoch() - relativeTo.toMSecsSinceEpoch());
+
+  // end Set relative or absolute DateTime
+  auto t0sec = t0ms / 1000.;
+  auto t1sec = t1ms / 1000.;
+
+  plot->xAxis->setRange(t0sec, t1sec);
+
+  QDateTime t0dateTime, t1dateTime;
+  // QDataTime max, min;
+  // max = QDateTime::currentDateTime().addYears(2);
+  // min = QDateTime::fromMSecsSinceEpoch(0);
+  //  ui->t0dateTimeEdit->setMaximumDateTime(max);
+  //  ui->t0dateTimeEdit->setMinimumDateTime(min);
+
+  t0dateTime = QDateTime::fromMSecsSinceEpoch(t0ms);
+  t1dateTime = QDateTime::fromMSecsSinceEpoch(t1ms);
+
+  ui->t0dateTimeEdit->setDateTime(t0dateTime);
+  auto msdiff = t0dateTime.msecsTo(t1dateTime);
+  QDateTime duration = QDateTime::fromMSecsSinceEpoch(msdiff);
+  ui->durationDateTimeEdit->setDateTime(duration);
 
   // show legend with slightly transparent background brush:
   plot->legend->setVisible(true);
@@ -60,8 +92,6 @@ void PlotWindow::Plot(QList<DataRegisterPtr> rxregs, const QString &title,
   plot->xAxis->setLabel(xlabel);
   plot->yAxis->setLabel(ylabel);
 
-  plot->xAxis->setRange(t0, t1);
-
   auto lower = plot->yAxis->range().lower;
   auto upper = plot->yAxis->range().upper;
 
@@ -69,26 +99,19 @@ void PlotWindow::Plot(QList<DataRegisterPtr> rxregs, const QString &title,
   ui->yHighLineEdit->setText(QString::number(upper));
 
   plot->addGraph();
-  QCPGraph *graph = plot->graph(0);
+  QCPGraph *graph = plot->graph(plot->graphCount() - 1);
   graph->setName(_windowTitle);
   graph->setScatterStyle(QCPScatterStyle::ssNone);
   graph->setLineStyle(QCPGraph::lsLine);
+  graph->setName(tagDesc);
 
   QPen pen;
-  pen.setColor(QColor(255, 0, 0));
+  uint32_t colorIndex = (plot->graphCount() - 1) % colors.count();
+  pen.setColor(colors[colorIndex]);
   graph->setPen(pen);
 
-  QVector<QCPGraphData> graphData(rxregs.count());
+  QVector<QCPGraphData> graphData = fillGraphData(relativeTo, regs);
 
-  for (int i = 0; i < graphData.count(); i++) {
-    auto dr = rxregs[i];
-    if (dr->JitterValud()) {
-      auto date = dr->GetDateTime();
-      auto secSinceEpoch = (date.toMSecsSinceEpoch()) / 1000.;
-      graphData[i].key = secSinceEpoch;
-      graphData[i].value = dr->GetJitter();
-    }
-  }
   graph->data()->set(graphData);
   plot->yAxis->rescale();
   // DIBUJAR
@@ -139,13 +162,13 @@ void PlotWindow::on_saveAsPDFButton_clicked() {
 }
 
 void PlotWindow::updateXAxisRangeFromInput() {
+
   QDateTime t0 = ui->t0dateTimeEdit->dateTime();
   QDateTime duration = ui->durationDateTimeEdit->dateTime();
-  QTime aux(0, 0);
-  auto ms = aux.msecsTo(duration.time());
-  QDateTime t1 = t0.addMSecs(ms);
-  auto t0sec = (t0.toMSecsSinceEpoch()) / 1000.;
-  auto t1sec = (t1.toMSecsSinceEpoch()) / 1000.;
+
+  auto t0sec = t0.toMSecsSinceEpoch() / 1000.;
+  auto durationMs = duration.toMSecsSinceEpoch();
+  auto t1sec = t0.addMSecs(durationMs).toMSecsSinceEpoch() / 1000.;
   ui->plotWidget->xAxis->setRange(t0sec, t1sec);
   ui->plotWidget->replot();
 }
@@ -153,8 +176,8 @@ void PlotWindow::on_fixXPushButton_clicked() { updateXAxisRangeFromInput(); }
 
 void PlotWindow::on_fixYPushButton_clicked() {
 
-  auto yTop = ui->yHighLineEdit->text().toInt();
-  auto yBottom = ui->yLowLineEdit->text().toInt();
+  auto yTop = ui->yHighLineEdit->text().toDouble();
+  auto yBottom = ui->yLowLineEdit->text().toDouble();
   auto plot = ui->plotWidget;
   plot->yAxis->setRange(yTop, yBottom);
   plot->replot();
@@ -166,11 +189,10 @@ void PlotWindow::xAxisChanged(QCPRange range) {
   auto t1sec = range.upper;
   t0 = t0.fromMSecsSinceEpoch(t0sec * 1000);
   t1 = t1.fromMSecsSinceEpoch(t1sec * 1000);
-  auto msdiff = t0.time().msecsTo(t1.time());
-  QTime tdiff(0, 0);
-  tdiff = tdiff.addMSecs(msdiff);
-  ui->t0dateTimeEdit->setTime(t0.time());
-  ui->durationDateTimeEdit->setTime(tdiff);
+  QDateTime duration;
+  duration = QDateTime::fromMSecsSinceEpoch(t0.msecsTo(t1));
+  ui->t0dateTimeEdit->setDateTime(t0);
+  ui->durationDateTimeEdit->setDateTime(duration);
 }
 
 void PlotWindow::yAxisChanged(QCPRange range) {

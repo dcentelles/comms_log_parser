@@ -45,8 +45,8 @@ void MainWindow::updateRegex() {
                              // discarded \\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
                              errPattern));
 
-  _packetSizeIndex = ui->packetSizeIndex_lineEdit->text().toInt()+1;
-  _seqNumIndex = ui->seqNumberIndex_lineEdit->text().toInt()+1;
+  _packetSizeIndex = ui->packetSizeIndex_lineEdit->text().toInt() + 1;
+  _seqNumIndex = ui->seqNumberIndex_lineEdit->text().toInt() + 1;
 
   if (ui->uint8_t_radioButton->isChecked())
     DataRegister::SetSeqType(DataRegister::SeqType::UINT8);
@@ -82,10 +82,10 @@ void MainWindow::parseTimes(QList<DataRegisterPtr> &coll,
       if (match.hasMatch()) {
         auto moment = match.captured(1);
         uint32_t size, nseq = 0;
-        if(_seqNumIndex != 0)
+        if (_seqNumIndex != 0)
           nseq = match.captured(_seqNumIndex).toInt();
         size = match.captured(_packetSizeIndex).toInt();
-        auto dataRegister = DataRegister::Build(size+2, moment);
+        auto dataRegister = DataRegister::Build(size + 2, moment);
         dataRegister->SetNseq(nseq);
         coll.append(dataRegister);
       }
@@ -186,6 +186,7 @@ void MainWindow::computeData(
     QList<DataRegisterPtr> &rxDataListFiltered)
 
 {
+  QString tagDesc = ui->tagDescriptionLineEdit->text();
   _t0 = QDateTime::fromString(txT0->text(), DataRegister::timeFormat);
   _t1 = QDateTime::fromString(rxT1->text(), DataRegister::timeFormat);
 
@@ -248,11 +249,17 @@ void MainWindow::computeData(
   updateLineEditText(ui->dl_packetSizeSdLineEdit, QString::number(pduSizeSd));
 
   // Plot Jitter
-  JitterPlotWindow *jitterPlot;
+  std::shared_ptr<JitterPlotWindow> jitterPlot;
+  if (jitterPlotList.size() == 0 || !_plotOver) {
+    jitterPlot = std::shared_ptr<JitterPlotWindow>(new JitterPlotWindow());
+    jitterPlotList.push_front(jitterPlot);
+  } else {
+    jitterPlot = jitterPlotList.front();
+  }
 
-  jitterPlot = new JitterPlotWindow();
   jitterPlot->show();
-  jitterPlot->Plot(rxDataListFiltered, "Jitter", _t0, _t1, "Jitter", "Reception time");
+  jitterPlot->Plot(rxDataListFiltered, "Jitter", _t0, _t1, "Jitter",
+                   "Reception time", tagDesc);
   // Transmission time
   if (_seqNumIndex != 0) {
     DataRegister::ComputeTransmissionTime(rxDataListFiltered, btt, bttSd);
@@ -268,11 +275,16 @@ void MainWindow::computeData(
     ttPlot->Plot("Transmission Time", btt, bttSd, 100, 0.001, "ms/byte");
 
     // Plot end 2 end delay per byte
-    End2EndPlotWindow *e2ePlot;
-
-    e2ePlot = new End2EndPlotWindow();
+    std::shared_ptr<End2EndPlotWindow> e2ePlot;
+    if (e2ePlotList.size() == 0 || !_plotOver) {
+      e2ePlot = std::shared_ptr<End2EndPlotWindow>(new End2EndPlotWindow());
+      e2ePlotList.push_front(e2ePlot);
+    } else {
+      e2ePlot = e2ePlotList.front();
+    }
     e2ePlot->show();
-    e2ePlot->Plot(rxDataListFiltered, "End-End delay per byte", _t0, _t1);
+    e2ePlot->Plot(rxDataListFiltered, "End-End delay per byte", _t0, _t1,
+                  "end-end delay (ms/byte)", "Reception time", tagDesc);
   }
 }
 

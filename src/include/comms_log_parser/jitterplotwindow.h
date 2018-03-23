@@ -15,6 +15,7 @@ class JitterPlotWindow : public PlotWindow {
 
 public:
   explicit JitterPlotWindow(QWidget *parent = 0);
+  QVector<QCPGraphData> fillGraphData(const QDateTime & relativeTo, const QList<DataRegisterPtr> & regs);
 
 };
 

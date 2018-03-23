@@ -8,6 +8,9 @@
 #include <comms_log_parser/dataregister.h>
 #include <QComboBox>
 #include <comms_log_parser/dataplotwindow.h>
+#include <memory>
+#include <end2endplotwindow.h>
+#include <jitterplotwindow.h>
 
 namespace Ui {
   class MainWindow;
@@ -54,6 +57,8 @@ private:
   DataPlotWindow * _lastPlotWindow;
   bool _plotOver;
   uint32_t _packetSizeIndex, _seqNumIndex;
+  std::list<std::shared_ptr<End2EndPlotWindow>> e2ePlotList;
+  std::list<std::shared_ptr<JitterPlotWindow>> jitterPlotList;
 
   void init();
   void updateRegex();

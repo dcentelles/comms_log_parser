@@ -163,14 +163,17 @@
       <item row="1" column="4">
        <widget class="QDateTimeEdit" name="t0dateTimeEdit">
         <property name="displayFormat">
-         <string>HH:mm:ss:zzz</string>
+         <string>HH:mm:ss:zzz </string>
         </property>
        </widget>
       </item>
       <item row="2" column="4">
        <widget class="QDateTimeEdit" name="durationDateTimeEdit">
+        <property name="currentSection">
+         <enum>QDateTimeEdit::HourSection</enum>
+        </property>
         <property name="displayFormat">
-         <string>HH:mm:ss:zzz</string>
+         <string>HH:mm:ss:zzz </string>
         </property>
        </widget>
       </item>

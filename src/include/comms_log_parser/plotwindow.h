@@ -16,7 +16,7 @@ public:
   explicit PlotWindow(QWidget *parent = 0);
   ~PlotWindow();
   void Plot(QList<DataRegisterPtr> rxregs, const QString &title, QDateTime tini,
-            QDateTime tend, const QString &ylabel, const QString &xlabel);
+            QDateTime tend, const QString &ylabel, const QString &xlabel, const QString &tagDesc);
 
 private slots:
   void on_fixYPushButton_clicked();
@@ -37,6 +37,10 @@ private:
   QList<DataRegisterPtr> _rxregs;
   Ui::PlotWindow *ui;
   void updateXAxisRangeFromInput();
+protected:
+  virtual QVector<QCPGraphData> fillGraphData(const QDateTime & relativeTo, const QList<DataRegisterPtr> & regs) = 0;
+  QVector<QColor> colors;
+  bool _relativeDateTime;
 };
 
 #endif // JITTERPLOTWINDOW_H
