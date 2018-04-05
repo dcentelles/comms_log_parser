@@ -8,8 +8,9 @@
 #include <QString>
 #include <comms_log_parser/dataplotwindow.h>
 #include <comms_log_parser/dataregister.h>
-#include <end2endplotwindow.h>
-#include <jitterplotwindow.h>
+#include <comms_log_parser/end2endplotwindow.h>
+#include <comms_log_parser/jitterplotwindow.h>
+#include <comms_log_parser/timedoubleplotwindow.h>
 #include <memory>
 
 namespace Ui {
@@ -23,10 +24,14 @@ public:
   explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
 
-private slots:
-  void on_packetSizeOffsetLineEdit_editingFinished();
 
 private slots:
+  void on_parseAndPlotDistanceButton_clicked();
+
+  void on_distancesPathBrowseButton_clicked();
+
+  void on_packetSizeOffsetLineEdit_editingFinished();
+
   void on_dl_txBrowseButton_clicked();
 
   void on_dl_rxBrowseButton_clicked();
@@ -43,7 +48,7 @@ private slots:
 
   void on_dl_rxT1ComboBox_currentIndexChanged(const QString &arg1);
 
-  void on_setIntervalButton_clicked();
+  //void on_setIntervalButton_clicked();
 
   void on_dl_plotButton_clicked();
 
@@ -60,14 +65,17 @@ private:
   uint32_t _packetSizeIndex, _seqNumIndex;
   std::list<std::shared_ptr<End2EndPlotWindow>> e2ePlotList;
   std::list<std::shared_ptr<JitterPlotWindow>> jitterPlotList;
+  std::list<std::shared_ptr<TimeDoublePlotWindow>> _distancePlotList;
 
   void init();
   void updateRegex();
+  void updateDistanceRegex();
   void updateLineEditText(QLineEdit *, const QString &txt);
   void parseTimes(QList<DataRegisterPtr> &data, const QString &fileName,
                   const QRegularExpression &reg, QComboBox *t0, QComboBox *t1);
 
-  void plotDistances(QList<DataRegisterPtr> &dataList, const QString &fileName, const QRegularExpression &reg,
+  void plotTimeDouble(QList<DataRegisterPtr> &dataList, const QString &fileName, const QRegularExpression &reg,
+                     const QString & xlabel, const QString & ylabel, const QString & seriesLabel, bool plotOver,
                      QLineEdit *t0le = NULL, QLineEdit *t1le = NULL);
   void computeData(QLineEdit *txT0, QLineEdit *txT1, QLineEdit *rxT0,
                    QLineEdit *rxT1,
@@ -91,14 +99,14 @@ private:
                    QList<DataRegisterPtr> &txDataListFiltered,
                    QList<DataRegisterPtr> &rxDataListFiltered);
   Ui::MainWindow *ui;
-  QString appTxFileName, appRxFileName, dlTxFileName, dlRxFileName;
-  QRegularExpression dlTxPattern, dlErrPattern, dlRxPattern;
+  QString appTxFileName, appRxFileName, dlTxFileName, dlRxFileName, dlDistancesFileName;
+  QRegularExpression dlTxPattern, dlErrPattern, dlRxPattern, _dlDistancePattern;
 
   QList<QString> appTxList;
   QString appDefaultPath;
   QString logTimeFormat;
   QList<DataRegisterPtr> dlRxDataList, dlTxDataList, appErrDataList,
-      dlErrDataList, distancesDataList;
+      dlErrDataList, _distancesDataList;
 
   float txGap, txGapSd;
   int totalFallos;

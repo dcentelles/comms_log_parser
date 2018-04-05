@@ -15,6 +15,14 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow() { delete ui; }
 
+void MainWindow::updateDistanceRegex() {
+  logTimeFormat = "\\[(\\d+-\\d+-\\d+ \\d+:\\d+:\\d+\\.\\d+)\\]";
+  auto distancePattern = ui->distanceRegexLineEdit->text();
+  _dlDistancePattern.setPattern(
+      QString("^%1.*%2").arg(logTimeFormat, distancePattern));
+  _distanceIndex = ui->distanceIndex_lineEdit->text().toInt() + 1;
+}
+
 void MainWindow::updateRegex() {
   logTimeFormat = "\\[(\\d+-\\d+-\\d+ \\d+:\\d+:\\d+\\.\\d+)\\]";
 
@@ -61,6 +69,7 @@ void MainWindow::init() {
   // "/home/centelld/programming/catkin_ws/src/build-dccomms_ros-Desktop-Debug/devel/lib/dccomms_ros";
   appDefaultPath = ui->mainFolderLineEdit->text();
   SetPktSizeOffset(0);
+  updateRegex();
 
   _plotOver = true;
   ui->plotOverCheckBox->setChecked(_plotOver);
@@ -72,10 +81,13 @@ void MainWindow::SetPktSizeOffset(int offset) {
   ui->packetSizeOffsetLineEdit->setText(QString::number(offset));
 }
 
-void MainWindow::plotDistances(QList<DataRegisterPtr> &coll,
-                               const QString &fileName,
-                               const QRegularExpression &reg,
-                               QLineEdit *t0, QLineEdit *t1) {
+void MainWindow::plotTimeDouble(QList<DataRegisterPtr> &coll,
+                                const QString &fileName,
+                                const QRegularExpression &reg,
+                                const QString &xlabel, const QString &ylabel,
+                                const QString &seriesLabel, bool plotOver,
+                                QLineEdit *t0, QLineEdit *t1) {
+
   QFile data(fileName);
   if (data.open(QFile::ReadOnly)) {
     QTextStream stream(&data);
@@ -88,9 +100,32 @@ void MainWindow::plotDistances(QList<DataRegisterPtr> &coll,
         double distance;
         distance = match.captured(_distanceIndex).toDouble();
         auto dataRegister = DataRegister::Build(0, moment);
-        dataRegister->SetDistance(distance);
+        dataRegister->SetDoubleValue(distance);
         coll.append(dataRegister);
       }
+    }
+
+    std::shared_ptr<TimeDoublePlotWindow> plot;
+    if (_distancePlotList.size() == 0 || !plotOver) {
+      plot = std::shared_ptr<TimeDoublePlotWindow>(new TimeDoublePlotWindow());
+      _distancePlotList.push_front(plot);
+    } else {
+      plot = _distancePlotList.front();
+    }
+    plot->show();
+    QDateTime t0dt, t1dt;
+    if (coll.size() > 0) {
+      if (t0 == NULL) {
+        t0dt = coll[0]->GetDateTime();
+      } else {
+        t0dt = QDateTime::fromString(t0->text(), DataRegister::timeFormat);
+      }
+      if (t1 == NULL) {
+        t1dt = coll[coll.size() - 1]->GetDateTime();
+      } else {
+        t1dt = QDateTime::fromString(t0->text(), DataRegister::timeFormat);
+      }
+      plot->Plot(coll, "Distance", t0dt, t1dt, ylabel, xlabel, seriesLabel);
     }
   }
 }
@@ -334,7 +369,7 @@ void MainWindow::on_dl_rxT1ComboBox_currentIndexChanged(const QString &arg1) {
   ui->dl_rxT1->clear();
   ui->dl_rxT1->insert(arg1);
 }
-
+/*
 void MainWindow::on_setIntervalButton_clicked() {
   auto t0 = ui->t0LineEdit->text();
   auto t1 = ui->t1LineEdit->text();
@@ -351,7 +386,7 @@ void MainWindow::on_setIntervalButton_clicked() {
   ui->dl_rxT1->clear();
   ui->dl_rxT1->insert(t1);
 }
-
+*/
 void MainWindow::on_dl_plotButton_clicked() {
   auto txTitle = ui->txTitleLineEdit->text();
   auto rxTitle = ui->rxTitleLineEdit->text();
@@ -413,4 +448,20 @@ void MainWindow::on_mainFolderLineEdit_textChanged(const QString &arg1) {
 void MainWindow::on_packetSizeOffsetLineEdit_editingFinished() {
   int value = ui->packetSizeOffsetLineEdit->text().toInt();
   SetPktSizeOffset(value);
+}
+
+void MainWindow::on_distancesPathBrowseButton_clicked() {
+  dlDistancesFileName = QFileDialog::getOpenFileName(
+      this, tr("Open Dl Tx File"), ui->distanceLogMainFolderLineEdit->text(),
+      tr("All files (*)"));
+  ui->distancesPathLineEdit->clear();
+  ui->distancesPathLineEdit->insert(dlDistancesFileName);
+}
+
+void MainWindow::on_parseAndPlotDistanceButton_clicked() {
+  updateDistanceRegex();
+  plotTimeDouble(_distancesDataList, ui->distancesPathLineEdit->text(),
+                 _dlDistancePattern, ui->distancesXLabel->text(),
+                 ui->distancesYLabel->text(), ui->distancesLabel->text(),
+                 ui->distancePlotOverCheck->isChecked());
 }

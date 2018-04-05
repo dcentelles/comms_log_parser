@@ -74,8 +74,8 @@ public:
   inline double GetJitter() { return _jitter; }
   inline double JitterValud() { return _jitterValid; }
 
-  inline void SetDistance(double distance) { _distance = distance; }
-  inline double GetDistance() { return _distance; }
+  inline void SetDoubleValue(double v) { _doubleValue = v; }
+  inline double GetDoubleValue() { return _doubleValue; }
 
 private:
   DataRegisterPtr _link;
@@ -87,7 +87,7 @@ private:
   double _jitter;
   double _jitterValid;
   double _end2EndDelay;
-  double _distance;
+  double _doubleValue;
 };
 
 #endif // PAQUETTRANSMISSION_H

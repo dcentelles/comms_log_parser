@@ -34,7 +34,7 @@ qt5_wrap_cpp(hmi_SRC
     ${HW_HEADER_DIR}/mainwindow.h
     ${HW_HEADER_DIR}/normalplot.h
     ${HW_HEADER_DIR}/qcustomplot.h
-    ${HW_HEADER_DIR}/distanceplotwindow.h
+    ${HW_HEADER_DIR}/timedoubleplotwindow.h
     )
 qt5_wrap_ui(hmi_UI
     ${HW_GUI_DIR}/dataplotwindow.ui
@@ -58,7 +58,7 @@ add_library(${${PROJECT_NAME}_LIB}
         src/end2endplotwindow.cpp
         src/qcustomplot.cpp
         src/normalplot.cpp
-        src/distanceplotwindow.cpp
+        src/timedoubleplotwindow.cpp
         ${hmi_SRC}
         ${hmi_UI}
 	)

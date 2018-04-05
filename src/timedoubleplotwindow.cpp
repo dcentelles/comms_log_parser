@@ -1,10 +1,10 @@
-#include <comms_log_parser/distanceplotwindow.h>
+#include <comms_log_parser/timedoubleplotwindow.h>
 #include <ui_end2endplotwindow.h>
 
-DistancePlotWindow::DistancePlotWindow(QWidget *parent) : PlotWindow(parent) {}
+TimeDoublePlotWindow::TimeDoublePlotWindow(QWidget *parent) : PlotWindow(parent) {}
 
 QVector<QCPGraphData>
-DistancePlotWindow::fillGraphData(const QDateTime &relativeTo,
+TimeDoublePlotWindow::fillGraphData(const QDateTime &relativeTo,
                                  const QList<DataRegisterPtr> &regs) {
   QVector<QCPGraphData> graphData(regs.count());
 
@@ -16,7 +16,7 @@ DistancePlotWindow::fillGraphData(const QDateTime &relativeTo,
     auto secSinceEpoch = (date.toMSecsSinceEpoch()) / 1000.;
     auto secs = secSinceEpoch - secsBegin;
     graphData[i].key = secs;
-    graphData[i].value = dr->GetDistance();
+    graphData[i].value = dr->GetDoubleValue();
   }
   return graphData;
 }

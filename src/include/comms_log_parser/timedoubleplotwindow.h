@@ -7,14 +7,14 @@
 #include <qcustomplot.h>
 
 namespace Ui {
-class DistancePlotWindow;
+class TimeDoublePlotWindow;
 }
 
-class DistancePlotWindow : public PlotWindow {
+class TimeDoublePlotWindow : public PlotWindow {
   Q_OBJECT
 
 public:
-  explicit DistancePlotWindow(QWidget *parent = 0);
+  explicit TimeDoublePlotWindow(QWidget *parent = 0);
   QVector<QCPGraphData> fillGraphData(const QDateTime & relativeTo, const QList<DataRegisterPtr> & regs);
 };
 

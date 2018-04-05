@@ -15,34 +15,7 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_2">
-    <item row="1" column="2">
-     <widget class="QLabel" name="label_56">
-      <property name="text">
-       <string>T1:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="3">
-     <widget class="QLineEdit" name="t1LineEdit"/>
-    </item>
-    <item row="1" column="4">
-     <widget class="QToolButton" name="setIntervalButton">
-      <property name="text">
-       <string>Set Interval to all</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="label_55">
-      <property name="text">
-       <string>T0:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QLineEdit" name="t0LineEdit"/>
-    </item>
-    <item row="2" column="0" colspan="5">
+    <item row="1" column="0" colspan="2">
      <widget class="QScrollArea" name="scrollArea">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -68,7 +41,7 @@
          <x>0</x>
          <y>0</y>
          <width>880</width>
-         <height>673</height>
+         <height>704</height>
         </rect>
        </property>
        <property name="minimumSize">
@@ -974,7 +947,7 @@
           </widget>
           <widget class="QWidget" name="tab_2">
            <attribute name="title">
-            <string>Position</string>
+            <string>Distance</string>
            </attribute>
            <widget class="QLineEdit" name="distancesPathLineEdit">
             <property name="geometry">
@@ -1041,11 +1014,11 @@
              <string>Distance expr:</string>
             </property>
            </widget>
-           <widget class="QToolButton" name="dl_computeButton_2">
+           <widget class="QToolButton" name="parseAndPlotDistanceButton">
             <property name="geometry">
              <rect>
-              <x>360</x>
-              <y>480</y>
+              <x>340</x>
+              <y>280</y>
               <width>161</width>
               <height>71</height>
              </rect>
@@ -1057,8 +1030,8 @@
            <widget class="QGroupBox" name="groupBox_5">
             <property name="geometry">
              <rect>
-              <x>130</x>
-              <y>100</y>
+              <x>370</x>
+              <y>90</y>
               <width>301</width>
               <height>61</height>
              </rect>
@@ -1076,7 +1049,7 @@
               </rect>
              </property>
              <property name="text">
-              <string>distance:</string>
+              <string>distance index:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1107,6 +1080,132 @@
             </property>
             <property name="text">
              <string>Distance path:</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="distanceLogMainFolderLineEdit">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>220</y>
+              <width>811</width>
+              <height>30</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>/home/centelld/programming/catkin_ws/src/uwsim/underwater_simulation/build-uwsim-ROS_Qt_5_7_1_64bit-Debug/devel/lib/uwsim</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_26">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>190</y>
+              <width>81</width>
+              <height>24</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Main folder:</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="distancesXLabel">
+            <property name="geometry">
+             <rect>
+              <x>70</x>
+              <y>106</y>
+              <width>191</width>
+              <height>26</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Time</string>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_27">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>110</y>
+              <width>61</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>X Label:</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_28">
+            <property name="geometry">
+             <rect>
+              <x>10</x>
+              <y>150</y>
+              <width>61</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Y Label:</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="distancesYLabel">
+            <property name="geometry">
+             <rect>
+              <x>70</x>
+              <y>146</y>
+              <width>191</width>
+              <height>26</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Meters</string>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+           <widget class="QCheckBox" name="distancePlotOverCheck">
+            <property name="geometry">
+             <rect>
+              <x>670</x>
+              <y>30</y>
+              <width>151</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Plot over existing</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="distancesLabel">
+            <property name="geometry">
+             <rect>
+              <x>470</x>
+              <y>180</y>
+              <width>281</width>
+              <height>31</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>n0 - n1</string>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_29">
+            <property name="geometry">
+             <rect>
+              <x>380</x>
+              <y>188</y>
+              <width>101</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Serie Label:</string>
             </property>
            </widget>
           </widget>
