@@ -12,7 +12,6 @@ typedef QSharedPointer<DataRegister> DataRegisterPtr;
 class DataRegister {
 
 public:
-
   static DataRegisterPtr Build(int size, const QString &time) {
     return DataRegisterPtr(new DataRegister(size, time));
   }
@@ -36,7 +35,10 @@ public:
   static void GetPDUSize(QList<DataRegisterPtr> data, float &packetSize,
                          float &packetSizeSd);
 
-  static void ComputeTransmissionTime(QList<DataRegisterPtr> data, float &tt,
+  static void ComputeEnd2EndDelay(QList<DataRegisterPtr> data, float &tt,
+                                      float &ttSd);
+
+  static void ComputeTimePerByte(QList<DataRegisterPtr> data, float &tt,
                                       float &ttSd);
 
   enum SeqType { UINT8, UINT16, UINT32 };
@@ -72,6 +74,9 @@ public:
   inline double GetJitter() { return _jitter; }
   inline double JitterValud() { return _jitterValid; }
 
+  inline void SetDistance(double distance) { _distance = distance; }
+  inline double GetDistance() { return _distance; }
+
 private:
   DataRegisterPtr _link;
   void init();
@@ -82,6 +87,7 @@ private:
   double _jitter;
   double _jitterValid;
   double _end2EndDelay;
+  double _distance;
 };
 
 #endif // PAQUETTRANSMISSION_H

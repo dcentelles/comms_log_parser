@@ -60,12 +60,39 @@ void MainWindow::init() {
   // appDefaultPath =
   // "/home/centelld/programming/catkin_ws/src/build-dccomms_ros-Desktop-Debug/devel/lib/dccomms_ros";
   appDefaultPath = ui->mainFolderLineEdit->text();
-
-  updateRegex();
+  SetPktSizeOffset(0);
 
   _plotOver = true;
   ui->plotOverCheckBox->setChecked(_plotOver);
   _lastPlotWindow = NULL;
+}
+
+void MainWindow::SetPktSizeOffset(int offset) {
+  _pktSizeOffset = offset;
+  ui->packetSizeOffsetLineEdit->setText(QString::number(offset));
+}
+
+void MainWindow::plotDistances(QList<DataRegisterPtr> &coll,
+                               const QString &fileName,
+                               const QRegularExpression &reg,
+                               QLineEdit *t0, QLineEdit *t1) {
+  QFile data(fileName);
+  if (data.open(QFile::ReadOnly)) {
+    QTextStream stream(&data);
+    QString line;
+    coll.clear();
+    while (stream.readLineInto(&line)) {
+      auto match = reg.match(line);
+      if (match.hasMatch()) {
+        auto moment = match.captured(1);
+        double distance;
+        distance = match.captured(_distanceIndex).toDouble();
+        auto dataRegister = DataRegister::Build(0, moment);
+        dataRegister->SetDistance(distance);
+        coll.append(dataRegister);
+      }
+    }
+  }
 }
 
 void MainWindow::parseTimes(QList<DataRegisterPtr> &coll,
@@ -85,7 +112,7 @@ void MainWindow::parseTimes(QList<DataRegisterPtr> &coll,
         if (_seqNumIndex != 0)
           nseq = match.captured(_seqNumIndex).toInt();
         size = match.captured(_packetSizeIndex).toInt();
-        auto dataRegister = DataRegister::Build(size + 2, moment);
+        auto dataRegister = DataRegister::Build(size + _pktSizeOffset, moment);
         dataRegister->SetNseq(nseq);
         coll.append(dataRegister);
       }
@@ -262,7 +289,7 @@ void MainWindow::computeData(
                    "Reception time", tagDesc);
   // Transmission time
   if (_seqNumIndex != 0) {
-    DataRegister::ComputeTransmissionTime(rxDataListFiltered, btt, bttSd);
+    DataRegister::ComputeEnd2EndDelay(rxDataListFiltered, btt, bttSd);
 
     updateLineEditText(ui->dl_transmissionTime, QString::number(btt));
     updateLineEditText(ui->dl_transmissionTimeSD, QString::number(bttSd));
@@ -272,9 +299,9 @@ void MainWindow::computeData(
     NormalPlot *ttPlot = new NormalPlot();
     ttPlot->show();
 
-    ttPlot->Plot("Transmission Time", btt, bttSd, 100, 0.001, "ms/byte");
+    ttPlot->Plot("End 2 End Delay", btt, bttSd, 100, 0.001, "ms");
 
-    // Plot end 2 end delay per byte
+    // Plot end 2 end delay
     std::shared_ptr<End2EndPlotWindow> e2ePlot;
     if (e2ePlotList.size() == 0 || !_plotOver) {
       e2ePlot = std::shared_ptr<End2EndPlotWindow>(new End2EndPlotWindow());
@@ -283,8 +310,8 @@ void MainWindow::computeData(
       e2ePlot = e2ePlotList.front();
     }
     e2ePlot->show();
-    e2ePlot->Plot(rxDataListFiltered, "End-End delay per byte", _t0, _t1,
-                  "end-end delay (ms/byte)", "Reception time", tagDesc);
+    e2ePlot->Plot(rxDataListFiltered, "End-End delay", _t0, _t1,
+                  "end-end delay (ms)", "Reception time", tagDesc);
   }
 }
 
@@ -381,4 +408,9 @@ void MainWindow::on_pushButton_clicked() { updateRegex(); }
 
 void MainWindow::on_mainFolderLineEdit_textChanged(const QString &arg1) {
   appDefaultPath = arg1;
+}
+
+void MainWindow::on_packetSizeOffsetLineEdit_editingFinished() {
+  int value = ui->packetSizeOffsetLineEdit->text().toInt();
+  SetPktSizeOffset(value);
 }

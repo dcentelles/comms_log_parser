@@ -1,29 +1,30 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QList>
-#include <QString>
-#include <QRegularExpression>
-#include <comms_log_parser/dataregister.h>
 #include <QComboBox>
+#include <QList>
+#include <QMainWindow>
+#include <QRegularExpression>
+#include <QString>
 #include <comms_log_parser/dataplotwindow.h>
-#include <memory>
+#include <comms_log_parser/dataregister.h>
 #include <end2endplotwindow.h>
 #include <jitterplotwindow.h>
+#include <memory>
 
 namespace Ui {
-  class MainWindow;
+class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
   Q_OBJECT
 
 public:
   explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
 
+private slots:
+  void on_packetSizeOffsetLineEdit_editingFinished();
 
 private slots:
   void on_dl_txBrowseButton_clicked();
@@ -53,8 +54,8 @@ private slots:
   void on_mainFolderLineEdit_textChanged(const QString &arg1);
 
 private:
-  QDateTime _t0,_t1;
-  DataPlotWindow * _lastPlotWindow;
+  QDateTime _t0, _t1;
+  DataPlotWindow *_lastPlotWindow;
   bool _plotOver;
   uint32_t _packetSizeIndex, _seqNumIndex;
   std::list<std::shared_ptr<End2EndPlotWindow>> e2ePlotList;
@@ -62,56 +63,42 @@ private:
 
   void init();
   void updateRegex();
-  void updateLineEditText(QLineEdit *, const QString & txt);
-  void parseTimes(QList<DataRegisterPtr> & data,
-                  const QString & fileName,
-                  const QRegularExpression & reg,
-                  QComboBox * t0,
-                  QComboBox * t1
-                  );
-  void computeData(QLineEdit * txT0,
-                               QLineEdit * txT1,
-                               QLineEdit * rxT0,
-                               QLineEdit * rxT1,
+  void updateLineEditText(QLineEdit *, const QString &txt);
+  void parseTimes(QList<DataRegisterPtr> &data, const QString &fileName,
+                  const QRegularExpression &reg, QComboBox *t0, QComboBox *t1);
 
-                               QLineEdit * sendLineEdit,
+  void plotDistances(QList<DataRegisterPtr> &dataList, const QString &fileName, const QRegularExpression &reg,
+                     QLineEdit *t0le = NULL, QLineEdit *t1le = NULL);
+  void computeData(QLineEdit *txT0, QLineEdit *txT1, QLineEdit *rxT0,
+                   QLineEdit *rxT1,
 
-                               QLineEdit * txGapLineEdit,
-                               QLineEdit * txGapSdLineEdit,
+                   QLineEdit *sendLineEdit,
 
-                               QLineEdit * recvLineEdit,
-                               QLineEdit * failsLineEdit,
-                               QLineEdit * errLineEdit,
-                               QLineEdit * lostLineEdit,
+                   QLineEdit *txGapLineEdit, QLineEdit *txGapSdLineEdit,
 
-                               QLineEdit * rxGapLineEdit,
-                               QLineEdit * rxGapSdLineEdit,
+                   QLineEdit *recvLineEdit, QLineEdit *failsLineEdit,
+                   QLineEdit *errLineEdit, QLineEdit *lostLineEdit,
 
-                               QLineEdit * rxDataRateLineEdit,
-                               QLineEdit * txDataRateLineEdit,
+                   QLineEdit *rxGapLineEdit, QLineEdit *rxGapSdLineEdit,
 
-                               QList<DataRegisterPtr> & txDataList,
-                               QList<DataRegisterPtr> & rxDataList,
+                   QLineEdit *rxDataRateLineEdit, QLineEdit *txDataRateLineEdit,
 
-                               QList<DataRegisterPtr> & errDataList,
+                   QList<DataRegisterPtr> &txDataList,
+                   QList<DataRegisterPtr> &rxDataList,
 
-                               QList<DataRegisterPtr> & txDataListFiltered,
-                               QList<DataRegisterPtr> & rxDataListFiltered
-                               );
+                   QList<DataRegisterPtr> &errDataList,
+
+                   QList<DataRegisterPtr> &txDataListFiltered,
+                   QList<DataRegisterPtr> &rxDataListFiltered);
   Ui::MainWindow *ui;
-  QString appTxFileName, appRxFileName,
-  dlTxFileName, dlRxFileName;
-  QRegularExpression
-  dlTxPattern,
-  dlErrPattern,
-  dlRxPattern;
+  QString appTxFileName, appRxFileName, dlTxFileName, dlRxFileName;
+  QRegularExpression dlTxPattern, dlErrPattern, dlRxPattern;
 
   QList<QString> appTxList;
   QString appDefaultPath;
   QString logTimeFormat;
-  QList<DataRegisterPtr>
-  dlRxDataList, dlTxDataList,
-  appErrDataList, dlErrDataList;
+  QList<DataRegisterPtr> dlRxDataList, dlTxDataList, appErrDataList,
+      dlErrDataList, distancesDataList;
 
   float txGap, txGapSd;
   int totalFallos;
@@ -120,7 +107,10 @@ private:
   float rxDataRate, txDataRate;
   float pduSize, pduSizeSd;
   float btt, bttSd;
+  int _pktSizeOffset;
+  int _distanceIndex;
 
+  void SetPktSizeOffset(int offset);
 };
 
 #endif // MAINWINDOW_H
