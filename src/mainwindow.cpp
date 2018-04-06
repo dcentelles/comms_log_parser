@@ -416,7 +416,7 @@ void MainWindow::computeData(
   jitterPlot->Plot(rxDataListFiltered, "Jitter", _t0, _t1, "Jitter",
                    "Reception time", tagDesc);
   // Transmission time
-  if (GetSeqIndex() != 0) {
+  if (GetSeqIndex() != 0 && rxDataListFiltered.size() > 0) {
     DataRegister::ComputeEnd2EndDelay(rxDataListFiltered, btt, bttSd);
 
     updateLineEditText(ui->dl_transmissionTime, QString::number(btt));
