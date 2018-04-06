@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <QFileDialog>
+#include <QSettings>
 #include <comms_log_parser/dataplotwindow.h>
 #include <comms_log_parser/end2endplotwindow.h>
 #include <comms_log_parser/jitterplotwindow.h>
@@ -15,46 +16,134 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow() { delete ui; }
 
-void MainWindow::updateDistanceRegex() {
-  logTimeFormat = "\\[(\\d+-\\d+-\\d+ \\d+:\\d+:\\d+\\.\\d+)\\]";
+void MainWindow::loadDefaultSettings() {
+  QSettings settings(_defaultSettingsFile, QSettings::NativeFormat);
+  _txTransportDefaultDir =
+      settings.value("tx_transport_default_dir").toString();
+  _rxTransportDefaultDir =
+      settings.value("rx_transport_default_dir").toString();
+  _distanceDefaultDir = settings.value("distance_default_dir").toString();
+
+  QString txTitle = settings.value("tx_title").toString();
+  QString rxTitle = settings.value("rx_title").toString();
+  QString erTitle = settings.value("er_title").toString();
+  ui->txTitleLineEdit->setText(txTitle);
+  ui->rxTitleLineEdit->setText(rxTitle);
+  ui->erTitleLineEdit->setText(erTitle);
+
+  QString txPattern = settings.value("tx_pattern").toString();
+  QString rxPattern = settings.value("rx_pattern").toString();
+  QString erPattern = settings.value("er_pattern").toString();
+  ui->txRegexLineEdit->setText(txPattern);
+  ui->rxRegexLineEdit->setText(rxPattern);
+  ui->errRegexLineEdit->setText(erPattern);
+
+  int seq_size = settings.value("seq_size").toInt();
+  if (seq_size == 8)
+    ui->uint8_t_radioButton->setChecked(true);
+  else if (seq_size == 16)
+    ui->uint16_t_radioButton->setChecked(true);
+  else if (seq_size == 32)
+    ui->uint32_t_radioButton->setChecked(true);
+
+  ui->packetSizeIndex_lineEdit->setText(
+      settings.value("packet_size_index").toString());
+  ui->packetSizeOffsetLineEdit->setText(
+      settings.value("packet_size_offset").toString());
+  ui->seqNumberIndex_lineEdit->setText(settings.value("seq_index").toString());
+
+  ui->distanceRegexLineEdit->setText(
+      settings.value("distance_pattern").toString());
+  ui->distancesXLabel->setText(settings.value("distance_xlabel").toString());
+  ui->distancesYLabel->setText(settings.value("distance_ylabel").toString());
+  ui->distancesLabel->setText(settings.value("distance_label").toString());
+  ui->distanceIndex_lineEdit->setText(
+      settings.value("distance_index").toString());
+
+  ui->tagDescriptionLineEdit->setText(
+      settings.value("transport_tag").toString());
+}
+
+void MainWindow::saveCurrentSettingsAsDefault() {
+  QSettings settings(_defaultSettingsFile, QSettings::NativeFormat);
+  settings.setValue("tx_transport_default_dir", _txTransportDefaultDir);
+  settings.setValue("rx_transport_default_dir", _rxTransportDefaultDir);
+  settings.setValue("distance_default_dir", _distanceDefaultDir);
+  settings.setValue("tx_title", ui->txTitleLineEdit->text());
+  settings.setValue("rx_title", ui->rxTitleLineEdit->text());
+  settings.setValue("er_title", ui->erTitleLineEdit->text());
+  settings.setValue("tx_pattern", ui->txRegexLineEdit->text());
+  settings.setValue("rx_pattern", ui->rxRegexLineEdit->text());
+  settings.setValue("er_pattern", ui->errRegexLineEdit->text());
+  int seq_size;
+  if (ui->uint8_t_radioButton->isChecked())
+    seq_size = 8;
+  else if (ui->uint16_t_radioButton->isChecked())
+    seq_size = 16;
+  else if (ui->uint32_t_radioButton->isChecked())
+    seq_size = 32;
+  settings.setValue("seq_size", seq_size);
+
+  settings.setValue("packet_size_index", ui->packetSizeIndex_lineEdit->text());
+  settings.setValue("packet_size_offset", ui->packetSizeOffsetLineEdit->text());
+  settings.setValue("seq_index", ui->seqNumberIndex_lineEdit->text());
+
+  settings.setValue("distance_pattern", ui->distanceRegexLineEdit->text());
+  settings.setValue("distance_xlabel", ui->distancesXLabel->text());
+  settings.setValue("distance_ylabel", ui->distancesYLabel->text());
+  settings.setValue("distance_label", ui->distancesLabel->text());
+  settings.setValue("distance_index", ui->distanceIndex_lineEdit->text());
+  settings.setValue("transport_tag", ui->tagDescriptionLineEdit->text());
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+  saveCurrentSettingsAsDefault();
+  event->accept();
+}
+
+int MainWindow::GetPktSizeOffset() {
+  return ui->packetSizeOffsetLineEdit->text().toInt();
+}
+
+int MainWindow::GetDistanceIndex() {
+  return ui->distanceIndex_lineEdit->text().toInt() + 1;
+}
+
+int MainWindow::GetSeqIndex() {
+  return ui->seqNumberIndex_lineEdit->text().toInt() + 1;
+}
+
+int MainWindow::GetPktSizeIndex() {
+  return ui->packetSizeIndex_lineEdit->text().toInt() + 1;
+}
+
+QString MainWindow::GetTransportTag() {
+  return ui->tagDescriptionLineEdit->text();
+}
+
+bool MainWindow::GetPlotOver() { return ui->plotOverCheckBox->isChecked(); }
+
+void MainWindow::updateDistanceParser() {
+  QString logTimeFormat = "\\[(\\d+-\\d+-\\d+ \\d+:\\d+:\\d+\\.\\d+)\\]";
   auto distancePattern = ui->distanceRegexLineEdit->text();
   _dlDistancePattern.setPattern(
       QString("^%1.*%2").arg(logTimeFormat, distancePattern));
-  _distanceIndex = ui->distanceIndex_lineEdit->text().toInt() + 1;
 }
 
-void MainWindow::updateRegex() {
-  logTimeFormat = "\\[(\\d+-\\d+-\\d+ \\d+:\\d+:\\d+\\.\\d+)\\]";
+void MainWindow::updateTransportParser() {
+  QString logTimeFormat = "\\[(\\d+-\\d+-\\d+ \\d+:\\d+:\\d+\\.\\d+)\\]";
 
   auto txPattern = ui->txRegexLineEdit->text();
 
-  dlTxPattern.setPattern(QString("^%1.*%2").arg(
-      logTimeFormat,
-      //"TX 2->1:.*\\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
-      //"TX: transmitting frame... \\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
-      txPattern));
+  dlTxPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat, txPattern));
 
   auto rxPattern = ui->rxRegexLineEdit->text();
 
-  dlRxPattern.setPattern(QString("^%1.*%2").arg(
-      logTimeFormat,
-      //"RX 1<-2:.*received frame without errors \\(Seq: (\\d+)\\) \\(FS:
-      //(\\d+)\\)"
-      //"RX: received frame without errors \\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
-      rxPattern));
+  dlRxPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat, rxPattern));
 
   auto errPattern = ui->errRegexLineEdit->text();
 
-  dlErrPattern.setPattern(
-      QString("^%1.*%2").arg(logTimeFormat,
-                             //"RX 1<-2: received frame with errors. Frame will
-                             // be discarted \\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
-                             //"RX: received frame with errors. Frame will be
-                             // discarded \\(Seq: (\\d+)\\) \\(FS: (\\d+)\\)"
-                             errPattern));
-
-  _packetSizeIndex = ui->packetSizeIndex_lineEdit->text().toInt() + 1;
-  _seqNumIndex = ui->seqNumberIndex_lineEdit->text().toInt() + 1;
+  dlErrPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat, errPattern));
 
   if (ui->uint8_t_radioButton->isChecked())
     DataRegister::SetSeqType(DataRegister::SeqType::UINT8);
@@ -65,20 +154,11 @@ void MainWindow::updateRegex() {
 }
 
 void MainWindow::init() {
-  // appDefaultPath =
-  // "/home/centelld/programming/catkin_ws/src/build-dccomms_ros-Desktop-Debug/devel/lib/dccomms_ros";
-  appDefaultPath = ui->mainFolderLineEdit->text();
-  SetPktSizeOffset(0);
-  updateRegex();
-
-  _plotOver = true;
-  ui->plotOverCheckBox->setChecked(_plotOver);
+  _defaultSettingsFile = QApplication::applicationDirPath() + "/default.ini";
+  loadDefaultSettings();
+  updateTransportParser();
+  ui->plotOverCheckBox->setChecked(false);
   _lastPlotWindow = NULL;
-}
-
-void MainWindow::SetPktSizeOffset(int offset) {
-  _pktSizeOffset = offset;
-  ui->packetSizeOffsetLineEdit->setText(QString::number(offset));
 }
 
 void MainWindow::plotTimeDouble(QList<DataRegisterPtr> &coll,
@@ -93,12 +173,13 @@ void MainWindow::plotTimeDouble(QList<DataRegisterPtr> &coll,
     QTextStream stream(&data);
     QString line;
     coll.clear();
+    auto dindex = GetDistanceIndex();
     while (stream.readLineInto(&line)) {
       auto match = reg.match(line);
       if (match.hasMatch()) {
         auto moment = match.captured(1);
         double distance;
-        distance = match.captured(_distanceIndex).toDouble();
+        distance = match.captured(dindex).toDouble();
         auto dataRegister = DataRegister::Build(0, moment);
         dataRegister->SetDoubleValue(distance);
         coll.append(dataRegister);
@@ -130,24 +211,27 @@ void MainWindow::plotTimeDouble(QList<DataRegisterPtr> &coll,
   }
 }
 
-void MainWindow::parseTimes(QList<DataRegisterPtr> &coll,
-                            const QString &fileName,
-                            const QRegularExpression &reg, QComboBox *t0,
-                            QComboBox *t1) {
+void MainWindow::parseTransportData(QList<DataRegisterPtr> &coll,
+                                    const QString &fileName,
+                                    const QRegularExpression &reg,
+                                    QComboBox *t0, QComboBox *t1) {
   QFile data(fileName);
   if (data.open(QFile::ReadOnly)) {
     QTextStream stream(&data);
     QString line;
     coll.clear();
+    auto seqNumIndex = GetSeqIndex();
+    auto packetSizeIndex = GetPktSizeIndex();
     while (stream.readLineInto(&line)) {
       auto match = reg.match(line);
       if (match.hasMatch()) {
         auto moment = match.captured(1);
         uint32_t size, nseq = 0;
-        if (_seqNumIndex != 0)
-          nseq = match.captured(_seqNumIndex).toInt();
-        size = match.captured(_packetSizeIndex).toInt();
-        auto dataRegister = DataRegister::Build(size + _pktSizeOffset, moment);
+        if (seqNumIndex != 0)
+          nseq = match.captured(seqNumIndex).toInt();
+        size = match.captured(packetSizeIndex).toInt();
+        auto dataRegister =
+            DataRegister::Build(size + GetPktSizeOffset(), moment);
         dataRegister->SetNseq(nseq);
         coll.append(dataRegister);
       }
@@ -204,26 +288,35 @@ void MainWindow::on_dl_computeButton_clicked() {
 
 void MainWindow::on_dl_txBrowseButton_clicked() {
   dlTxFileName = QFileDialog::getOpenFileName(
-      this, tr("Open Dl Tx File"), appDefaultPath, tr("All files (*)"));
-  ui->dl_txFileLineEdit->clear();
-  ui->dl_txFileLineEdit->insert(dlTxFileName);
+      this, tr("Open Dl Tx File"), _txTransportDefaultDir, tr("All files (*)"));
+  if (dlTxFileName != "") {
+    QFileInfo file(dlTxFileName);
+    _txTransportDefaultDir = file.absolutePath();
+    ui->dl_txFileLineEdit->clear();
+    ui->dl_txFileLineEdit->insert(dlTxFileName);
+  }
 }
 
 void MainWindow::on_dl_rxBrowseButton_clicked() {
   dlRxFileName = QFileDialog::getOpenFileName(
-      this, tr("Open Dl Rx File"), appDefaultPath, tr("All files (*)"));
-  ui->dl_rxFileLineEdit->clear();
-  ui->dl_rxFileLineEdit->insert(dlRxFileName);
+      this, tr("Open Dl Rx File"), _rxTransportDefaultDir, tr("All files (*)"));
+  if (dlRxFileName != "") {
+    QFileInfo file(dlRxFileName);
+    _rxTransportDefaultDir = file.absolutePath();
+    ui->dl_rxFileLineEdit->clear();
+    ui->dl_rxFileLineEdit->insert(dlRxFileName);
+  }
 }
 
 void MainWindow::on_dl_parseTimesButton_clicked() {
-  parseTimes(dlTxDataList, dlTxFileName, dlTxPattern, ui->dl_txT0ComboBox,
-             ui->dl_txT1ComboBox);
+  updateTransportParser();
+  parseTransportData(dlTxDataList, dlTxFileName, dlTxPattern,
+                     ui->dl_txT0ComboBox, ui->dl_txT1ComboBox);
 
-  parseTimes(dlRxDataList, dlRxFileName, dlRxPattern, ui->dl_rxT0ComboBox,
-             ui->dl_rxT1ComboBox);
+  parseTransportData(dlRxDataList, dlRxFileName, dlRxPattern,
+                     ui->dl_rxT0ComboBox, ui->dl_rxT1ComboBox);
 
-  parseTimes(dlErrDataList, dlRxFileName, dlErrPattern, NULL, NULL);
+  parseTransportData(dlErrDataList, dlRxFileName, dlErrPattern, NULL, NULL);
 }
 
 void MainWindow::computeData(
@@ -248,7 +341,7 @@ void MainWindow::computeData(
     QList<DataRegisterPtr> &rxDataListFiltered)
 
 {
-  QString tagDesc = ui->tagDescriptionLineEdit->text();
+  QString tagDesc = GetTransportTag();
   _t0 = QDateTime::fromString(txT0->text(), DataRegister::timeFormat);
   _t1 = QDateTime::fromString(rxT1->text(), DataRegister::timeFormat);
 
@@ -312,7 +405,7 @@ void MainWindow::computeData(
 
   // Plot Jitter
   std::shared_ptr<JitterPlotWindow> jitterPlot;
-  if (jitterPlotList.size() == 0 || !_plotOver) {
+  if (jitterPlotList.size() == 0 || !GetPlotOver()) {
     jitterPlot = std::shared_ptr<JitterPlotWindow>(new JitterPlotWindow());
     jitterPlotList.push_front(jitterPlot);
   } else {
@@ -323,7 +416,7 @@ void MainWindow::computeData(
   jitterPlot->Plot(rxDataListFiltered, "Jitter", _t0, _t1, "Jitter",
                    "Reception time", tagDesc);
   // Transmission time
-  if (_seqNumIndex != 0) {
+  if (GetSeqIndex() != 0) {
     DataRegister::ComputeEnd2EndDelay(rxDataListFiltered, btt, bttSd);
 
     updateLineEditText(ui->dl_transmissionTime, QString::number(btt));
@@ -338,7 +431,7 @@ void MainWindow::computeData(
 
     // Plot end 2 end delay
     std::shared_ptr<End2EndPlotWindow> e2ePlot;
-    if (e2ePlotList.size() == 0 || !_plotOver) {
+    if (e2ePlotList.size() == 0 || !GetPlotOver()) {
       e2ePlot = std::shared_ptr<End2EndPlotWindow>(new End2EndPlotWindow());
       e2ePlotList.push_front(e2ePlot);
     } else {
@@ -369,30 +462,13 @@ void MainWindow::on_dl_rxT1ComboBox_currentIndexChanged(const QString &arg1) {
   ui->dl_rxT1->clear();
   ui->dl_rxT1->insert(arg1);
 }
-/*
-void MainWindow::on_setIntervalButton_clicked() {
-  auto t0 = ui->t0LineEdit->text();
-  auto t1 = ui->t1LineEdit->text();
 
-  ui->dl_txT0->clear();
-  ui->dl_txT0->insert(t0);
-
-  ui->dl_txT1->clear();
-  ui->dl_txT1->insert(t1);
-
-  ui->dl_rxT0->clear();
-  ui->dl_rxT0->insert(t0);
-
-  ui->dl_rxT1->clear();
-  ui->dl_rxT1->insert(t1);
-}
-*/
 void MainWindow::on_dl_plotButton_clicked() {
   auto txTitle = ui->txTitleLineEdit->text();
   auto rxTitle = ui->rxTitleLineEdit->text();
   auto erTitle = ui->erTitleLineEdit->text();
 
-  if (_plotOver && _lastPlotWindow != NULL) {
+  if (GetPlotOver() && _lastPlotWindow != NULL) {
     _lastPlotWindow->PlotOver(dlTxDataList, dlRxDataList, dlErrDataList, _t0,
                               _t1, txTitle, rxTitle, erTitle);
   } else {
@@ -431,35 +507,20 @@ void MainWindow::on_dl_plotButton_clicked() {
   }
 }
 
-void MainWindow::on_plotOverCheckBox_clicked(bool checked) {
-  if (checked) {
-    _plotOver = true;
-  } else {
-    _plotOver = false;
+void MainWindow::on_distancesPathBrowseButton_clicked() {
+  dlDistancesFileName = QFileDialog::getOpenFileName(
+      this, tr("Open Dl Tx File"), _distanceDefaultDir, tr("All files (*)"));
+
+  if (dlDistancesFileName != "") {
+    QFileInfo file(dlDistancesFileName);
+    _distanceDefaultDir = file.absolutePath();
+    ui->distancesPathLineEdit->clear();
+    ui->distancesPathLineEdit->insert(dlDistancesFileName);
   }
 }
 
-void MainWindow::on_pushButton_clicked() { updateRegex(); }
-
-void MainWindow::on_mainFolderLineEdit_textChanged(const QString &arg1) {
-  appDefaultPath = arg1;
-}
-
-void MainWindow::on_packetSizeOffsetLineEdit_editingFinished() {
-  int value = ui->packetSizeOffsetLineEdit->text().toInt();
-  SetPktSizeOffset(value);
-}
-
-void MainWindow::on_distancesPathBrowseButton_clicked() {
-  dlDistancesFileName = QFileDialog::getOpenFileName(
-      this, tr("Open Dl Tx File"), ui->distanceLogMainFolderLineEdit->text(),
-      tr("All files (*)"));
-  ui->distancesPathLineEdit->clear();
-  ui->distancesPathLineEdit->insert(dlDistancesFileName);
-}
-
 void MainWindow::on_parseAndPlotDistanceButton_clicked() {
-  updateDistanceRegex();
+  updateDistanceParser();
   plotTimeDouble(_distancesDataList, ui->distancesPathLineEdit->text(),
                  _dlDistancePattern, ui->distancesXLabel->text(),
                  ui->distancesYLabel->text(), ui->distancesLabel->text(),
