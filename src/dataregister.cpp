@@ -1,22 +1,29 @@
 #include <comms_log_parser/dataregister.h>
 #include <qmath.h>
 
-const QString DataRegister::timeFormat = "yyyy-MM-dd HH:mm:ss.zzz";
-
 DataRegister::SeqType DataRegister::_seqType = UINT8;
 
 DataRegister::DataRegister() { init(); }
 
-DataRegister::DataRegister(int size, const QString &time) {
+DataRegister::DataRegister(int size, double relativeValue) {
   init();
   SetDataSize(size);
-  SetDateTimeAsString(time);
+  SetRelativeValue(relativeValue);
 }
 
-DataRegister::DataRegister(int size, const QDateTime &time) {
+DataRegister::DataRegister(int size, const QDateTime &time,
+                           const QString &sdecimals) {
   init();
   SetDataSize(size);
   SetDateTime(time);
+  int nd = sdecimals.size();
+  int left = nd >= 3 ? 3 : nd;
+  QString smillis = sdecimals.left(left);
+  while (smillis.size() < 3)
+    smillis.append('0');
+  uint32_t millis = smillis.toUInt();
+  auto dateTime = time.addMSecs(millis);
+  SetDateTime(dateTime);
 }
 
 void DataRegister::init() {
@@ -27,22 +34,15 @@ void DataRegister::init() {
 
 void DataRegister::SetDataSize(int size) { dataSize = size; }
 
-void DataRegister::SetDateTimeAsString(const QString &time) {
-  moment = QDateTime::fromString(time, timeFormat);
-}
 void DataRegister::SetDateTime(const QDateTime &time) { moment = time; }
 
 QDateTime DataRegister::GetDateTime() { return moment; }
 
-QString DataRegister::GetDateTimeAsString() {
-  return moment.toString(timeFormat);
+QString DataRegister::GetDateTimeAsString(const QString &format) {
+  return moment.toString(format);
 }
 
 int DataRegister::GetDataSize() { return dataSize; }
-
-void DataRegister::SetNseq(int nseq) { _nseq = nseq; }
-
-int DataRegister::GetNseq() { return _nseq; }
 
 void DataRegister::SetRxDateTime(const QDateTime &datetime) {
   _rxmoment = datetime;
@@ -52,7 +52,8 @@ QDateTime DataRegister::GetRxDateTime() { return _rxmoment; }
 
 QString DataRegister::ToString() {
   return QString("%1 => %2 bytes")
-      .arg(GetDateTimeAsString(), QString::number(GetDataSize()));
+      .arg(GetDateTimeAsString("yyyy-MM-dd HH:mm:ss.zzz"),
+           QString::number(GetDataSize()));
 }
 QList<DataRegisterPtr> DataRegister::GetInterval(QList<DataRegisterPtr> data,
                                                  QDateTime t0, QDateTime t1) {
@@ -139,9 +140,8 @@ void DataRegister::ComputeLinks(QList<DataRegisterPtr> txl,
   }
 }
 
-
-void DataRegister::ComputeTimePerByte(QList<DataRegisterPtr> rxl,
-                                           float &btt, float &bttSd) {
+void DataRegister::ComputeTimePerByte(QList<DataRegisterPtr> rxl, float &btt,
+                                      float &bttSd) {
   btt = 0;
   bttSd = 0;
   int count = 0;
@@ -175,8 +175,8 @@ void DataRegister::ComputeTimePerByte(QList<DataRegisterPtr> rxl,
   bttSd = qSqrt(bttSd / count);
 }
 
-void DataRegister::ComputeEnd2EndDelay(QList<DataRegisterPtr> rxl,
-                                           float &btt, float &bttSd) {
+void DataRegister::ComputeEnd2EndDelay(QList<DataRegisterPtr> rxl, float &btt,
+                                       float &bttSd) {
   btt = 0;
   bttSd = 0;
   int count = 0;

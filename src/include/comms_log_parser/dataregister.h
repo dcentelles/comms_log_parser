@@ -12,13 +12,18 @@ typedef QSharedPointer<DataRegister> DataRegisterPtr;
 class DataRegister {
 
 public:
-  static DataRegisterPtr Build(int size, const QString &time) {
-    return DataRegisterPtr(new DataRegister(size, time));
+  static DataRegisterPtr Build(int size, double relativeValue) {
+    return DataRegisterPtr(new DataRegister(size, relativeValue));
   }
-  static DataRegisterPtr Build(int size, const QDateTime &time) {
-    return DataRegisterPtr(new DataRegister(size, time));
+  static DataRegisterPtr Build(int size, const QDateTime &time,
+                               const QString &sdecimals) {
+    return DataRegisterPtr(new DataRegister(size, time, sdecimals));
   }
   static DataRegisterPtr Build() { return DataRegisterPtr(new DataRegister()); }
+
+  DataRegister();
+  DataRegister(int size, double relativeValue);
+  DataRegister(int size, const QDateTime &time, const QString &sdecimals);
 
   static QList<DataRegisterPtr> GetInterval(QList<DataRegisterPtr> data,
                                             QDateTime t0, QDateTime t1);
@@ -47,23 +52,14 @@ public:
   static void SetSeqType(SeqType type) { _seqType = type; }
   static SeqType GetSeqType() { return _seqType; }
 
-  static const QString timeFormat;
-  DataRegister();
-  DataRegister(int size, const QString &time);
-  DataRegister(int size, const QDateTime &time);
-
   void SetDataSize(int);
-  void SetDateTimeAsString(const QString &);
   void SetDateTime(const QDateTime &);
 
   void SetRxDateTime(const QDateTime &);
   QDateTime GetRxDateTime();
 
-  void SetNseq(int);
-  int GetNseq(void);
-
   int GetDataSize();
-  QString GetDateTimeAsString();
+  QString GetDateTimeAsString(const QString &format);
   QDateTime GetDateTime();
 
   QString ToString();
@@ -77,21 +73,25 @@ public:
   inline void SetDoubleValue(double v) { _doubleValue = v; }
   inline double GetDoubleValue() { return _doubleValue; }
 
-  inline double GetSec() { return _second; }
-  inline double SetSec(double sec) { _second = sec; }
+  inline double GetRelativeValue() { return _relativeValue; }
+  inline double SetRelativeValue(double v) { _relativeValue = v; }
+
+  inline void SetNseq(uint64_t nseq) { _nseq = nseq; }
+  inline uint64_t GetNseq() { return _nseq; }
 
 private:
+  QString _dateTimeFormat;
   DataRegisterPtr _link;
   void init();
   QDateTime moment, _rxmoment;
   int dataSize;
-  int _nseq;
   int _ptt;
   double _jitter;
   double _jitterValid;
   double _end2EndDelay;
   double _doubleValue;
-  double _second;
+  double _relativeValue;
+  uint64_t _nseq;
 };
 
 #endif // PAQUETTRANSMISSION_H

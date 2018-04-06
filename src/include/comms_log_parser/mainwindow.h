@@ -26,6 +26,9 @@ public:
   ~MainWindow();
 
 private slots:
+  void on_trDateTimeRadioButton_toggled(bool checked);
+
+private slots:
   void on_parseAndPlotDistanceButton_clicked();
 
   void on_distancesPathBrowseButton_clicked();
@@ -59,10 +62,10 @@ private:
   void updateTransportParser();
   void updateDistanceParser();
   void updateLineEditText(QLineEdit *, const QString &txt);
-  void parseTransportData(QList<DataRegisterPtr> &data, const QString &fileName,
+  void parsePacketTrace(QList<DataRegisterPtr> &data, const QString &fileName,
                   const QRegularExpression &reg, QComboBox *t0, QComboBox *t1);
 
-  void plotTimeDouble(QList<DataRegisterPtr> &dataList, const QString &fileName,
+  void parseDoubleTrace(QList<DataRegisterPtr> &dataList, const QString &fileName,
                       const QRegularExpression &reg, const QString &xlabel,
                       const QString &ylabel, const QString &seriesLabel,
                       bool plotOver, QLineEdit *t0le = NULL,
@@ -109,9 +112,15 @@ private:
   int GetPktSizeOffset();
   int GetPktSizeIndex();
   int GetDistanceIndex();
+  int GetDateTimeIndex();
+  int GetDecimalsIndex();
+  int GetRelativeValueIndex();
   int GetSeqIndex();
   bool GetPlotOver();
   QString GetTransportTag();
+
+  bool TimeIsRelative();
+  void SetRelativeTime(bool);
 
   void loadDefaultSettings();
   void saveCurrentSettingsAsDefault();
@@ -119,6 +128,8 @@ private:
   void closeEvent(QCloseEvent *event);
 
   QString _defaultSettingsFile;
+
+  int GetMaxPrefixIndex();
 };
 
 #endif // MAINWINDOW_H

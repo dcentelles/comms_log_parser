@@ -62,6 +62,22 @@ void MainWindow::loadDefaultSettings() {
 
   ui->tagDescriptionLineEdit->setText(
       settings.value("transport_tag").toString());
+
+  ui->transportTimePattern->setText(
+      settings.value("common_parser_time_pattern").toString());
+
+  ui->transportDateTimeFormat->setText(
+      settings.value("common_parser_datetime_format").toString());
+
+  ui->trDateTimeIndex->setText(
+      settings.value("common_parser_datetime_index").toString());
+  ui->trDecimalsIndex->setText(
+      settings.value("common_parser_decimals_index").toString());
+  bool relativeTime = settings.value("common_parser_time_is_relative").toBool();
+  SetRelativeTime(relativeTime);
+
+  ui->trRelativeTimeIndex->setText(
+      settings.value("common_parser_relative_time_index").toString());
 }
 
 void MainWindow::saveCurrentSettingsAsDefault() {
@@ -94,6 +110,20 @@ void MainWindow::saveCurrentSettingsAsDefault() {
   settings.setValue("distance_label", ui->distancesLabel->text());
   settings.setValue("distance_index", ui->distanceIndex_lineEdit->text());
   settings.setValue("transport_tag", ui->tagDescriptionLineEdit->text());
+
+  settings.setValue("common_parser_time_pattern",
+                    ui->transportTimePattern->text());
+  settings.setValue("common_parser_datetime_format",
+                    ui->transportDateTimeFormat->text());
+
+  settings.setValue("common_parser_datetime_index",
+                    ui->trDateTimeIndex->text());
+  settings.setValue("common_parser_decimals_index",
+                    ui->trDecimalsIndex->text());
+
+  settings.setValue("common_parser_time_is_relative", TimeIsRelative() ? 1 : 0);
+  settings.setValue("common_parser_relative_time_index",
+                    ui->trRelativeTimeIndex->text());
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -101,20 +131,48 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   event->accept();
 }
 
+bool MainWindow::TimeIsRelative() {
+  return ui->trRelativeTimeRadioButton->isChecked();
+}
+
+void MainWindow::SetRelativeTime(bool v) {
+  ui->trRelativeTimeRadioButton->setChecked(v);
+  ui->trDateTimeRadioButton->setChecked(!v);
+  on_trDateTimeRadioButton_toggled(!v);
+}
 int MainWindow::GetPktSizeOffset() {
   return ui->packetSizeOffsetLineEdit->text().toInt();
 }
 
+int MainWindow::GetDateTimeIndex() {
+  return ui->trDateTimeIndex->text().toInt();
+}
+int MainWindow::GetDecimalsIndex() {
+  return ui->trDecimalsIndex->text().toInt();
+}
+int MainWindow::GetRelativeValueIndex() {
+  return ui->trRelativeTimeIndex->text().toInt();
+}
+
+int MainWindow::GetMaxPrefixIndex() {
+  QRegularExpression prefixExpr;
+  prefixExpr.setPattern(ui->transportTimePattern->text());
+  return prefixExpr.namedCaptureGroups().size() - 1;
+}
+
 int MainWindow::GetDistanceIndex() {
-  return ui->distanceIndex_lineEdit->text().toInt() + 1;
+  int maxPrefixIndex = GetMaxPrefixIndex();
+  return ui->distanceIndex_lineEdit->text().toInt() + maxPrefixIndex;
 }
 
 int MainWindow::GetSeqIndex() {
-  return ui->seqNumberIndex_lineEdit->text().toInt() + 1;
+  int maxPrefixIndex = GetMaxPrefixIndex();
+  return ui->seqNumberIndex_lineEdit->text().toInt() + maxPrefixIndex;
 }
 
 int MainWindow::GetPktSizeIndex() {
-  return ui->packetSizeIndex_lineEdit->text().toInt() + 1;
+  int maxPrefixIndex = GetMaxPrefixIndex();
+  return ui->packetSizeIndex_lineEdit->text().toInt() + maxPrefixIndex;
 }
 
 QString MainWindow::GetTransportTag() {
@@ -124,14 +182,14 @@ QString MainWindow::GetTransportTag() {
 bool MainWindow::GetPlotOver() { return ui->plotOverCheckBox->isChecked(); }
 
 void MainWindow::updateDistanceParser() {
-  QString logTimeFormat = "\\[(\\d+-\\d+-\\d+ \\d+:\\d+:\\d+\\.\\d+)\\]";
+  QString logTimeFormat = ui->transportTimePattern->text();
   auto distancePattern = ui->distanceRegexLineEdit->text();
   _dlDistancePattern.setPattern(
       QString("^%1.*%2").arg(logTimeFormat, distancePattern));
 }
 
 void MainWindow::updateTransportParser() {
-  QString logTimeFormat = "\\[(\\d+-\\d+-\\d+ \\d+:\\d+:\\d+\\.\\d+)\\]";
+  QString logTimeFormat = ui->transportTimePattern->text();
 
   auto txPattern = ui->txRegexLineEdit->text();
 
@@ -161,63 +219,75 @@ void MainWindow::init() {
   _lastPlotWindow = NULL;
 }
 
-void MainWindow::plotTimeDouble(QList<DataRegisterPtr> &coll,
-                                const QString &fileName,
-                                const QRegularExpression &reg,
-                                const QString &xlabel, const QString &ylabel,
-                                const QString &seriesLabel, bool plotOver,
-                                QLineEdit *t0, QLineEdit *t1) {
+void MainWindow::parseDoubleTrace(QList<DataRegisterPtr> &coll,
+                                  const QString &fileName,
+                                  const QRegularExpression &reg,
+                                  const QString &xlabel, const QString &ylabel,
+                                  const QString &seriesLabel, bool plotOver,
+                                  QLineEdit *t0, QLineEdit *t1) {
+  /*
+    QFile data(fileName);
+    if (data.open(QFile::ReadOnly)) {
+      QTextStream stream(&data);
+      QString line;
+      coll.clear();
+      auto dindex = GetDistanceIndex();
+      while (stream.readLineInto(&line)) {
+        auto match = reg.match(line);
+        if (match.hasMatch()) {
+          auto moment = match.captured(1);
+          double distance;
+          distance = match.captured(dindex).toDouble();
+          auto dataRegister =
+              DataRegister::Build(0, moment,
+    ui->transportDateTimeFormat->text());
+          dataRegister->SetDoubleValue(distance);
+          coll.append(dataRegister);
+        }
+      }
 
-  QFile data(fileName);
-  if (data.open(QFile::ReadOnly)) {
-    QTextStream stream(&data);
-    QString line;
-    coll.clear();
-    auto dindex = GetDistanceIndex();
-    while (stream.readLineInto(&line)) {
-      auto match = reg.match(line);
-      if (match.hasMatch()) {
-        auto moment = match.captured(1);
-        double distance;
-        distance = match.captured(dindex).toDouble();
-        auto dataRegister = DataRegister::Build(0, moment);
-        dataRegister->SetDoubleValue(distance);
-        coll.append(dataRegister);
-      }
-    }
-
-    std::shared_ptr<DateTimePlotWindow> plot;
-    if (_distancePlotList.size() == 0 || !plotOver) {
-      plot = std::shared_ptr<DateTimePlotWindow>(new DateTimePlotWindow());
-      plot->SetGraphFiller(GraphFillerPtr(new DoubleGraphFiller()));
-      _distancePlotList.push_front(plot);
-    } else {
-      plot = _distancePlotList.front();
-    }
-    plot->show();
-    QDateTime t0dt, t1dt;
-    if (coll.size() > 0) {
-      if (t0 == NULL) {
-        t0dt = coll[0]->GetDateTime();
+      std::shared_ptr<DateTimePlotWindow> plot;
+      if (_distancePlotList.size() == 0 || !plotOver) {
+        plot = std::shared_ptr<DateTimePlotWindow>(new DateTimePlotWindow());
+        plot->SetGraphFiller(GraphFillerPtr(new DoubleGraphFiller()));
+        _distancePlotList.push_front(plot);
       } else {
-        t0dt = QDateTime::fromString(t0->text(), DataRegister::timeFormat);
+        plot = _distancePlotList.front();
       }
-      if (t1 == NULL) {
-        t1dt = coll[coll.size() - 1]->GetDateTime();
-      } else {
-        t1dt = QDateTime::fromString(t0->text(), DataRegister::timeFormat);
+      plot->show();
+      QDateTime t0dt, t1dt;
+      if (coll.size() > 0) {
+        if (t0 == NULL) {
+          t0dt = coll[0]->GetDateTime();
+        } else {
+          t0dt = QDateTime::fromString(t0->text(),
+                                       ui->transportDateTimeFormat->text());
+        }
+        if (t1 == NULL) {
+          t1dt = coll[coll.size() - 1]->GetDateTime();
+        } else {
+          t1dt = QDateTime::fromString(t0->text(),
+                                       ui->transportDateTimeFormat->text());
+        }
+        plot->Plot(coll, "Distance", t0dt, t1dt, ylabel, xlabel, seriesLabel);
       }
-      plot->Plot(coll, "Distance", t0dt, t1dt, ylabel, xlabel, seriesLabel);
     }
-  }
+    */
 }
 
-void MainWindow::parseTransportData(QList<DataRegisterPtr> &coll,
-                                    const QString &fileName,
-                                    const QRegularExpression &reg,
-                                    QComboBox *t0, QComboBox *t1) {
+void MainWindow::parsePacketTrace(QList<DataRegisterPtr> &coll,
+                                  const QString &fileName,
+                                  const QRegularExpression &reg, QComboBox *t0,
+                                  QComboBox *t1) {
+
   QFile data(fileName);
   if (data.open(QFile::ReadOnly)) {
+    bool relativeTime = TimeIsRelative();
+    DataRegisterPtr dataRegister;
+    int dateTimeIndex = GetDateTimeIndex();
+    int decimalsIndex = GetDecimalsIndex();
+    int relativeValueIndex = GetRelativeValueIndex();
+    QString dateTimeFormat = ui->transportDateTimeFormat->text();
     QTextStream stream(&data);
     QString line;
     coll.clear();
@@ -226,13 +296,22 @@ void MainWindow::parseTransportData(QList<DataRegisterPtr> &coll,
     while (stream.readLineInto(&line)) {
       auto match = reg.match(line);
       if (match.hasMatch()) {
-        auto moment = match.captured(1);
         uint32_t size, nseq = 0;
-        if (seqNumIndex != 0)
+        if (seqNumIndex != -1)
           nseq = match.captured(seqNumIndex).toInt();
         size = match.captured(packetSizeIndex).toInt();
-        auto dataRegister =
-            DataRegister::Build(size + GetPktSizeOffset(), moment);
+        if (relativeTime) {
+          double relativeValue = match.captured(relativeValueIndex).toDouble();
+          dataRegister =
+              DataRegister::Build(size + GetPktSizeOffset(), relativeValue);
+        } else {
+          QString dateTimeStr = match.captured(dateTimeIndex);
+          QString sdecimals = match.captured(decimalsIndex);
+          QDateTime dateTime =
+              QDateTime::fromString(dateTimeStr, dateTimeFormat);
+          dataRegister = DataRegister::Build(size + GetPktSizeOffset(),
+                                             dateTime, sdecimals);
+        }
         dataRegister->SetNseq(nseq);
         coll.append(dataRegister);
       }
@@ -243,8 +322,8 @@ void MainWindow::parseTransportData(QList<DataRegisterPtr> &coll,
 
       for (auto it = coll.begin(); it != coll.end(); it++) {
 
-        t0->addItem((*it)->GetDateTimeAsString());
-        t1->addItem((*it)->GetDateTimeAsString());
+        t0->addItem((*it)->GetDateTimeAsString(dateTimeFormat));
+        t1->addItem((*it)->GetDateTimeAsString(dateTimeFormat));
       }
     }
   }
@@ -311,13 +390,13 @@ void MainWindow::on_dl_rxBrowseButton_clicked() {
 
 void MainWindow::on_dl_parseTimesButton_clicked() {
   updateTransportParser();
-  parseTransportData(dlTxDataList, dlTxFileName, dlTxPattern,
-                     ui->dl_txT0ComboBox, ui->dl_txT1ComboBox);
+  parsePacketTrace(dlTxDataList, dlTxFileName, dlTxPattern, ui->dl_txT0ComboBox,
+                   ui->dl_txT1ComboBox);
 
-  parseTransportData(dlRxDataList, dlRxFileName, dlRxPattern,
-                     ui->dl_rxT0ComboBox, ui->dl_rxT1ComboBox);
+  parsePacketTrace(dlRxDataList, dlRxFileName, dlRxPattern, ui->dl_rxT0ComboBox,
+                   ui->dl_rxT1ComboBox);
 
-  parseTransportData(dlErrDataList, dlRxFileName, dlErrPattern, NULL, NULL);
+  parsePacketTrace(dlErrDataList, dlRxFileName, dlErrPattern, NULL, NULL);
 }
 
 void MainWindow::computeData(
@@ -343,8 +422,10 @@ void MainWindow::computeData(
 
 {
   QString tagDesc = GetTransportTag();
-  _t0 = QDateTime::fromString(txT0->text(), DataRegister::timeFormat);
-  _t1 = QDateTime::fromString(rxT1->text(), DataRegister::timeFormat);
+  _t0 =
+      QDateTime::fromString(txT0->text(), ui->transportDateTimeFormat->text());
+  _t1 =
+      QDateTime::fromString(rxT1->text(), ui->transportDateTimeFormat->text());
 
   txDataListFiltered = DataRegister::GetInterval(txDataList, _t0, _t1);
 
@@ -418,7 +499,7 @@ void MainWindow::computeData(
   jitterPlot->Plot(rxDataListFiltered, "Jitter", _t0, _t1, "Jitter",
                    "Reception time", tagDesc);
   // Transmission time
-  if (GetSeqIndex() != 0 && rxDataListFiltered.size() > 0) {
+  if (GetSeqIndex() != -1 && rxDataListFiltered.size() > 0) {
     DataRegister::ComputeEnd2EndDelay(rxDataListFiltered, btt, bttSd);
 
     updateLineEditText(ui->dl_transmissionTime, QString::number(btt));
@@ -524,8 +605,15 @@ void MainWindow::on_distancesPathBrowseButton_clicked() {
 
 void MainWindow::on_parseAndPlotDistanceButton_clicked() {
   updateDistanceParser();
-  plotTimeDouble(_distancesDataList, ui->distancesPathLineEdit->text(),
-                 _dlDistancePattern, ui->distancesXLabel->text(),
-                 ui->distancesYLabel->text(), ui->distancesLabel->text(),
-                 ui->distancePlotOverCheck->isChecked());
+  parseDoubleTrace(_distancesDataList, ui->distancesPathLineEdit->text(),
+                   _dlDistancePattern, ui->distancesXLabel->text(),
+                   ui->distancesYLabel->text(), ui->distancesLabel->text(),
+                   ui->distancePlotOverCheck->isChecked());
+}
+
+void MainWindow::on_trDateTimeRadioButton_toggled(bool checked) {
+  ui->transportDateTimeFormat->setEnabled(checked);
+  ui->trDecimalsIndex->setEnabled(checked);
+  ui->trDateTimeIndex->setEnabled(checked);
+  ui->trRelativeTimeIndex->setEnabled(!checked);
 }
