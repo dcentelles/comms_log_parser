@@ -28,19 +28,19 @@ set(HW_GUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/gui)
 #https://stackoverflow.com/questions/19761767/qt-5-cmake-fails-with-undefined-reference-to-vtable-on-hello-world-with-inc-sr
 qt5_wrap_cpp(hmi_SRC
     ${HW_HEADER_DIR}/dataplotwindow.h
-    ${HW_HEADER_DIR}/jitterplotwindow.h
-    ${HW_HEADER_DIR}/plotwindow.h
-    ${HW_HEADER_DIR}/end2endplotwindow.h
+    ${HW_HEADER_DIR}/jittergraphfiller.h
+    ${HW_HEADER_DIR}/datetimeplotwindow.h
+    ${HW_HEADER_DIR}/genericplotwindow.h
+    ${HW_HEADER_DIR}/end2endgraphfiller.h
     ${HW_HEADER_DIR}/mainwindow.h
     ${HW_HEADER_DIR}/normalplot.h
     ${HW_HEADER_DIR}/qcustomplot.h
-    ${HW_HEADER_DIR}/timedoubleplotwindow.h
+    ${HW_HEADER_DIR}/doublegraphfiller.h
     )
 qt5_wrap_ui(hmi_UI
     ${HW_GUI_DIR}/dataplotwindow.ui
-    ${HW_GUI_DIR}/jitterplotwindow.ui
-    ${HW_GUI_DIR}/plotwindow.ui
-    ${HW_GUI_DIR}/end2endplotwindow.ui
+    ${HW_GUI_DIR}/datetimeplotwindow.ui
+    ${HW_GUI_DIR}/genericplotwindow.ui
     ${HW_GUI_DIR}/mainwindow.ui
     ${HW_GUI_DIR}/normalplot.ui
     )
@@ -53,12 +53,13 @@ add_library(${${PROJECT_NAME}_LIB}
         src/mainwindow.cpp
         src/dataregister.cpp
         src/dataplotwindow.cpp
-        src/jitterplotwindow.cpp
-        src/plotwindow.cpp
-        src/end2endplotwindow.cpp
+        src/jittergraphfiller.cpp
+        src/datetimeplotwindow.cpp
+        src/genericplotwindow.cpp
+        src/end2endgraphfiller.cpp
         src/qcustomplot.cpp
         src/normalplot.cpp
-        src/timedoubleplotwindow.cpp
+        src/doublegraphfiller.cpp
         ${hmi_SRC}
         ${hmi_UI}
 	)

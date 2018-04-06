@@ -2,8 +2,8 @@
 #include <QFileDialog>
 #include <QSettings>
 #include <comms_log_parser/dataplotwindow.h>
-#include <comms_log_parser/end2endplotwindow.h>
-#include <comms_log_parser/jitterplotwindow.h>
+#include <comms_log_parser/end2endgraphfiller.h>
+#include <comms_log_parser/jittergraphfiller.h>
 #include <comms_log_parser/mainwindow.h>
 #include <comms_log_parser/normalplot.h>
 #include <ui_mainwindow.h>
@@ -186,9 +186,10 @@ void MainWindow::plotTimeDouble(QList<DataRegisterPtr> &coll,
       }
     }
 
-    std::shared_ptr<TimeDoublePlotWindow> plot;
+    std::shared_ptr<DateTimePlotWindow> plot;
     if (_distancePlotList.size() == 0 || !plotOver) {
-      plot = std::shared_ptr<TimeDoublePlotWindow>(new TimeDoublePlotWindow());
+      plot = std::shared_ptr<DateTimePlotWindow>(new DateTimePlotWindow());
+      plot->SetGraphFiller(GraphFillerPtr(new DoubleGraphFiller()));
       _distancePlotList.push_front(plot);
     } else {
       plot = _distancePlotList.front();
@@ -404,9 +405,10 @@ void MainWindow::computeData(
   updateLineEditText(ui->dl_packetSizeSdLineEdit, QString::number(pduSizeSd));
 
   // Plot Jitter
-  std::shared_ptr<JitterPlotWindow> jitterPlot;
+  std::shared_ptr<DateTimePlotWindow> jitterPlot;
   if (jitterPlotList.size() == 0 || !GetPlotOver()) {
-    jitterPlot = std::shared_ptr<JitterPlotWindow>(new JitterPlotWindow());
+    jitterPlot = std::shared_ptr<DateTimePlotWindow>(new DateTimePlotWindow());
+    jitterPlot->SetGraphFiller(GraphFillerPtr(new JitterGraphFiller()));
     jitterPlotList.push_front(jitterPlot);
   } else {
     jitterPlot = jitterPlotList.front();
@@ -430,9 +432,10 @@ void MainWindow::computeData(
     ttPlot->Plot("End 2 End Delay", btt, bttSd, 100, 0.001, "ms");
 
     // Plot end 2 end delay
-    std::shared_ptr<End2EndPlotWindow> e2ePlot;
+    std::shared_ptr<DateTimePlotWindow> e2ePlot;
     if (e2ePlotList.size() == 0 || !GetPlotOver()) {
-      e2ePlot = std::shared_ptr<End2EndPlotWindow>(new End2EndPlotWindow());
+      e2ePlot = std::shared_ptr<DateTimePlotWindow>(new DateTimePlotWindow());
+      e2ePlot->SetGraphFiller(GraphFillerPtr(new End2EndGraphFiller()));
       e2ePlotList.push_front(e2ePlot);
     } else {
       e2ePlot = e2ePlotList.front();

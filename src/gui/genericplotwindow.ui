@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>JitterPlotWindow</class>
- <widget class="QMainWindow" name="JitterPlotWindow">
+ <class>GenericPlotWindow</class>
+ <widget class="QMainWindow" name="GenericPlotWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>889</width>
-    <height>618</height>
+    <width>922</width>
+    <height>628</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -114,31 +114,82 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="5">
+      <item row="1" column="6">
+       <widget class="QLineEdit" name="yHighLineEdit">
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="5" rowspan="2">
        <widget class="QPushButton" name="fixXPushButton">
+        <property name="maximumSize">
+         <size>
+          <width>45</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>Fix X</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="6">
-       <widget class="QLineEdit" name="yHighLineEdit"/>
+      <item row="2" column="6">
+       <widget class="QLineEdit" name="yLowLineEdit">
+        <property name="minimumSize">
+         <size>
+          <width>80</width>
+          <height>0</height>
+         </size>
+        </property>
+       </widget>
       </item>
-      <item row="1" column="8">
+      <item row="1" column="8" rowspan="2">
        <widget class="QPushButton" name="fixYPushButton">
+        <property name="maximumSize">
+         <size>
+          <width>45</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="text">
          <string>Fix Y</string>
         </property>
        </widget>
       </item>
       <item row="1" column="4">
-       <widget class="QLineEdit" name="xLowLineEdit"/>
+       <widget class="QDateTimeEdit" name="t0dateTimeEdit">
+        <property name="displayFormat">
+         <string>HH:mm:ss:zzz </string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="4">
+       <widget class="QDateTimeEdit" name="durationDateTimeEdit">
+        <property name="currentSection">
+         <enum>QDateTimeEdit::HourSection</enum>
+        </property>
+        <property name="displayFormat">
+         <string>HH:mm:ss:zzz </string>
+        </property>
+       </widget>
       </item>
       <item row="1" column="3">
-       <widget class="QLineEdit" name="xHighLineEdit"/>
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>T0:</string>
+        </property>
+       </widget>
       </item>
-      <item row="1" column="7">
-       <widget class="QLineEdit" name="yLowLineEdit"/>
+      <item row="2" column="3">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Dur.:</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -149,7 +200,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>889</width>
+     <width>922</width>
      <height>22</height>
     </rect>
    </property>

@@ -8,9 +8,10 @@
 #include <QString>
 #include <comms_log_parser/dataplotwindow.h>
 #include <comms_log_parser/dataregister.h>
-#include <comms_log_parser/end2endplotwindow.h>
-#include <comms_log_parser/jitterplotwindow.h>
-#include <comms_log_parser/timedoubleplotwindow.h>
+#include <comms_log_parser/end2endgraphfiller.h>
+#include <comms_log_parser/jittergraphfiller.h>
+#include <comms_log_parser/doublegraphfiller.h>
+#include <comms_log_parser/datetimeplotwindow.h>
 #include <memory>
 
 namespace Ui {
@@ -50,9 +51,9 @@ private slots:
 private:
   QDateTime _t0, _t1;
   DataPlotWindow *_lastPlotWindow;
-  std::list<std::shared_ptr<End2EndPlotWindow>> e2ePlotList;
-  std::list<std::shared_ptr<JitterPlotWindow>> jitterPlotList;
-  std::list<std::shared_ptr<TimeDoublePlotWindow>> _distancePlotList;
+  std::list<std::shared_ptr<DateTimePlotWindow>> e2ePlotList;
+  std::list<std::shared_ptr<DateTimePlotWindow>> jitterPlotList;
+  std::list<std::shared_ptr<DateTimePlotWindow>> _distancePlotList;
 
   void init();
   void updateTransportParser();

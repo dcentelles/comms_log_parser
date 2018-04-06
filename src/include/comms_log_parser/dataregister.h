@@ -36,10 +36,10 @@ public:
                          float &packetSizeSd);
 
   static void ComputeEnd2EndDelay(QList<DataRegisterPtr> data, float &tt,
-                                      float &ttSd);
+                                  float &ttSd);
 
   static void ComputeTimePerByte(QList<DataRegisterPtr> data, float &tt,
-                                      float &ttSd);
+                                 float &ttSd);
 
   enum SeqType { UINT8, UINT16, UINT32 };
 
@@ -77,6 +77,9 @@ public:
   inline void SetDoubleValue(double v) { _doubleValue = v; }
   inline double GetDoubleValue() { return _doubleValue; }
 
+  inline double GetSec() { return _second; }
+  inline double SetSec(double sec) { _second = sec; }
+
 private:
   DataRegisterPtr _link;
   void init();
@@ -88,6 +91,7 @@ private:
   double _jitterValid;
   double _end2EndDelay;
   double _doubleValue;
+  double _second;
 };
 
 #endif // PAQUETTRANSMISSION_H

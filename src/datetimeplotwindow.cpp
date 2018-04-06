@@ -1,8 +1,9 @@
-#include <comms_log_parser/plotwindow.h>
-#include <ui_plotwindow.h>
+#include <comms_log_parser/datetimeplotwindow.h>
+#include <comms_log_parser/doublegraphfiller.h>
+#include <ui_datetimeplotwindow.h>
 
-PlotWindow::PlotWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::PlotWindow) {
+DateTimePlotWindow::DateTimePlotWindow(QWidget *parent)
+    : QMainWindow(parent), ui(new Ui::DateTimePlotWindow) {
   ui->setupUi(this);
   connect(ui->plotWidget->xAxis, SIGNAL(rangeChanged(QCPRange)), this,
           SLOT(xAxisChanged(QCPRange)));
@@ -16,14 +17,19 @@ PlotWindow::PlotWindow(QWidget *parent)
   colors.append(QColor(255, 0, 255));
   colors.append(QColor(0, 255, 255));
   colors.append(QColor(255, 255, 255));
-  _relativeDateTime = true;
+  _relativeDateTime = false;
+  _gf = GraphFillerPtr(new DoubleGraphFiller());
 }
 
-PlotWindow::~PlotWindow() { delete ui; }
+void DateTimePlotWindow::SetGraphFiller(GraphFillerPtr gf) { _gf = gf; }
+GraphFillerPtr DateTimePlotWindow::GetGraphFiller() { return _gf; }
 
-void PlotWindow::Plot(QList<DataRegisterPtr> regs, const QString &title,
-                      QDateTime tini, QDateTime tend, const QString &ylabel,
-                      const QString &xlabel, const QString &tagDesc) {
+DateTimePlotWindow::~DateTimePlotWindow() { delete ui; }
+
+void DateTimePlotWindow::Plot(QList<DataRegisterPtr> regs, const QString &title,
+                              QDateTime tini, QDateTime tend,
+                              const QString &ylabel, const QString &xlabel,
+                              const QString &tagDesc) {
   _windowTitle = title;
   _rxregs = regs;
 
@@ -43,21 +49,11 @@ void PlotWindow::Plot(QList<DataRegisterPtr> regs, const QString &title,
   plot->xAxis->setTickLabelFont(QFont(QFont().family(), 6));
   plot->yAxis->setTickLabelFont(QFont(QFont().family(), 8));
 
-  // Set relative or absolute DateTime
-  QDateTime relativeTo;
+  ui->t0dateTimeEdit->setDisplayFormat("HH:mm::ss:zzz");
+  ui->durationDateTimeEdit->setDisplayFormat("mm:ss:zzz");
 
-  if (_relativeDateTime) {
-    relativeTo = tini;
-    ui->t0dateTimeEdit->setDisplayFormat("mm:ss:zzz");
-    ui->durationDateTimeEdit->setDisplayFormat("mm:ss:zzz");
-  } else {
-    relativeTo = QDateTime::fromMSecsSinceEpoch(0);
-    ui->t0dateTimeEdit->setDisplayFormat("HH:mm::ss:zzz");
-    ui->durationDateTimeEdit->setDisplayFormat("mm:ss:zzz");
-  }
-
-  auto t0ms = (tini.toMSecsSinceEpoch() - relativeTo.toMSecsSinceEpoch());
-  auto t1ms = (tend.toMSecsSinceEpoch() - relativeTo.toMSecsSinceEpoch());
+  auto t0ms = tini.toMSecsSinceEpoch();
+  auto t1ms = tend.toMSecsSinceEpoch();
 
   // end Set relative or absolute DateTime
   auto t0sec = t0ms / 1000.;
@@ -110,7 +106,11 @@ void PlotWindow::Plot(QList<DataRegisterPtr> regs, const QString &title,
   pen.setColor(colors[colorIndex]);
   graph->setPen(pen);
 
-  QVector<QCPGraphData> graphData = fillGraphData(relativeTo, regs);
+  //  auto secsBegin = relativeTo.toMSecsSinceEpoch() / 1000.;
+  //  for (int i = 0; i < regs.count(); i++) {
+
+  //    }
+  QVector<QCPGraphData> graphData = _gf->fillGraphData(regs);
 
   graph->data()->set(graphData);
   plot->yAxis->rescale();
@@ -121,22 +121,22 @@ void PlotWindow::Plot(QList<DataRegisterPtr> regs, const QString &title,
   sb->setValue(plot->xAxis->ticker()->tickCount());
 }
 
-void PlotWindow::on_tickStepSpinBox_valueChanged(int arg1) {
+void DateTimePlotWindow::on_tickStepSpinBox_valueChanged(int arg1) {
   QCustomPlot *plot = ui->plotWidget;
   auto graph = plot->graph(0);
   plot->xAxis->ticker()->setTickCount(arg1);
   plot->replot();
 }
 
-void PlotWindow::on_blockXToggle_toggled(bool checked) {
+void DateTimePlotWindow::on_blockXToggle_toggled(bool checked) {
   updateZoomSettingsFromUi();
 }
 
-void PlotWindow::on_blockYToggle_toggled(bool checked) {
+void DateTimePlotWindow::on_blockYToggle_toggled(bool checked) {
   updateZoomSettingsFromUi();
 }
 
-void PlotWindow::updateZoomSettingsFromUi() {
+void DateTimePlotWindow::updateZoomSettingsFromUi() {
   QCustomPlot *plot = ui->plotWidget;
   QCheckBox *blockXT = ui->blockXToggle;
   QCheckBox *blockYT = ui->blockYToggle;
@@ -155,13 +155,13 @@ void PlotWindow::updateZoomSettingsFromUi() {
   }
 }
 
-void PlotWindow::on_saveAsPDFButton_clicked() {
+void DateTimePlotWindow::on_saveAsPDFButton_clicked() {
   QString fileName = QFileDialog::getSaveFileName(
       this, tr("Save plot"), "", tr("PDF (*.pdf);;All Files (*)"));
   ui->plotWidget->savePdf(fileName);
 }
 
-void PlotWindow::updateXAxisRangeFromInput() {
+void DateTimePlotWindow::updateXAxisRangeFromInput() {
 
   QDateTime t0 = ui->t0dateTimeEdit->dateTime();
   QDateTime duration = ui->durationDateTimeEdit->dateTime();
@@ -172,9 +172,11 @@ void PlotWindow::updateXAxisRangeFromInput() {
   ui->plotWidget->xAxis->setRange(t0sec, t1sec);
   ui->plotWidget->replot();
 }
-void PlotWindow::on_fixXPushButton_clicked() { updateXAxisRangeFromInput(); }
+void DateTimePlotWindow::on_fixXPushButton_clicked() {
+  updateXAxisRangeFromInput();
+}
 
-void PlotWindow::on_fixYPushButton_clicked() {
+void DateTimePlotWindow::on_fixYPushButton_clicked() {
 
   auto yTop = ui->yHighLineEdit->text().toDouble();
   auto yBottom = ui->yLowLineEdit->text().toDouble();
@@ -183,7 +185,7 @@ void PlotWindow::on_fixYPushButton_clicked() {
   plot->replot();
 }
 
-void PlotWindow::xAxisChanged(QCPRange range) {
+void DateTimePlotWindow::xAxisChanged(QCPRange range) {
   QDateTime t0, t1;
   auto t0sec = range.lower;
   auto t1sec = range.upper;
@@ -195,7 +197,7 @@ void PlotWindow::xAxisChanged(QCPRange range) {
   ui->durationDateTimeEdit->setDateTime(duration);
 }
 
-void PlotWindow::yAxisChanged(QCPRange range) {
+void DateTimePlotWindow::yAxisChanged(QCPRange range) {
   auto y0 = range.lower;
   auto y1 = range.upper;
   ui->yLowLineEdit->setText(QString::number(y0));
