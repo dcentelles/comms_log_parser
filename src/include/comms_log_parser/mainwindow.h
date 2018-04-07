@@ -26,6 +26,12 @@ public:
   ~MainWindow();
 
 private slots:
+  void on_loadSettingsFromFileButton_clicked();
+
+private slots:
+  void on_saveSettingsAsButton_clicked();
+
+private slots:
   void on_trDateTimeRadioButton_toggled(bool checked);
 
 private slots:
@@ -127,8 +133,11 @@ private:
   void closeEvent(QCloseEvent *event);
 
   QString _defaultSettingsFile;
+  QString _lastSettingsFileDir;
 
   int GetMaxPrefixIndex();
+  void SaveCurrentSettings(const QString & path);
+  void LoadSettingsFile(const QString & path);
 };
 
 #endif // MAINWINDOW_H

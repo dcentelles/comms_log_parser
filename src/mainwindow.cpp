@@ -16,8 +16,55 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow() { delete ui; }
 
-void MainWindow::loadDefaultSettings() {
-  QSettings settings(_defaultSettingsFile, QSettings::NativeFormat);
+void MainWindow::SaveCurrentSettings(const QString &path) {
+  QSettings settings(path, QSettings::NativeFormat);
+  settings.setValue("tx_transport_default_dir", _txTransportDefaultDir);
+  settings.setValue("rx_transport_default_dir", _rxTransportDefaultDir);
+  settings.setValue("distance_default_dir", _distanceDefaultDir);
+  settings.setValue("tx_title", ui->txTitleLineEdit->text());
+  settings.setValue("rx_title", ui->rxTitleLineEdit->text());
+  settings.setValue("er_title", ui->erTitleLineEdit->text());
+  settings.setValue("tx_pattern", ui->txRegexLineEdit->text());
+  settings.setValue("rx_pattern", ui->rxRegexLineEdit->text());
+  settings.setValue("er_pattern", ui->errRegexLineEdit->text());
+  int seq_size;
+  if (ui->uint8_t_radioButton->isChecked())
+    seq_size = 8;
+  else if (ui->uint16_t_radioButton->isChecked())
+    seq_size = 16;
+  else if (ui->uint32_t_radioButton->isChecked())
+    seq_size = 32;
+  settings.setValue("seq_size", seq_size);
+
+  settings.setValue("packet_size_index", ui->packetSizeIndex_lineEdit->text());
+  settings.setValue("packet_size_offset", ui->packetSizeOffsetLineEdit->text());
+  settings.setValue("seq_index", ui->seqNumberIndex_lineEdit->text());
+
+  settings.setValue("distance_pattern", ui->distanceRegexLineEdit->text());
+  settings.setValue("distance_xlabel", ui->distancesXLabel->text());
+  settings.setValue("distance_ylabel", ui->distancesYLabel->text());
+  settings.setValue("distance_label", ui->distancesLabel->text());
+  settings.setValue("distance_index", ui->distanceIndex_lineEdit->text());
+  settings.setValue("transport_tag", ui->tagDescriptionLineEdit->text());
+
+  settings.setValue("common_parser_time_pattern",
+                    ui->transportTimePattern->text());
+  settings.setValue("common_parser_datetime_format",
+                    ui->transportDateTimeFormat->text());
+
+  settings.setValue("common_parser_datetime_index",
+                    ui->trDateTimeIndex->text());
+  settings.setValue("common_parser_decimals_index",
+                    ui->trDecimalsIndex->text());
+
+  settings.setValue("common_parser_time_is_relative", TimeIsRelative() ? 1 : 0);
+  settings.setValue("common_parser_relative_time_index",
+                    ui->trRelativeTimeIndex->text());
+
+  settings.setValue("settings_last_dir", _lastSettingsFileDir);
+}
+void MainWindow::LoadSettingsFile(const QString &path) {
+  QSettings settings(path, QSettings::NativeFormat);
   _txTransportDefaultDir =
       settings.value("tx_transport_default_dir").toString();
   _rxTransportDefaultDir =
@@ -78,52 +125,15 @@ void MainWindow::loadDefaultSettings() {
 
   ui->trRelativeTimeIndex->setText(
       settings.value("common_parser_relative_time_index").toString());
+
+  _lastSettingsFileDir = settings.value("settings_last_dir").toString();
+}
+void MainWindow::loadDefaultSettings() {
+  LoadSettingsFile(_defaultSettingsFile);
 }
 
 void MainWindow::saveCurrentSettingsAsDefault() {
-  QSettings settings(_defaultSettingsFile, QSettings::NativeFormat);
-  settings.setValue("tx_transport_default_dir", _txTransportDefaultDir);
-  settings.setValue("rx_transport_default_dir", _rxTransportDefaultDir);
-  settings.setValue("distance_default_dir", _distanceDefaultDir);
-  settings.setValue("tx_title", ui->txTitleLineEdit->text());
-  settings.setValue("rx_title", ui->rxTitleLineEdit->text());
-  settings.setValue("er_title", ui->erTitleLineEdit->text());
-  settings.setValue("tx_pattern", ui->txRegexLineEdit->text());
-  settings.setValue("rx_pattern", ui->rxRegexLineEdit->text());
-  settings.setValue("er_pattern", ui->errRegexLineEdit->text());
-  int seq_size;
-  if (ui->uint8_t_radioButton->isChecked())
-    seq_size = 8;
-  else if (ui->uint16_t_radioButton->isChecked())
-    seq_size = 16;
-  else if (ui->uint32_t_radioButton->isChecked())
-    seq_size = 32;
-  settings.setValue("seq_size", seq_size);
-
-  settings.setValue("packet_size_index", ui->packetSizeIndex_lineEdit->text());
-  settings.setValue("packet_size_offset", ui->packetSizeOffsetLineEdit->text());
-  settings.setValue("seq_index", ui->seqNumberIndex_lineEdit->text());
-
-  settings.setValue("distance_pattern", ui->distanceRegexLineEdit->text());
-  settings.setValue("distance_xlabel", ui->distancesXLabel->text());
-  settings.setValue("distance_ylabel", ui->distancesYLabel->text());
-  settings.setValue("distance_label", ui->distancesLabel->text());
-  settings.setValue("distance_index", ui->distanceIndex_lineEdit->text());
-  settings.setValue("transport_tag", ui->tagDescriptionLineEdit->text());
-
-  settings.setValue("common_parser_time_pattern",
-                    ui->transportTimePattern->text());
-  settings.setValue("common_parser_datetime_format",
-                    ui->transportDateTimeFormat->text());
-
-  settings.setValue("common_parser_datetime_index",
-                    ui->trDateTimeIndex->text());
-  settings.setValue("common_parser_decimals_index",
-                    ui->trDecimalsIndex->text());
-
-  settings.setValue("common_parser_time_is_relative", TimeIsRelative() ? 1 : 0);
-  settings.setValue("common_parser_relative_time_index",
-                    ui->trRelativeTimeIndex->text());
+  SaveCurrentSettings(_defaultSettingsFile);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -637,4 +647,27 @@ void MainWindow::on_trDateTimeRadioButton_toggled(bool checked) {
   ui->trDecimalsIndex->setEnabled(checked);
   ui->trDateTimeIndex->setEnabled(checked);
   ui->trRelativeTimeIndex->setEnabled(!checked);
+}
+
+void MainWindow::on_saveSettingsAsButton_clicked() {
+  QString filePath =
+      QFileDialog::getSaveFileName(this, tr("Save settings to file"),
+                                   _lastSettingsFileDir, tr("All files (*)"));
+  if (filePath != "") {
+    QFileInfo file(filePath);
+    _lastSettingsFileDir = file.absolutePath();
+    SaveCurrentSettings(filePath);
+  }
+}
+
+void MainWindow::on_loadSettingsFromFileButton_clicked() {
+  QString filePath =
+      QFileDialog::getOpenFileName(this, tr("Open settings file"),
+                                   _lastSettingsFileDir, tr("All files (*)"));
+
+  if (filePath != "") {
+    QFileInfo file(filePath);
+    _lastSettingsFileDir = file.absolutePath();
+    LoadSettingsFile(filePath);
+  }
 }

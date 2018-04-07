@@ -41,7 +41,7 @@
          <x>0</x>
          <y>0</y>
          <width>880</width>
-         <height>704</height>
+         <height>673</height>
         </rect>
        </property>
        <property name="minimumSize">
@@ -1343,6 +1343,20 @@
         </item>
        </layout>
       </widget>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QPushButton" name="saveSettingsAsButton">
+      <property name="text">
+       <string>Save Settings As</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QPushButton" name="loadSettingsFromFileButton">
+      <property name="text">
+       <string>Load Settings From File</string>
+      </property>
      </widget>
     </item>
    </layout>
