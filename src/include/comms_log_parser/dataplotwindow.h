@@ -20,7 +20,7 @@ public:
    void Plot(QList<DataRegisterPtr> txPdus,
              QList<DataRegisterPtr> rxPdus,
              QList<DataRegisterPtr> errors,
-             QDateTime tini, QDateTime tend,
+             uint64_t tini, uint64_t tend,
              const QString & txtitle,
              const QString & rxtitle,
              const QString & errtitle);
@@ -28,7 +28,7 @@ public:
    void PlotOver(QList<DataRegisterPtr> txPdus,
              QList<DataRegisterPtr> rxPdus,
              QList<DataRegisterPtr> errors,
-             QDateTime tini, QDateTime tend,
+             uint64_t tini, uint64_t tend,
              const QString & txtitle,
              const QString & rxtitle,
              const QString & errtitle);

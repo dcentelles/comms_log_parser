@@ -27,7 +27,7 @@ GraphFillerPtr DateTimePlotWindow::GetGraphFiller() { return _gf; }
 DateTimePlotWindow::~DateTimePlotWindow() { delete ui; }
 
 void DateTimePlotWindow::Plot(QList<DataRegisterPtr> regs, const QString &title,
-                              QDateTime tini, QDateTime tend,
+                              uint64_t tini, uint64_t tend,
                               const QString &ylabel, const QString &xlabel,
                               const QString &tagDesc) {
   _windowTitle = title;
@@ -52,8 +52,8 @@ void DateTimePlotWindow::Plot(QList<DataRegisterPtr> regs, const QString &title,
   ui->t0dateTimeEdit->setDisplayFormat("HH:mm::ss:zzz");
   ui->durationDateTimeEdit->setDisplayFormat("mm:ss:zzz");
 
-  auto t0ms = tini.toMSecsSinceEpoch();
-  auto t1ms = tend.toMSecsSinceEpoch();
+  auto t0ms = tini / 1e6;
+  auto t1ms = tend / 1e6;
 
   // end Set relative or absolute DateTime
   auto t0sec = t0ms / 1000.;

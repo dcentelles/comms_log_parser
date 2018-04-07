@@ -281,6 +281,7 @@ void MainWindow::parsePacketTrace(QList<DataRegisterPtr> &coll,
                                   QComboBox *t1) {
 
   QFile data(fileName);
+  bool epochSet = false;
   if (data.open(QFile::ReadOnly)) {
     bool relativeTime = TimeIsRelative();
     DataRegisterPtr dataRegister;
@@ -309,6 +310,10 @@ void MainWindow::parsePacketTrace(QList<DataRegisterPtr> &coll,
           QString sdecimals = match.captured(decimalsIndex);
           QDateTime dateTime =
               QDateTime::fromString(dateTimeStr, dateTimeFormat);
+          if (!epochSet) {
+            DataRegister::epoch = dateTime.addDays(-1);
+            epochSet = true;
+          }
           dataRegister = DataRegister::Build(size + GetPktSizeOffset(),
                                              dateTime, sdecimals);
         }
@@ -319,11 +324,14 @@ void MainWindow::parsePacketTrace(QList<DataRegisterPtr> &coll,
     if (t0 != NULL && t1 != NULL) {
       t0->clear();
       t1->clear();
-
+      dateTimeFormat = dateTimeFormat + ":zzz"; // show millis
+      uint32_t idx = 0;
       for (auto it = coll.begin(); it != coll.end(); it++) {
-
-        t0->addItem((*it)->GetDateTimeAsString(dateTimeFormat));
-        t1->addItem((*it)->GetDateTimeAsString(dateTimeFormat));
+        QString name = (*it)->GetDateTimeAsString(dateTimeFormat) + " (" +
+                       QString::number(idx) + ")";
+        t0->addItem(name);
+        t1->addItem(name);
+        idx++;
       }
     }
   }
@@ -338,6 +346,17 @@ void MainWindow::parsePacketTrace(QList<DataRegisterPtr> &coll,
   }
 }
 
+DataRegisterPtr
+MainWindow::GetDataRegisterFromId(const QString &id,
+                                  const QList<DataRegisterPtr> &rlist) {
+  QRegularExpression reg;
+  reg.setPattern("^.* \\((\\d+)\\)");
+  auto match = reg.match(id);
+  auto gidx = reg.namedCaptureGroups().size() - 1;
+  uint32_t idx = match.captured(gidx).toInt();
+  return rlist[idx];
+}
+
 void MainWindow::updateLineEditText(QLineEdit *le, const QString &txt) {
   le->clear();
   le->insert(txt);
@@ -346,24 +365,24 @@ void MainWindow::updateLineEditText(QLineEdit *le, const QString &txt) {
 void MainWindow::on_dl_computeButton_clicked() {
   QList<DataRegisterPtr> txDataListFiltered, rxDataListFiltered;
 
-  computeData(ui->dl_txT0, ui->dl_txT1, ui->dl_rxT0, ui->dl_rxT1,
+  computeData(
 
-              ui->dl_sendLineEdit,
+      ui->dl_sendLineEdit,
 
-              ui->dl_txGapLineEdit, ui->dl_txGapSdLineEdit,
+      ui->dl_txGapLineEdit, ui->dl_txGapSdLineEdit,
 
-              ui->dl_recvLineEdit, ui->dl_failsLineEdit, ui->dl_errLineEdit,
-              ui->dl_lostLineEdit,
+      ui->dl_recvLineEdit, ui->dl_failsLineEdit, ui->dl_errLineEdit,
+      ui->dl_lostLineEdit,
 
-              ui->dl_rxGapLineEdit, ui->dl_rxGapSdLineEdit,
+      ui->dl_rxGapLineEdit, ui->dl_rxGapSdLineEdit,
 
-              ui->dl_rxDataRate, ui->dl_txDataRate,
+      ui->dl_rxDataRate, ui->dl_txDataRate,
 
-              dlTxDataList, dlRxDataList,
+      dlTxDataList, dlRxDataList,
 
-              dlErrDataList,
+      dlErrDataList,
 
-              txDataListFiltered, rxDataListFiltered);
+      txDataListFiltered, rxDataListFiltered);
 }
 
 void MainWindow::on_dl_txBrowseButton_clicked() {
@@ -397,11 +416,17 @@ void MainWindow::on_dl_parseTimesButton_clicked() {
                    ui->dl_rxT1ComboBox);
 
   parsePacketTrace(dlErrDataList, dlRxFileName, dlErrPattern, NULL, NULL);
+
+  if (dlTxDataList.size() && dlRxDataList.size()) {
+    auto t0reg = GetDataRegisterFromId(ui->dl_txT0->text(), dlTxDataList);
+    auto tnreg = GetDataRegisterFromId(ui->dl_rxT1->text(), dlRxDataList);
+
+    _t0 = t0reg->GetNanos();
+    _t1 = tnreg->GetNanos();
+  }
 }
 
 void MainWindow::computeData(
-    QLineEdit *txT0, QLineEdit *txT1, QLineEdit *rxT0, QLineEdit *rxT1,
-
     QLineEdit *sendLineEdit,
 
     QLineEdit *txGapLineEdit, QLineEdit *txGapSdLineEdit,
@@ -422,10 +447,6 @@ void MainWindow::computeData(
 
 {
   QString tagDesc = GetTransportTag();
-  _t0 =
-      QDateTime::fromString(txT0->text(), ui->transportDateTimeFormat->text());
-  _t1 =
-      QDateTime::fromString(rxT1->text(), ui->transportDateTimeFormat->text());
 
   txDataListFiltered = DataRegister::GetInterval(txDataList, _t0, _t1);
 

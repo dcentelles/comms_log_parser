@@ -1,6 +1,8 @@
 #include <comms_log_parser/dataregister.h>
 #include <qmath.h>
 
+
+QDateTime DataRegister::epoch;
 DataRegister::SeqType DataRegister::_seqType = UINT8;
 
 DataRegister::DataRegister() { init(); }
@@ -8,22 +10,32 @@ DataRegister::DataRegister() { init(); }
 DataRegister::DataRegister(int size, double relativeValue) {
   init();
   SetDataSize(size);
-  SetRelativeValue(relativeValue);
+  auto datetime = QDateTime::fromMSecsSinceEpoch(relativeValue * 1e3);
+  SetDateTime(datetime);
+  SetNanos(relativeValue * 1e9);
+  SetSecs(relativeValue);
 }
 
 DataRegister::DataRegister(int size, const QDateTime &time,
                            const QString &sdecimals) {
   init();
   SetDataSize(size);
-  SetDateTime(time);
   int nd = sdecimals.size();
   int left = nd >= 3 ? 3 : nd;
   QString smillis = sdecimals.left(left);
   while (smillis.size() < 3)
     smillis.append('0');
   uint32_t millis = smillis.toUInt();
-  auto dateTime = time.addMSecs(millis);
+  auto millisSinceEpoch = epoch.msecsTo(time);
+  auto dateTime = QDateTime::fromMSecsSinceEpoch(millisSinceEpoch);
+  dateTime = dateTime.addMSecs(millis);
   SetDateTime(dateTime);
+  QString snanos = sdecimals;
+  while (snanos.size() < 9)
+    snanos.append('0');
+  uint64_t snanosInt = snanos.toUInt();
+  SetNanos(millisSinceEpoch * 1e6 + snanosInt);
+  SetSecs(GetNanos() / 1e9);
 }
 
 void DataRegister::init() {
@@ -56,19 +68,19 @@ QString DataRegister::ToString() {
            QString::number(GetDataSize()));
 }
 QList<DataRegisterPtr> DataRegister::GetInterval(QList<DataRegisterPtr> data,
-                                                 QDateTime t0, QDateTime t1) {
+                                                 uint64_t t0, uint64_t t1) {
   int idx0;
   for (idx0 = 0; idx0 < data.count(); idx0++) {
-    auto datetime = data.at(idx0)->GetDateTime();
-    if (t0 <= datetime) {
+    auto nanos = data.at(idx0)->GetNanos();
+    if (t0 <= nanos) {
       break;
     }
   }
 
   int idx1;
   for (idx1 = idx0; idx1 < data.count(); idx1++) {
-    auto datetime = data.at(idx1)->GetDateTime();
-    if (t1 < datetime) {
+    auto nanos = data.at(idx1)->GetNanos();
+    if (t1 < nanos) {
       idx1 -= 1;
       break;
     }
@@ -88,9 +100,9 @@ void DataRegister::ComputeLinks(QList<DataRegisterPtr> txl,
                                 QList<DataRegisterPtr> rxl) {
   if (txl.count() > 0 && rxl.count() > 0) {
     int idxtx;
-    auto rxd = rxl.at(0)->GetDateTime();
+    auto rxd = rxl.at(0)->GetNanos();
     for (idxtx = 0; idxtx < txl.count(); idxtx++) {
-      auto txd = txl.at(idxtx)->GetDateTime();
+      auto txd = txl.at(idxtx)->GetNanos();
       if (txd >= rxd) {
         idxtx--;
         break;
@@ -123,10 +135,10 @@ void DataRegister::ComputeLinks(QList<DataRegisterPtr> txl,
 
       int nrxidx = idxrx + 1;
       if (nrxidx < rxl.count()) {
-        rxd = rxl.at(nrxidx)->GetDateTime();
+        rxd = rxl.at(nrxidx)->GetNanos();
         idxtx = initx;
         for (; idxtx < txl.count(); idxtx++) {
-          auto txd = txl.at(idxtx)->GetDateTime();
+          auto txd = txl.at(idxtx)->GetNanos();
           if (txd >= rxd) {
             idxtx--;
             break;
@@ -140,21 +152,21 @@ void DataRegister::ComputeLinks(QList<DataRegisterPtr> txl,
   }
 }
 
-void DataRegister::ComputeTimePerByte(QList<DataRegisterPtr> rxl, float &btt,
-                                      float &bttSd) {
+void DataRegister::ComputeTimePerByte(QList<DataRegisterPtr> rxl, double &btt,
+                                      double &bttSd) {
   btt = 0;
   bttSd = 0;
   int count = 0;
   for (auto rx : rxl) {
     auto tx = rx->GetLinkedRegister();
     if (tx) {
-      auto txTime = tx->GetDateTime();
-      auto rxTime = rx->GetDateTime();
-      auto gap = txTime.msecsTo(rxTime);
+      auto txTime = tx->GetNanos();
+      auto rxTime = rx->GetNanos();
+      auto gap = (rxTime - txTime) / 1e6;
       tx->_ptt = gap;
       rx->_ptt = gap;
       auto psize = tx->GetDataSize();
-      float _btt = (float)gap / psize;
+      double _btt = (double)gap / psize;
       btt += _btt;
       rx->_end2EndDelay = (double)gap / psize;
       count++;
@@ -167,7 +179,7 @@ void DataRegister::ComputeTimePerByte(QList<DataRegisterPtr> rxl, float &btt,
     if (tx) {
       auto gap = rx->_ptt;
       auto psize = tx->GetDataSize();
-      float _btt = (float)gap / psize;
+      double _btt = (double)gap / psize;
       auto diff = _btt - btt;
       bttSd += diff * diff;
     }
@@ -175,17 +187,17 @@ void DataRegister::ComputeTimePerByte(QList<DataRegisterPtr> rxl, float &btt,
   bttSd = qSqrt(bttSd / count);
 }
 
-void DataRegister::ComputeEnd2EndDelay(QList<DataRegisterPtr> rxl, float &btt,
-                                       float &bttSd) {
+void DataRegister::ComputeEnd2EndDelay(QList<DataRegisterPtr> rxl, double &btt,
+                                       double &bttSd) {
   btt = 0;
   bttSd = 0;
   int count = 0;
   for (auto rx : rxl) {
     auto tx = rx->GetLinkedRegister();
     if (tx) {
-      auto txTime = tx->GetDateTime();
-      auto rxTime = rx->GetDateTime();
-      auto gap = txTime.msecsTo(rxTime);
+      auto txTime = tx->GetNanos();
+      auto rxTime = rx->GetNanos();
+      auto gap = (rxTime - txTime) / 1e6;
       tx->_ptt = gap;
       rx->_ptt = gap;
       double _btt = gap;
@@ -208,43 +220,44 @@ void DataRegister::ComputeEnd2EndDelay(QList<DataRegisterPtr> rxl, float &btt,
   bttSd = qSqrt(bttSd / count);
 }
 
-void DataRegister::GetGapData(QList<DataRegisterPtr> data, float &gap,
-                              float &gapSd) {
+void DataRegister::GetGapData(QList<DataRegisterPtr> data, double &gap,
+                              double &gapSd) {
   gap = 0;
   gapSd = 0;
 
   if (data.count() > 0) {
-    auto t0 = data[0]->GetDateTime();
+    auto t0 = data[0]->GetNanos();
     int count = 0;
     for (int i = 1; i < data.count(); i++) {
       auto reg = data[i];
-      auto t1 = reg->GetDateTime();
-      gap += t0.msecsTo(t1);
+      auto t1 = reg->GetNanos();
+      gap += (t1 - t0);
       t0 = t1;
       count++;
     }
     gap = gap / count;
 
-    t0 = data[0]->GetDateTime();
+    t0 = data[0]->GetNanos();
     for (int i = 1; i < data.count(); i++) {
       auto reg = data[i];
-      auto t1 = reg->GetDateTime();
-      auto _gap = t0.msecsTo(t1);
+      auto t1 = reg->GetNanos();
+      auto _gap = (t1 - t0);
       auto diff = _gap - gap;
       gapSd += diff * diff;
       t0 = t1;
     }
-    gapSd = qSqrt(gapSd / count);
+    gap = gap / 1e6;
+    gapSd = qSqrt(gapSd / 1e6 / count);
   }
 }
 
 void DataRegister::GetRxGapAndComputeJitter(QList<DataRegisterPtr> data,
-                                            float &gap, float &gapSd) {
+                                            double &gap, double &gapSd) {
   gap = 0;
   gapSd = 0;
 
   if (data.count() > 0) {
-    auto t0 = data[0]->GetDateTime();
+    auto t0 = data[0]->GetNanos();
     auto seq0 = data[0]->GetNseq();
 
     int count = 0;
@@ -252,9 +265,9 @@ void DataRegister::GetRxGapAndComputeJitter(QList<DataRegisterPtr> data,
       auto reg = data[i];
       auto seq1 = reg->GetNseq();
       auto next2seq0 = (seq0 + 1) % 255;
-      auto t1 = reg->GetDateTime();
+      auto t1 = reg->GetNanos();
 
-      auto _gap = t0.msecsTo(t1);
+      auto _gap = (t1 - t0) / 1e6;
       if (next2seq0 == seq1) {
         gap += _gap;
         count++;
@@ -275,16 +288,16 @@ void DataRegister::GetRxGapAndComputeJitter(QList<DataRegisterPtr> data,
     }
     gap = gap / count;
 
-    t0 = data[0]->GetDateTime();
+    t0 = data[0]->GetNanos();
     seq0 = data[0]->GetNseq();
     for (int i = 1; i < data.count(); i++) {
       auto reg = data[i];
       auto seq1 = reg->GetNseq();
       auto next2seq0 = (seq0 + 1) % 255;
-      auto t1 = reg->GetDateTime();
+      auto t1 = reg->GetNanos();
 
       if (next2seq0 == seq1) {
-        auto _gap = t0.msecsTo(t1);
+        auto _gap = (t1 - t0) / 1e6;
         auto diff = _gap - gap;
         gapSd += diff * diff;
       }
@@ -296,27 +309,27 @@ void DataRegister::GetRxGapAndComputeJitter(QList<DataRegisterPtr> data,
   }
 }
 
-void DataRegister::GetDataRate(QList<DataRegisterPtr> data, float &dataRate) {
+void DataRegister::GetDataRate(QList<DataRegisterPtr> data, double &dataRate) {
   dataRate = 0;
 
   if (data.count() > 1) {
-    auto tini = data[0]->GetDateTime();
-    auto tend = data[data.count() - 1]->GetDateTime();
-    auto elapsed = tini.msecsTo(tend);
+    auto tini = data[0]->GetNanos();
+    auto tend = data[data.count() - 1]->GetNanos();
+    auto elapsed = (tend - tini);
 
     for (auto reg : data) {
       dataRate += reg->GetDataSize();
     }
 
-    float elapsedSec = elapsed / 1000.;
+    float elapsedSec = elapsed / 1e9;
 
     dataRate = dataRate * 8 / elapsedSec; // to bps
     dataRate = dataRate / 1000;           // to kbps
   }
 }
 
-void DataRegister::GetPDUSize(QList<DataRegisterPtr> data, float &pduSize,
-                              float &pduSizeSd) {
+void DataRegister::GetPDUSize(QList<DataRegisterPtr> data, double &pduSize,
+                              double &pduSizeSd) {
   pduSize = 0;
   pduSizeSd = 0;
 

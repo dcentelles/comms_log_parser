@@ -8,10 +8,10 @@
 #include <QString>
 #include <comms_log_parser/dataplotwindow.h>
 #include <comms_log_parser/dataregister.h>
+#include <comms_log_parser/datetimeplotwindow.h>
+#include <comms_log_parser/doublegraphfiller.h>
 #include <comms_log_parser/end2endgraphfiller.h>
 #include <comms_log_parser/jittergraphfiller.h>
-#include <comms_log_parser/doublegraphfiller.h>
-#include <comms_log_parser/datetimeplotwindow.h>
 #include <memory>
 
 namespace Ui {
@@ -52,7 +52,7 @@ private slots:
   void on_dl_plotButton_clicked();
 
 private:
-  QDateTime _t0, _t1;
+  uint64_t _t0, _t1;
   DataPlotWindow *_lastPlotWindow;
   std::list<std::shared_ptr<DateTimePlotWindow>> e2ePlotList;
   std::list<std::shared_ptr<DateTimePlotWindow>> jitterPlotList;
@@ -63,17 +63,15 @@ private:
   void updateDistanceParser();
   void updateLineEditText(QLineEdit *, const QString &txt);
   void parsePacketTrace(QList<DataRegisterPtr> &data, const QString &fileName,
-                  const QRegularExpression &reg, QComboBox *t0, QComboBox *t1);
+                        const QRegularExpression &reg, QComboBox *t0,
+                        QComboBox *t1);
 
-  void parseDoubleTrace(QList<DataRegisterPtr> &dataList, const QString &fileName,
-                      const QRegularExpression &reg, const QString &xlabel,
-                      const QString &ylabel, const QString &seriesLabel,
-                      bool plotOver, QLineEdit *t0le = NULL,
-                      QLineEdit *t1le = NULL);
-  void computeData(QLineEdit *txT0, QLineEdit *txT1, QLineEdit *rxT0,
-                   QLineEdit *rxT1,
-
-                   QLineEdit *sendLineEdit,
+  void parseDoubleTrace(QList<DataRegisterPtr> &dataList,
+                        const QString &fileName, const QRegularExpression &reg,
+                        const QString &xlabel, const QString &ylabel,
+                        const QString &seriesLabel, bool plotOver,
+                        QLineEdit *t0le = NULL, QLineEdit *t1le = NULL);
+  void computeData(QLineEdit *sendLineEdit,
 
                    QLineEdit *txGapLineEdit, QLineEdit *txGapSdLineEdit,
 
@@ -101,13 +99,13 @@ private:
   QList<DataRegisterPtr> dlRxDataList, dlTxDataList, appErrDataList,
       dlErrDataList, _distancesDataList;
 
-  float txGap, txGapSd;
+  double txGap, txGapSd;
   int totalFallos;
   QList<DataRegisterPtr> errors;
-  float rxGap, rxGapSd;
-  float rxDataRate, txDataRate;
-  float pduSize, pduSizeSd;
-  float btt, bttSd;
+  double rxGap, rxGapSd;
+  double rxDataRate, txDataRate;
+  double pduSize, pduSizeSd;
+  double btt, bttSd;
 
   int GetPktSizeOffset();
   int GetPktSizeIndex();
@@ -124,6 +122,7 @@ private:
 
   void loadDefaultSettings();
   void saveCurrentSettingsAsDefault();
+  DataRegisterPtr GetDataRegisterFromId(const QString &id, const QList<DataRegisterPtr> &rlist);
 
   void closeEvent(QCloseEvent *event);
 

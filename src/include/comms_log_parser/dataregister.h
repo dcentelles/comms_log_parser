@@ -26,25 +26,25 @@ public:
   DataRegister(int size, const QDateTime &time, const QString &sdecimals);
 
   static QList<DataRegisterPtr> GetInterval(QList<DataRegisterPtr> data,
-                                            QDateTime t0, QDateTime t1);
+                                            uint64_t t0, uint64_t t1);
 
   static void ComputeLinks(QList<DataRegisterPtr> txl,
                            QList<DataRegisterPtr> rxl);
-  static void GetGapData(QList<DataRegisterPtr> data, float &gap, float &gapSd);
+  static void GetGapData(QList<DataRegisterPtr> data, double &gap, double &gapSd);
 
-  static void GetRxGapAndComputeJitter(QList<DataRegisterPtr> data, float &gap,
-                                       float &gapSd);
+  static void GetRxGapAndComputeJitter(QList<DataRegisterPtr> data, double &gap,
+                                       double &gapSd);
 
-  static void GetDataRate(QList<DataRegisterPtr> data, float &dataRate);
+  static void GetDataRate(QList<DataRegisterPtr> data, double &dataRate);
 
-  static void GetPDUSize(QList<DataRegisterPtr> data, float &packetSize,
-                         float &packetSizeSd);
+  static void GetPDUSize(QList<DataRegisterPtr> data, double &packetSize,
+                         double &packetSizeSd);
 
-  static void ComputeEnd2EndDelay(QList<DataRegisterPtr> data, float &tt,
-                                  float &ttSd);
+  static void ComputeEnd2EndDelay(QList<DataRegisterPtr> data, double &tt,
+                                  double &ttSd);
 
-  static void ComputeTimePerByte(QList<DataRegisterPtr> data, float &tt,
-                                 float &ttSd);
+  static void ComputeTimePerByte(QList<DataRegisterPtr> data, double &tt,
+                                 double &ttSd);
 
   enum SeqType { UINT8, UINT16, UINT32 };
 
@@ -73,11 +73,16 @@ public:
   inline void SetDoubleValue(double v) { _doubleValue = v; }
   inline double GetDoubleValue() { return _doubleValue; }
 
-  inline double GetRelativeValue() { return _relativeValue; }
-  inline double SetRelativeValue(double v) { _relativeValue = v; }
-
   inline void SetNseq(uint64_t nseq) { _nseq = nseq; }
   inline uint64_t GetNseq() { return _nseq; }
+
+  inline void SetNanos(uint64_t nanos) { _nanos = nanos; }
+  inline uint64_t GetNanos() { return _nanos; }
+
+  inline void SetSecs(double secs) { _secs = secs; }
+  inline double GetSecs() { return _secs; }
+
+  static QDateTime epoch;
 
 private:
   QString _dateTimeFormat;
@@ -90,8 +95,8 @@ private:
   double _jitterValid;
   double _end2EndDelay;
   double _doubleValue;
-  double _relativeValue;
-  uint64_t _nseq;
+  uint64_t _nseq, _nanos;
+  double _secs;
 };
 
 #endif // PAQUETTRANSMISSION_H
