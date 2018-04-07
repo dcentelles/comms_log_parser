@@ -222,6 +222,10 @@ void MainWindow::updateTransportParser() {
 }
 
 void MainWindow::init() {
+  //Force absolute DateTime.
+  DataRegister::epoch = QDateTime::fromMSecsSinceEpoch(0);
+  DataRegister::epochSet = true;
+
   _defaultSettingsFile = QApplication::applicationDirPath() + "/default.ini";
   loadDefaultSettings();
   updateTransportParser();
@@ -621,7 +625,7 @@ void MainWindow::on_dl_plotButton_clicked() {
 
 void MainWindow::on_distancesPathBrowseButton_clicked() {
   dlDistancesFileName = QFileDialog::getOpenFileName(
-      this, tr("Open Dl Tx File"), _distanceDefaultDir, tr("All files (*)"));
+      this, tr("Open Distances File"), _distanceDefaultDir, tr("All files (*)"));
 
   if (dlDistancesFileName != "") {
     QFileInfo file(dlDistancesFileName);

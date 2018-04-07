@@ -253,7 +253,7 @@ void DataRegister::GetGapData(QList<DataRegisterPtr> data, double &gap,
       t0 = t1;
     }
     gap = gap / 1e6;
-    gapSd = qSqrt(gapSd / 1e6 / count);
+    gapSd = qSqrt(gapSd / count) / 1e6;
   }
 }
 
