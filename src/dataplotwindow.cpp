@@ -1,12 +1,8 @@
 #include <comms_log_parser/dataplotwindow.h>
-#include <ui_dataplotwindow.h>
 
-DataPlotWindow::DataPlotWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::DataPlotWindow) {
-  ui->setupUi(this);
-}
+DataPlotWindow::DataPlotWindow(QWidget *parent) : DateTimePlotWindow(parent) {}
 
-DataPlotWindow::~DataPlotWindow() { delete ui; }
+DataPlotWindow::~DataPlotWindow() {}
 
 void DataPlotWindow::setDRsToTimeGraph(QCPGraph *graph,
                                        QList<DataRegisterPtr> drs) {
@@ -19,7 +15,7 @@ void DataPlotWindow::setDRsToTimeGraph(QCPGraph *graph,
     auto dr = drs[i];
     auto date = dr->GetSecs();
     // auto secSinceEpoch = (date.toMSecsSinceEpoch () - msT0) / 1000.;
-    auto secSinceEpoch = date ;
+    auto secSinceEpoch = date;
     dRsGraphData[i].key = secSinceEpoch;
     dRsGraphData[i].value = dr->GetDataSize();
   }
@@ -186,44 +182,4 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
 
   // DIBUJAR
   plot->replot();
-}
-
-void DataPlotWindow::on_tickStepSpinBox_valueChanged(int arg1) {
-  QCustomPlot *plot = ui->plotWidget;
-  auto graph = plot->graph(0);
-  plot->xAxis->ticker()->setTickCount(arg1);
-  plot->replot();
-}
-
-void DataPlotWindow::on_blockXToggle_toggled(bool checked) {
-  updateZoomSettingsFromUi();
-}
-
-void DataPlotWindow::on_blockYToggle_toggled(bool checked) {
-  updateZoomSettingsFromUi();
-}
-
-void DataPlotWindow::updateZoomSettingsFromUi() {
-  QCustomPlot *plot = ui->plotWidget;
-  QCheckBox *blockXT = ui->blockXToggle;
-  QCheckBox *blockYT = ui->blockYToggle;
-  bool blockX = blockXT->checkState();
-  bool blockY = blockYT->checkState();
-  if (!blockX) {
-    if (!blockY)
-      plot->axisRect()->setRangeZoomAxes(plot->xAxis, plot->yAxis);
-    else
-      plot->axisRect()->setRangeZoomAxes(plot->xAxis, 0);
-  } else {
-    if (!blockY)
-      plot->axisRect()->setRangeZoomAxes(0, plot->yAxis);
-    else
-      plot->axisRect()->setRangeZoomAxes(0, 0);
-  }
-}
-
-void DataPlotWindow::on_saveAsPDFButton_clicked() {
-  QString fileName = QFileDialog::getSaveFileName(
-      this, tr("Save plot"), "", tr("PDF (*.pdf);;All Files (*)"));
-  ui->plotWidget->savePdf(fileName);
 }

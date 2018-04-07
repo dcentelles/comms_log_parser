@@ -35,16 +35,15 @@ private slots:
   void xAxisChanged(QCPRange range);
   void yAxisChanged(QCPRange range);
 
-private:
+protected:
   void updateZoomSettingsFromUi();
   QString _windowTitle;
   QList<DataRegisterPtr> _rxregs;
-  Ui::DateTimePlotWindow *ui;
   void updateXAxisRangeFromInput();
-protected:
   QVector<QColor> colors;
   bool _relativeDateTime;
   GraphFillerPtr _gf;
+  Ui::DateTimePlotWindow *ui;
 };
 
 #endif // JITTERPLOTWINDOW_H
