@@ -30,7 +30,8 @@ public:
 
   static void ComputeLinks(QList<DataRegisterPtr> txl,
                            QList<DataRegisterPtr> rxl);
-  static void GetGapData(QList<DataRegisterPtr> data, double &gap, double &gapSd);
+  static void GetGapData(QList<DataRegisterPtr> data, double &gap,
+                         double &gapSd);
 
   static void GetRxGapAndComputeJitter(QList<DataRegisterPtr> data, double &gap,
                                        double &gapSd);
@@ -54,13 +55,12 @@ public:
 
   void SetDataSize(int);
   void SetDateTime(const QDateTime &);
-
-  void SetRxDateTime(const QDateTime &);
-  QDateTime GetRxDateTime();
+  void SetRelativeDateTime(const QDateTime &);
 
   int GetDataSize();
   QString GetDateTimeAsString(const QString &format);
   QDateTime GetDateTime();
+  QDateTime GetRelativeDateTime();
 
   QString ToString();
   DataRegisterPtr GetLinkedRegister();
@@ -83,12 +83,13 @@ public:
   inline double GetSecs() { return _secs; }
 
   static QDateTime epoch;
+  static bool epochSet;
 
 private:
   QString _dateTimeFormat;
   DataRegisterPtr _link;
   void init();
-  QDateTime moment, _rxmoment;
+  QDateTime _absoluteDateTime, _relativeDateTime;
   int dataSize;
   int _ptt;
   double _jitter;

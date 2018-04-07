@@ -75,8 +75,7 @@ private:
   void parseDoubleTrace(QList<DataRegisterPtr> &dataList,
                         const QString &fileName, const QRegularExpression &reg,
                         const QString &xlabel, const QString &ylabel,
-                        const QString &seriesLabel, bool plotOver,
-                        QLineEdit *t0le = NULL, QLineEdit *t1le = NULL);
+                        const QString &seriesLabel, bool plotOver, int index);
   void computeData(QLineEdit *sendLineEdit,
 
                    QLineEdit *txGapLineEdit, QLineEdit *txGapSdLineEdit,
@@ -128,7 +127,8 @@ private:
 
   void loadDefaultSettings();
   void saveCurrentSettingsAsDefault();
-  DataRegisterPtr GetDataRegisterFromId(const QString &id, const QList<DataRegisterPtr> &rlist);
+  DataRegisterPtr GetDataRegisterFromId(const QString &id,
+                                        const QList<DataRegisterPtr> &rlist);
 
   void closeEvent(QCloseEvent *event);
 
@@ -136,8 +136,8 @@ private:
   QString _lastSettingsFileDir;
 
   int GetMaxPrefixIndex();
-  void SaveCurrentSettings(const QString & path);
-  void LoadSettingsFile(const QString & path);
+  void SaveCurrentSettings(const QString &path);
+  void LoadSettingsFile(const QString &path);
 };
 
 #endif // MAINWINDOW_H

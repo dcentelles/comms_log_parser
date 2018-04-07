@@ -975,7 +975,7 @@
                <item row="3" column="0">
                 <widget class="QLabel" name="label_2">
                  <property name="text">
-                  <string>TT SD:</string>
+                  <string>End To End Delay SD:</string>
                  </property>
                 </widget>
                </item>

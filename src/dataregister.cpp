@@ -1,8 +1,9 @@
 #include <comms_log_parser/dataregister.h>
 #include <qmath.h>
 
-
 QDateTime DataRegister::epoch;
+bool DataRegister::epochSet = false;
+
 DataRegister::SeqType DataRegister::_seqType = UINT8;
 
 DataRegister::DataRegister() { init(); }
@@ -12,6 +13,7 @@ DataRegister::DataRegister(int size, double relativeValue) {
   SetDataSize(size);
   auto datetime = QDateTime::fromMSecsSinceEpoch(relativeValue * 1e3);
   SetDateTime(datetime);
+  SetRelativeDateTime(datetime);
   SetNanos(relativeValue * 1e9);
   SetSecs(relativeValue);
 }
@@ -26,10 +28,12 @@ DataRegister::DataRegister(int size, const QDateTime &time,
   while (smillis.size() < 3)
     smillis.append('0');
   uint32_t millis = smillis.toUInt();
+  SetDateTime(time.addMSecs(millis));
+  // epoch = QDateTime::fromMSecsSinceEpoch(0);
   auto millisSinceEpoch = epoch.msecsTo(time);
   auto dateTime = QDateTime::fromMSecsSinceEpoch(millisSinceEpoch);
   dateTime = dateTime.addMSecs(millis);
-  SetDateTime(dateTime);
+  SetRelativeDateTime(dateTime);
   QString snanos = sdecimals;
   while (snanos.size() < 9)
     snanos.append('0');
@@ -46,21 +50,23 @@ void DataRegister::init() {
 
 void DataRegister::SetDataSize(int size) { dataSize = size; }
 
-void DataRegister::SetDateTime(const QDateTime &time) { moment = time; }
+void DataRegister::SetRelativeDateTime(const QDateTime &time) {
+  _relativeDateTime = time;
+}
 
-QDateTime DataRegister::GetDateTime() { return moment; }
+QDateTime DataRegister::GetRelativeDateTime() { return _relativeDateTime; }
+
+void DataRegister::SetDateTime(const QDateTime &time) {
+  _absoluteDateTime = time;
+}
+
+QDateTime DataRegister::GetDateTime() { return _absoluteDateTime; }
 
 QString DataRegister::GetDateTimeAsString(const QString &format) {
-  return moment.toString(format);
+  return _absoluteDateTime.toString(format);
 }
 
 int DataRegister::GetDataSize() { return dataSize; }
-
-void DataRegister::SetRxDateTime(const QDateTime &datetime) {
-  _rxmoment = datetime;
-}
-
-QDateTime DataRegister::GetRxDateTime() { return _rxmoment; }
 
 QString DataRegister::ToString() {
   return QString("%1 => %2 bytes")

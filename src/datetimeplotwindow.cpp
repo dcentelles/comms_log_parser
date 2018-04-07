@@ -49,7 +49,7 @@ void DateTimePlotWindow::Plot(QList<DataRegisterPtr> regs, const QString &title,
   plot->xAxis->setTickLabelFont(QFont(QFont().family(), 6));
   plot->yAxis->setTickLabelFont(QFont(QFont().family(), 8));
 
-  ui->t0dateTimeEdit->setDisplayFormat("HH:mm::ss:zzz");
+  ui->t0dateTimeEdit->setDisplayFormat("HH:mm:ss:zzz");
   ui->durationDateTimeEdit->setDisplayFormat("mm:ss:zzz");
 
   auto t0ms = tini / 1e6;

@@ -234,55 +234,56 @@ void MainWindow::parseDoubleTrace(QList<DataRegisterPtr> &coll,
                                   const QRegularExpression &reg,
                                   const QString &xlabel, const QString &ylabel,
                                   const QString &seriesLabel, bool plotOver,
-                                  QLineEdit *t0, QLineEdit *t1) {
-  /*
-    QFile data(fileName);
-    if (data.open(QFile::ReadOnly)) {
-      QTextStream stream(&data);
-      QString line;
-      coll.clear();
-      auto dindex = GetDistanceIndex();
-      while (stream.readLineInto(&line)) {
-        auto match = reg.match(line);
-        if (match.hasMatch()) {
-          auto moment = match.captured(1);
-          double distance;
-          distance = match.captured(dindex).toDouble();
-          auto dataRegister =
-              DataRegister::Build(0, moment,
-    ui->transportDateTimeFormat->text());
-          dataRegister->SetDoubleValue(distance);
-          coll.append(dataRegister);
-        }
-      }
-
-      std::shared_ptr<DateTimePlotWindow> plot;
-      if (_distancePlotList.size() == 0 || !plotOver) {
-        plot = std::shared_ptr<DateTimePlotWindow>(new DateTimePlotWindow());
-        plot->SetGraphFiller(GraphFillerPtr(new DoubleGraphFiller()));
-        _distancePlotList.push_front(plot);
-      } else {
-        plot = _distancePlotList.front();
-      }
-      plot->show();
-      QDateTime t0dt, t1dt;
-      if (coll.size() > 0) {
-        if (t0 == NULL) {
-          t0dt = coll[0]->GetDateTime();
+                                  int index) {
+  QFile data(fileName);
+  if (data.open(QFile::ReadOnly)) {
+    bool relativeTime = TimeIsRelative();
+    DataRegisterPtr dataRegister;
+    int dateTimeIndex = GetDateTimeIndex();
+    int decimalsIndex = GetDecimalsIndex();
+    int relativeValueIndex = GetRelativeValueIndex();
+    QString dateTimeFormat = ui->transportDateTimeFormat->text();
+    QTextStream stream(&data);
+    QString line;
+    coll.clear();
+    while (stream.readLineInto(&line)) {
+      auto match = reg.match(line);
+      if (match.hasMatch()) {
+        double value = match.captured(index).toDouble();
+        if (relativeTime) {
+          double relativeValue = match.captured(relativeValueIndex).toDouble();
+          dataRegister = DataRegister::Build(0, relativeValue);
         } else {
-          t0dt = QDateTime::fromString(t0->text(),
-                                       ui->transportDateTimeFormat->text());
+          QString dateTimeStr = match.captured(dateTimeIndex);
+          QString sdecimals = match.captured(decimalsIndex);
+          QDateTime dateTime =
+              QDateTime::fromString(dateTimeStr, dateTimeFormat);
+          if (!DataRegister::epochSet) {
+            DataRegister::epoch = dateTime.addDays(-1).addSecs(3600);
+            DataRegister::epochSet = true;
+          }
+          dataRegister = DataRegister::Build(0, dateTime, sdecimals);
         }
-        if (t1 == NULL) {
-          t1dt = coll[coll.size() - 1]->GetDateTime();
-        } else {
-          t1dt = QDateTime::fromString(t0->text(),
-                                       ui->transportDateTimeFormat->text());
-        }
-        plot->Plot(coll, "Distance", t0dt, t1dt, ylabel, xlabel, seriesLabel);
+        dataRegister->SetDoubleValue(value);
+        coll.append(dataRegister);
       }
     }
-    */
+    std::shared_ptr<DateTimePlotWindow> plot;
+    if (_distancePlotList.size() == 0 || !plotOver) {
+      plot = std::shared_ptr<DateTimePlotWindow>(new DateTimePlotWindow());
+      plot->SetGraphFiller(GraphFillerPtr(new DoubleGraphFiller()));
+      _distancePlotList.push_front(plot);
+    } else {
+      plot = _distancePlotList.front();
+    }
+    plot->show();
+    uint64_t t0, t1;
+    if (coll.size() > 0) {
+      t0 = coll[0]->GetNanos();
+      t1 = coll[coll.size() - 1]->GetNanos();
+      plot->Plot(coll, "Distance", t0, t1, ylabel, xlabel, seriesLabel);
+    }
+  }
 }
 
 void MainWindow::parsePacketTrace(QList<DataRegisterPtr> &coll,
@@ -291,7 +292,6 @@ void MainWindow::parsePacketTrace(QList<DataRegisterPtr> &coll,
                                   QComboBox *t1) {
 
   QFile data(fileName);
-  bool epochSet = false;
   if (data.open(QFile::ReadOnly)) {
     bool relativeTime = TimeIsRelative();
     DataRegisterPtr dataRegister;
@@ -320,9 +320,9 @@ void MainWindow::parsePacketTrace(QList<DataRegisterPtr> &coll,
           QString sdecimals = match.captured(decimalsIndex);
           QDateTime dateTime =
               QDateTime::fromString(dateTimeStr, dateTimeFormat);
-          if (!epochSet) {
-            DataRegister::epoch = dateTime.addDays(-1);
-            epochSet = true;
+          if (!DataRegister::epochSet) {
+            DataRegister::epoch = dateTime.addDays(-1).addSecs(3600);
+            DataRegister::epochSet = true;
           }
           dataRegister = DataRegister::Build(size + GetPktSizeOffset(),
                                              dateTime, sdecimals);
@@ -348,9 +348,6 @@ void MainWindow::parsePacketTrace(QList<DataRegisterPtr> &coll,
   data.close();
 
   if (coll.count() > 1 && t0 != NULL && t1 != NULL) {
-    // auto idx0 = t0->findData(coll[0]->GetDateTimeAsString ());
-    // auto idx1 = t1->findData (coll[coll.count()-1]->GetDateTimeAsString ());
-
     t0->setCurrentIndex(0);
     t1->setCurrentIndex(coll.count() - 1);
   }
@@ -639,7 +636,7 @@ void MainWindow::on_parseAndPlotDistanceButton_clicked() {
   parseDoubleTrace(_distancesDataList, ui->distancesPathLineEdit->text(),
                    _dlDistancePattern, ui->distancesXLabel->text(),
                    ui->distancesYLabel->text(), ui->distancesLabel->text(),
-                   ui->distancePlotOverCheck->isChecked());
+                   ui->distancePlotOverCheck->isChecked(), GetDistanceIndex());
 }
 
 void MainWindow::on_trDateTimeRadioButton_toggled(bool checked) {
