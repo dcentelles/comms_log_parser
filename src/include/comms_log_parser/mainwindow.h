@@ -26,6 +26,21 @@ public:
   ~MainWindow();
 
 private slots:
+  void on_lsStepRightRadioButton_clicked();
+
+private slots:
+  void on_lsStepLeftRafioButton_clicked();
+
+private slots:
+  void on_lsLineRadioButton_clicked();
+
+private slots:
+  void on_parseAndPlotTimeValueButton_clicked();
+
+private slots:
+  void on_timeValuePathBrowseButton_clicked();
+
+private slots:
   void on_simulationCheckBox_clicked(bool checked);
 
 private slots:
@@ -41,9 +56,6 @@ private slots:
   void on_trDateTimeRadioButton_toggled(bool checked);
 
 private slots:
-  void on_parseAndPlotDistanceButton_clicked();
-
-  void on_distancesPathBrowseButton_clicked();
 
   void on_dl_txBrowseButton_clicked();
 
@@ -68,11 +80,11 @@ private:
   DataPlotWindow *_lastPlotWindow;
   std::list<std::shared_ptr<DateTimePlotWindow>> e2ePlotList;
   std::list<std::shared_ptr<DateTimePlotWindow>> jitterPlotList;
-  std::list<std::shared_ptr<DateTimePlotWindow>> _distancePlotList;
+  std::list<std::shared_ptr<DateTimePlotWindow>> _timeValuePlotList;
 
   void init();
   void updateTransportParser();
-  void updateDistanceParser();
+  void updateTimeValueParser();
   void updateLineEditText(QLineEdit *, const QString &txt);
   void parsePacketTrace(QList<DataRegisterPtr> &data, const QString &fileName,
                         const QRegularExpression &reg, QComboBox *t0,
@@ -84,7 +96,7 @@ private:
                           const QString &fileName,
                           const QRegularExpression &reg, const QString &xlabel,
                           const QString &ylabel, const QString &seriesLabel,
-                          bool plotOver, int index);
+                          bool plotOver);
     void computeData(QLineEdit * sendLineEdit,
 
                      QLineEdit * txGapLineEdit, QLineEdit * txGapSdLineEdit,
@@ -106,15 +118,15 @@ private:
                      QList<DataRegisterPtr> & rxDataListFiltered);
     Ui::MainWindow *ui;
     QString appTxFileName, appRxFileName, dlTxFileName, dlRxFileName,
-        dlDistancesFileName;
+        timeValueFileName;
     QRegularExpression dlTxPattern, dlErrPattern, dlRxPattern,
-        _dlDistancePattern;
+        _timeValuePattern;
 
     QList<QString> appTxList;
-    QString _txTransportDefaultDir, _rxTransportDefaultDir, _distanceDefaultDir;
+    QString _txTransportDefaultDir, _rxTransportDefaultDir, _timeValueDefaultDir;
     QList<DataRegisterPtr> dlRxDataList, dlTxDataList, appErrDataList,
         dlErrDataList, dlPropErrDataList, dlColErrDataList, dlMultErrDataList,
-        _distancesDataList;
+        _timeValueDataList;
 
     double txGap, txGapSd;
     int totalFallos;
@@ -126,7 +138,6 @@ private:
 
     int GetPktSizeOffset();
     int GetPktSizeIndex();
-    int GetDistanceIndex();
     int GetDateTimeIndex();
     int GetDecimalsIndex();
     int GetRelativeValueIndex();
@@ -152,6 +163,7 @@ private:
     void LoadSettingsFile(const QString &path);
 
     bool _seqNum, _simulation;
+    QCPGraph::LineStyle _timeValueLineStyle;
   };
 
 #endif // MAINWINDOW_H

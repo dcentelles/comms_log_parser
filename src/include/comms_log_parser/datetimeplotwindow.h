@@ -17,7 +17,8 @@ public:
   explicit DateTimePlotWindow(QWidget *parent = 0);
   ~DateTimePlotWindow();
   void Plot(QList<DataRegisterPtr> rxregs, const QString &title, uint64_t tini,
-            uint64_t tend, const QString &ylabel, const QString &xlabel, const QString &tagDesc);
+            uint64_t tend, const QString &ylabel, const QString &xlabel, const QString &tagDesc,
+            QCPGraph::LineStyle lineStyle = QCPGraph::lsLine);
 
   void SetGraphFiller(GraphFillerPtr gf);
   GraphFillerPtr GetGraphFiller();

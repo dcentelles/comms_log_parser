@@ -20,7 +20,7 @@ void MainWindow::SaveCurrentSettings(const QString &path) {
   QSettings settings(path, QSettings::NativeFormat);
   settings.setValue("tx_transport_default_dir", _txTransportDefaultDir);
   settings.setValue("rx_transport_default_dir", _rxTransportDefaultDir);
-  settings.setValue("distance_default_dir", _distanceDefaultDir);
+  settings.setValue("time_value_default_dir", _timeValueDefaultDir);
   settings.setValue("tx_title", ui->txTitleLineEdit->text());
   settings.setValue("rx_title", ui->rxTitleLineEdit->text());
   settings.setValue("er_title", ui->erTitleLineEdit->text());
@@ -40,11 +40,10 @@ void MainWindow::SaveCurrentSettings(const QString &path) {
   settings.setValue("packet_size_offset", ui->packetSizeOffsetLineEdit->text());
   settings.setValue("seq_index", ui->seqNumberIndex_lineEdit->text());
 
-  settings.setValue("distance_pattern", ui->distanceRegexLineEdit->text());
-  settings.setValue("distance_xlabel", ui->distancesXLabel->text());
-  settings.setValue("distance_ylabel", ui->distancesYLabel->text());
-  settings.setValue("distance_label", ui->distancesLabel->text());
-  settings.setValue("distance_index", ui->distanceIndex_lineEdit->text());
+  settings.setValue("time_value_pattern", ui->timeValueRegexLineEdit->text());
+  settings.setValue("time_value_xlabel", ui->timeValueXLabel->text());
+  settings.setValue("time_value_ylabel", ui->timeValueYLabel->text());
+  settings.setValue("time_value_label", ui->timeValueLabel->text());
   settings.setValue("transport_tag", ui->tagDescriptionLineEdit->text());
 
   settings.setValue("common_parser_time_pattern",
@@ -64,6 +63,7 @@ void MainWindow::SaveCurrentSettings(const QString &path) {
   settings.setValue("settings_last_dir", _lastSettingsFileDir);
   settings.setValue("transport_with_seqnum", _seqNum ? 1 : 0);
   settings.setValue("transport_simulation", _simulation ? 1 : 0);
+  settings.setValue("time_value_linestyle", _timeValueLineStyle);
 }
 void MainWindow::LoadSettingsFile(const QString &path) {
   QSettings settings(path, QSettings::NativeFormat);
@@ -71,7 +71,7 @@ void MainWindow::LoadSettingsFile(const QString &path) {
       settings.value("tx_transport_default_dir").toString();
   _rxTransportDefaultDir =
       settings.value("rx_transport_default_dir").toString();
-  _distanceDefaultDir = settings.value("distance_default_dir").toString();
+  _timeValueDefaultDir = settings.value("time_value_default_dir").toString();
 
   QString txTitle = settings.value("tx_title").toString();
   QString rxTitle = settings.value("rx_title").toString();
@@ -101,13 +101,11 @@ void MainWindow::LoadSettingsFile(const QString &path) {
       settings.value("packet_size_offset").toString());
   ui->seqNumberIndex_lineEdit->setText(settings.value("seq_index").toString());
 
-  ui->distanceRegexLineEdit->setText(
-      settings.value("distance_pattern").toString());
-  ui->distancesXLabel->setText(settings.value("distance_xlabel").toString());
-  ui->distancesYLabel->setText(settings.value("distance_ylabel").toString());
-  ui->distancesLabel->setText(settings.value("distance_label").toString());
-  ui->distanceIndex_lineEdit->setText(
-      settings.value("distance_index").toString());
+  ui->timeValueRegexLineEdit->setText(
+      settings.value("time_value_pattern").toString());
+  ui->timeValueXLabel->setText(settings.value("time_value_xlabel").toString());
+  ui->timeValueYLabel->setText(settings.value("time_value_ylabel").toString());
+  ui->timeValueLabel->setText(settings.value("time_value_label").toString());
 
   ui->tagDescriptionLineEdit->setText(
       settings.value("transport_tag").toString());
@@ -133,6 +131,20 @@ void MainWindow::LoadSettingsFile(const QString &path) {
   ui->seqNumCheckBox->setChecked(_seqNum);
   _simulation = settings.value("transport_simulation").toBool();
   ui->simulationCheckBox->setChecked(_simulation);
+
+  _timeValueLineStyle = (QCPGraph::LineStyle) settings.value("time_value_linestyle").toUInt();
+  switch (_timeValueLineStyle) {
+  case QCPGraph::LineStyle::lsLine:
+    ui->lsLineRadioButton->setChecked(true);
+    break;
+  case QCPGraph::LineStyle::lsStepLeft:
+    ui->lsStepLeftRafioButton->setChecked(true);
+    break;
+  case QCPGraph::LineStyle::lsStepRight:
+    ui->lsStepRightRadioButton->setChecked(true);
+    ;
+    break;
+  }
 }
 void MainWindow::loadDefaultSettings() {
   LoadSettingsFile(_defaultSettingsFile);
@@ -176,11 +188,6 @@ int MainWindow::GetMaxPrefixIndex() {
   return prefixExpr.namedCaptureGroups().size() - 1;
 }
 
-int MainWindow::GetDistanceIndex() {
-  int maxPrefixIndex = GetMaxPrefixIndex();
-  return ui->distanceIndex_lineEdit->text().toInt() + maxPrefixIndex;
-}
-
 int MainWindow::GetSeqIndex() {
   int maxPrefixIndex = GetMaxPrefixIndex();
   return ui->seqNumberIndex_lineEdit->text().toInt() + maxPrefixIndex;
@@ -197,11 +204,11 @@ QString MainWindow::GetTransportTag() {
 
 bool MainWindow::GetPlotOver() { return ui->plotOverCheckBox->isChecked(); }
 
-void MainWindow::updateDistanceParser() {
+void MainWindow::updateTimeValueParser() {
   QString logTimeFormat = ui->transportTimePattern->text();
-  auto distancePattern = ui->distanceRegexLineEdit->text();
-  _dlDistancePattern.setPattern(
-      QString("^%1.*%2").arg(logTimeFormat, distancePattern));
+  auto timeValuePattern = ui->timeValueRegexLineEdit->text();
+  _timeValuePattern.setPattern(
+      QString("^%1.*%2").arg(logTimeFormat, timeValuePattern));
 }
 
 void MainWindow::updateTransportParser() {
@@ -243,8 +250,7 @@ void MainWindow::parseDoubleTrace(QList<DataRegisterPtr> &coll,
                                   const QString &fileName,
                                   const QRegularExpression &reg,
                                   const QString &xlabel, const QString &ylabel,
-                                  const QString &seriesLabel, bool plotOver,
-                                  int index) {
+                                  const QString &seriesLabel, bool plotOver) {
   QFile data(fileName);
   if (data.open(QFile::ReadOnly)) {
     bool relativeTime = TimeIsRelative();
@@ -259,7 +265,7 @@ void MainWindow::parseDoubleTrace(QList<DataRegisterPtr> &coll,
     while (stream.readLineInto(&line)) {
       auto match = reg.match(line);
       if (match.hasMatch()) {
-        double value = match.captured(index).toDouble();
+        double value = match.captured("value").toDouble();
         if (relativeTime) {
           double relativeValue = match.captured(relativeValueIndex).toDouble();
           dataRegister = DataRegister::Build(0, relativeValue);
@@ -279,19 +285,20 @@ void MainWindow::parseDoubleTrace(QList<DataRegisterPtr> &coll,
       }
     }
     std::shared_ptr<DateTimePlotWindow> plot;
-    if (_distancePlotList.size() == 0 || !plotOver) {
+    if (_timeValuePlotList.size() == 0 || !plotOver) {
       plot = std::shared_ptr<DateTimePlotWindow>(new DateTimePlotWindow());
       plot->SetGraphFiller(GraphFillerPtr(new DoubleGraphFiller()));
-      _distancePlotList.push_front(plot);
+      _timeValuePlotList.push_front(plot);
     } else {
-      plot = _distancePlotList.front();
+      plot = _timeValuePlotList.front();
     }
     plot->show();
     uint64_t t0, t1;
     if (coll.size() > 0) {
       t0 = coll[0]->GetNanos();
       t1 = coll[coll.size() - 1]->GetNanos();
-      plot->Plot(coll, "Distance", t0, t1, ylabel, xlabel, seriesLabel);
+      plot->Plot(coll, "Time-Value", t0, t1, ylabel, xlabel, seriesLabel,
+                 _timeValueLineStyle);
     }
   }
 }
@@ -694,25 +701,25 @@ void MainWindow::on_dl_plotButton_clicked() {
   }
 }
 
-void MainWindow::on_distancesPathBrowseButton_clicked() {
-  dlDistancesFileName =
-      QFileDialog::getOpenFileName(this, tr("Open Distances File"),
-                                   _distanceDefaultDir, tr("All files (*)"));
+void MainWindow::on_timeValuePathBrowseButton_clicked() {
+  timeValueFileName =
+      QFileDialog::getOpenFileName(this, tr("Open time-value File"),
+                                   _timeValueDefaultDir, tr("All files (*)"));
 
-  if (dlDistancesFileName != "") {
-    QFileInfo file(dlDistancesFileName);
-    _distanceDefaultDir = file.absolutePath();
-    ui->distancesPathLineEdit->clear();
-    ui->distancesPathLineEdit->insert(dlDistancesFileName);
+  if (timeValueFileName != "") {
+    QFileInfo file(timeValueFileName);
+    _timeValueDefaultDir = file.absolutePath();
+    ui->timeValuePathLineEdit->clear();
+    ui->timeValuePathLineEdit->insert(timeValueFileName);
   }
 }
 
-void MainWindow::on_parseAndPlotDistanceButton_clicked() {
-  updateDistanceParser();
-  parseDoubleTrace(_distancesDataList, ui->distancesPathLineEdit->text(),
-                   _dlDistancePattern, ui->distancesXLabel->text(),
-                   ui->distancesYLabel->text(), ui->distancesLabel->text(),
-                   ui->distancePlotOverCheck->isChecked(), GetDistanceIndex());
+void MainWindow::on_parseAndPlotTimeValueButton_clicked() {
+  updateTimeValueParser();
+  parseDoubleTrace(_timeValueDataList, ui->timeValuePathLineEdit->text(),
+                   _timeValuePattern, ui->timeValueXLabel->text(),
+                   ui->timeValueYLabel->text(), ui->timeValueLabel->text(),
+                   ui->timeValuePlotOverCheck->isChecked());
 }
 
 void MainWindow::on_trDateTimeRadioButton_toggled(bool checked) {
@@ -749,4 +756,16 @@ void MainWindow::on_seqNumCheckBox_clicked(bool checked) { _seqNum = checked; }
 
 void MainWindow::on_simulationCheckBox_clicked(bool checked) {
   _simulation = checked;
+}
+
+void MainWindow::on_lsLineRadioButton_clicked() {
+  _timeValueLineStyle = QCPGraph::lsLine;
+}
+
+void MainWindow::on_lsStepLeftRafioButton_clicked() {
+  _timeValueLineStyle = QCPGraph::lsStepLeft;
+}
+
+void MainWindow::on_lsStepRightRadioButton_clicked() {
+  _timeValueLineStyle = QCPGraph::lsStepRight;
 }

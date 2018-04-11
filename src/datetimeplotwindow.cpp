@@ -29,7 +29,7 @@ DateTimePlotWindow::~DateTimePlotWindow() { delete ui; }
 void DateTimePlotWindow::Plot(QList<DataRegisterPtr> regs, const QString &title,
                               uint64_t tini, uint64_t tend,
                               const QString &ylabel, const QString &xlabel,
-                              const QString &tagDesc) {
+                              const QString &tagDesc, QCPGraph::LineStyle lineStyle) {
   _windowTitle = title;
   _rxregs = regs;
 
@@ -98,7 +98,7 @@ void DateTimePlotWindow::Plot(QList<DataRegisterPtr> regs, const QString &title,
   QCPGraph *graph = plot->graph(plot->graphCount() - 1);
   graph->setName(_windowTitle);
   graph->setScatterStyle(QCPScatterStyle::ssNone);
-  graph->setLineStyle(QCPGraph::lsLine);
+  graph->setLineStyle(lineStyle);
   graph->setName(tagDesc);
 
   QPen pen;
