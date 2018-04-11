@@ -69,7 +69,7 @@
            </size>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>3</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -407,6 +407,9 @@
             </widget>
            </widget>
            <widget class="QGroupBox" name="groupBox_3">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="geometry">
              <rect>
               <x>360</x>
@@ -498,6 +501,32 @@
               <widget class="QLineEdit" name="packetSizeOffsetLineEdit"/>
              </item>
             </layout>
+           </widget>
+           <widget class="QCheckBox" name="seqNumCheckBox">
+            <property name="geometry">
+             <rect>
+              <x>570</x>
+              <y>340</y>
+              <width>92</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Seq. num</string>
+            </property>
+           </widget>
+           <widget class="QCheckBox" name="simulationCheckBox">
+            <property name="geometry">
+             <rect>
+              <x>570</x>
+              <y>380</y>
+              <width>251</width>
+              <height>23</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Simulation (checks the error type)</string>
+            </property>
            </widget>
           </widget>
           <widget class="QWidget" name="transportTab">
@@ -1103,7 +1132,7 @@
           </widget>
           <widget class="QWidget" name="tab_2">
            <attribute name="title">
-            <string>Distance</string>
+            <string>Time-Number</string>
            </attribute>
            <widget class="QLineEdit" name="distancesPathLineEdit">
             <property name="geometry">
@@ -1167,7 +1196,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>Distance expr:</string>
+             <string>Log expr:</string>
             </property>
            </widget>
            <widget class="QToolButton" name="parseAndPlotDistanceButton">
@@ -1193,7 +1222,7 @@
              </rect>
             </property>
             <property name="title">
-             <string>Distance Line fields index (first = 1):</string>
+             <string>Number Line fields index (first = 1):</string>
             </property>
             <widget class="QLabel" name="label_12">
              <property name="geometry">
@@ -1205,7 +1234,7 @@
               </rect>
              </property>
              <property name="text">
-              <string>distance index:</string>
+              <string>Number index:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1235,7 +1264,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>Distance path:</string>
+             <string>Log path:</string>
             </property>
            </widget>
            <widget class="QLineEdit" name="distancesXLabel">

@@ -14,8 +14,10 @@ DataRegister::DataRegister(int size, double relativeValue) {
   auto datetime = QDateTime::fromMSecsSinceEpoch(relativeValue * 1e3);
   SetDateTime(datetime);
   SetRelativeDateTime(datetime);
-  SetNanos(relativeValue * 1e9);
   SetSecs(relativeValue);
+  SetMillis(relativeValue * 1e3);
+  SetMicros(relativeValue * 1e6);
+  SetNanos(relativeValue * 1e9);
 }
 
 DataRegister::DataRegister(int size, const QDateTime &time,
@@ -40,6 +42,8 @@ DataRegister::DataRegister(int size, const QDateTime &time,
   uint64_t snanosInt = snanos.toUInt();
   SetNanos(millisSinceEpoch * 1e6 + snanosInt);
   SetSecs(GetNanos() / 1e9);
+  SetMillis(GetNanos() / 1e3);
+  SetMicros(GetNanos() / 1e6);
 }
 
 void DataRegister::init() {
@@ -158,41 +162,6 @@ void DataRegister::ComputeLinks(QList<DataRegisterPtr> txl,
   }
 }
 
-void DataRegister::ComputeTimePerByte(QList<DataRegisterPtr> rxl, double &btt,
-                                      double &bttSd) {
-  btt = 0;
-  bttSd = 0;
-  int count = 0;
-  for (auto rx : rxl) {
-    auto tx = rx->GetLinkedRegister();
-    if (tx) {
-      auto txTime = tx->GetNanos();
-      auto rxTime = rx->GetNanos();
-      auto gap = (rxTime - txTime) / 1e6;
-      tx->_ptt = gap;
-      rx->_ptt = gap;
-      auto psize = tx->GetDataSize();
-      double _btt = (double)gap / psize;
-      btt += _btt;
-      rx->_end2EndDelay = (double)gap / psize;
-      count++;
-    }
-  }
-
-  btt /= count;
-  for (auto rx : rxl) {
-    auto tx = rx->GetLinkedRegister();
-    if (tx) {
-      auto gap = rx->_ptt;
-      auto psize = tx->GetDataSize();
-      double _btt = (double)gap / psize;
-      auto diff = _btt - btt;
-      bttSd += diff * diff;
-    }
-  }
-  bttSd = qSqrt(bttSd / count);
-}
-
 void DataRegister::ComputeEnd2EndDelay(QList<DataRegisterPtr> rxl, double &btt,
                                        double &bttSd) {
   btt = 0;
@@ -201,9 +170,9 @@ void DataRegister::ComputeEnd2EndDelay(QList<DataRegisterPtr> rxl, double &btt,
   for (auto rx : rxl) {
     auto tx = rx->GetLinkedRegister();
     if (tx) {
-      auto txTime = tx->GetNanos();
-      auto rxTime = rx->GetNanos();
-      auto gap = (rxTime - txTime) / 1e6;
+      auto txTime = tx->GetMillis();
+      auto rxTime = rx->GetMillis();
+      auto gap = (rxTime - txTime);
       tx->_ptt = gap;
       rx->_ptt = gap;
       double _btt = gap;
@@ -232,28 +201,28 @@ void DataRegister::GetGapData(QList<DataRegisterPtr> data, double &gap,
   gapSd = 0;
 
   if (data.count() > 0) {
-    auto t0 = data[0]->GetNanos();
+    auto t0 = data[0]->GetMillis();
     int count = 0;
     for (int i = 1; i < data.count(); i++) {
       auto reg = data[i];
-      auto t1 = reg->GetNanos();
+      auto t1 = reg->GetMillis();
       gap += (t1 - t0);
       t0 = t1;
       count++;
     }
     gap = gap / count;
 
-    t0 = data[0]->GetNanos();
+    t0 = data[0]->GetMillis();
     for (int i = 1; i < data.count(); i++) {
       auto reg = data[i];
-      auto t1 = reg->GetNanos();
+      auto t1 = reg->GetMillis();
       auto _gap = (t1 - t0);
       auto diff = _gap - gap;
       gapSd += diff * diff;
       t0 = t1;
     }
-    gap = gap / 1e6;
-    gapSd = qSqrt(gapSd / count) / 1e6;
+    gap = gap;
+    gapSd = qSqrt(gapSd / count);
   }
 }
 
@@ -263,7 +232,7 @@ void DataRegister::GetRxGapAndComputeJitter(QList<DataRegisterPtr> data,
   gapSd = 0;
 
   if (data.count() > 0) {
-    auto t0 = data[0]->GetNanos();
+    auto t0 = data[0]->GetMillis();
     auto seq0 = data[0]->GetNseq();
 
     int count = 0;
@@ -271,9 +240,9 @@ void DataRegister::GetRxGapAndComputeJitter(QList<DataRegisterPtr> data,
       auto reg = data[i];
       auto seq1 = reg->GetNseq();
       auto next2seq0 = (seq0 + 1) % 255;
-      auto t1 = reg->GetNanos();
+      auto t1 = reg->GetMillis();
 
-      auto _gap = (t1 - t0) / 1e6;
+      auto _gap = (t1 - t0);
       if (next2seq0 == seq1) {
         gap += _gap;
         count++;
@@ -294,16 +263,16 @@ void DataRegister::GetRxGapAndComputeJitter(QList<DataRegisterPtr> data,
     }
     gap = gap / count;
 
-    t0 = data[0]->GetNanos();
+    t0 = data[0]->GetMillis();
     seq0 = data[0]->GetNseq();
     for (int i = 1; i < data.count(); i++) {
       auto reg = data[i];
       auto seq1 = reg->GetNseq();
       auto next2seq0 = (seq0 + 1) % 255;
-      auto t1 = reg->GetNanos();
+      auto t1 = reg->GetMillis();
 
       if (next2seq0 == seq1) {
-        auto _gap = (t1 - t0) / 1e6;
+        auto _gap = (t1 - t0);
         auto diff = _gap - gap;
         gapSd += diff * diff;
       }

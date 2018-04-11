@@ -62,6 +62,8 @@ void MainWindow::SaveCurrentSettings(const QString &path) {
                     ui->trRelativeTimeIndex->text());
 
   settings.setValue("settings_last_dir", _lastSettingsFileDir);
+  settings.setValue("transport_with_seqnum", _seqNum ? 1 : 0);
+  settings.setValue("transport_simulation", _simulation ? 1 : 0);
 }
 void MainWindow::LoadSettingsFile(const QString &path) {
   QSettings settings(path, QSettings::NativeFormat);
@@ -127,6 +129,10 @@ void MainWindow::LoadSettingsFile(const QString &path) {
       settings.value("common_parser_relative_time_index").toString());
 
   _lastSettingsFileDir = settings.value("settings_last_dir").toString();
+  _seqNum = settings.value("transport_with_seqnum").toBool();
+  ui->seqNumCheckBox->setChecked(_seqNum);
+  _simulation = settings.value("transport_simulation").toBool();
+  ui->simulationCheckBox->setChecked(_simulation);
 }
 void MainWindow::loadDefaultSettings() {
   LoadSettingsFile(_defaultSettingsFile);
@@ -222,7 +228,7 @@ void MainWindow::updateTransportParser() {
 }
 
 void MainWindow::init() {
-  //Force absolute DateTime.
+  // Force absolute DateTime.
   DataRegister::epoch = QDateTime::fromMSecsSinceEpoch(0);
   DataRegister::epochSet = true;
 
@@ -306,15 +312,13 @@ void MainWindow::parsePacketTrace(QList<DataRegisterPtr> &coll,
     QTextStream stream(&data);
     QString line;
     coll.clear();
-    auto seqNumIndex = GetSeqIndex();
-    auto packetSizeIndex = GetPktSizeIndex();
     while (stream.readLineInto(&line)) {
       auto match = reg.match(line);
       if (match.hasMatch()) {
         uint32_t size, nseq = 0;
-        if (seqNumIndex != -1)
-          nseq = match.captured(seqNumIndex).toInt();
-        size = match.captured(packetSizeIndex).toInt();
+        if (_seqNum)
+          nseq = match.captured("seqnum").toInt();
+        size = match.captured("size").toInt();
         if (relativeTime) {
           double relativeValue = match.captured(relativeValueIndex).toDouble();
           dataRegister =
@@ -355,6 +359,63 @@ void MainWindow::parsePacketTrace(QList<DataRegisterPtr> &coll,
     t0->setCurrentIndex(0);
     t1->setCurrentIndex(coll.count() - 1);
   }
+}
+
+void MainWindow::parsePacketErrorsTrace(const QString &fileName,
+                                        const QRegularExpression &reg) {
+
+  QFile data(fileName);
+  if (data.open(QFile::ReadOnly)) {
+    bool relativeTime = TimeIsRelative();
+    DataRegisterPtr dataRegister;
+    int dateTimeIndex = GetDateTimeIndex();
+    int decimalsIndex = GetDecimalsIndex();
+    int relativeValueIndex = GetRelativeValueIndex();
+    QString dateTimeFormat = ui->transportDateTimeFormat->text();
+    QTextStream stream(&data);
+    QString line;
+    dlPropErrDataList.clear();
+    dlColErrDataList.clear();
+    dlMultErrDataList.clear();
+    while (stream.readLineInto(&line)) {
+      auto match = reg.match(line);
+      if (match.hasMatch()) {
+        uint32_t size, nseq = 0;
+        if (_seqNum)
+          nseq = match.captured("seqnum").toInt();
+        size = match.captured("size").toInt();
+        if (relativeTime) {
+          double relativeValue = match.captured(relativeValueIndex).toDouble();
+          dataRegister =
+              DataRegister::Build(size + GetPktSizeOffset(), relativeValue);
+        } else {
+          QString dateTimeStr = match.captured(dateTimeIndex);
+          QString sdecimals = match.captured(decimalsIndex);
+          QDateTime dateTime =
+              QDateTime::fromString(dateTimeStr, dateTimeFormat);
+          if (!DataRegister::epochSet) {
+            DataRegister::epoch = dateTime.addDays(-1).addSecs(3600);
+            DataRegister::epochSet = true;
+          }
+          dataRegister = DataRegister::Build(size + GetPktSizeOffset(),
+                                             dateTime, sdecimals);
+        }
+        dataRegister->SetNseq(nseq);
+        if (_simulation) {
+          QString errorType = match.captured("errtype");
+          if (errorType == "MERR")
+            dlMultErrDataList.append(dataRegister);
+          else if (errorType == "COL")
+            dlColErrDataList.append(dataRegister);
+          else if (errorType == "PERR")
+            dlPropErrDataList.append(dataRegister);
+        }
+
+        dlErrDataList.append(dataRegister);
+      }
+    }
+  }
+  data.close();
 }
 
 DataRegisterPtr
@@ -426,7 +487,7 @@ void MainWindow::on_dl_parseTimesButton_clicked() {
   parsePacketTrace(dlRxDataList, dlRxFileName, dlRxPattern, ui->dl_rxT0ComboBox,
                    ui->dl_rxT1ComboBox);
 
-  parsePacketTrace(dlErrDataList, dlRxFileName, dlErrPattern, NULL, NULL);
+  parsePacketErrorsTrace(dlRxFileName, dlErrPattern);
 
   if (dlTxDataList.size() && dlRxDataList.size()) {
     auto t0reg = GetDataRegisterFromId(ui->dl_txT0->text(), dlTxDataList);
@@ -531,7 +592,7 @@ void MainWindow::computeData(
   jitterPlot->Plot(rxDataListFiltered, "Jitter", _t0, _t1, "Jitter",
                    "Reception time", tagDesc);
   // Transmission time
-  if (GetSeqIndex() != -1 && rxDataListFiltered.size() > 0) {
+  if (_seqNum && rxDataListFiltered.size() > 0) {
     DataRegister::ComputeEnd2EndDelay(rxDataListFiltered, btt, bttSd);
 
     updateLineEditText(ui->dl_transmissionTime, QString::number(btt));
@@ -585,8 +646,13 @@ void MainWindow::on_dl_plotButton_clicked() {
   auto erTitle = ui->erTitleLineEdit->text();
 
   if (GetPlotOver() && _lastPlotWindow != NULL) {
-    _lastPlotWindow->PlotOver(dlTxDataList, dlRxDataList, dlErrDataList, _t0,
-                              _t1, txTitle, rxTitle, erTitle);
+    if (!_simulation)
+      _lastPlotWindow->PlotOver(dlTxDataList, dlRxDataList, dlErrDataList, _t0,
+                                _t1, txTitle, rxTitle, erTitle);
+    else
+      _lastPlotWindow->PlotOver(dlTxDataList, dlRxDataList, dlPropErrDataList,
+                                dlColErrDataList, dlMultErrDataList, _t0, _t1,
+                                txTitle, rxTitle, erTitle);
   } else {
     DataPlotWindow *dwRx;
 
@@ -617,15 +683,21 @@ void MainWindow::on_dl_plotButton_clicked() {
      * para ver otras muestras que esten fuera del intervalo
      */
 
-    dwRx->Plot(dlTxDataList, dlRxDataList, dlErrDataList, _t0, _t1, txTitle,
-               rxTitle, erTitle);
+    if (!_simulation)
+      dwRx->Plot(dlTxDataList, dlRxDataList, dlErrDataList, _t0, _t1, txTitle,
+                 rxTitle, erTitle);
+    else
+      dwRx->Plot(dlTxDataList, dlRxDataList, dlPropErrDataList,
+                 dlColErrDataList, dlMultErrDataList, _t0, _t1, txTitle,
+                 rxTitle, erTitle);
     _lastPlotWindow = dwRx;
   }
 }
 
 void MainWindow::on_distancesPathBrowseButton_clicked() {
-  dlDistancesFileName = QFileDialog::getOpenFileName(
-      this, tr("Open Distances File"), _distanceDefaultDir, tr("All files (*)"));
+  dlDistancesFileName =
+      QFileDialog::getOpenFileName(this, tr("Open Distances File"),
+                                   _distanceDefaultDir, tr("All files (*)"));
 
   if (dlDistancesFileName != "") {
     QFileInfo file(dlDistancesFileName);
@@ -671,4 +743,10 @@ void MainWindow::on_loadSettingsFromFileButton_clicked() {
     _lastSettingsFileDir = file.absolutePath();
     LoadSettingsFile(filePath);
   }
+}
+
+void MainWindow::on_seqNumCheckBox_clicked(bool checked) { _seqNum = checked; }
+
+void MainWindow::on_simulationCheckBox_clicked(bool checked) {
+  _simulation = checked;
 }

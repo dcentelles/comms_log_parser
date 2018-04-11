@@ -26,6 +26,12 @@ public:
   ~MainWindow();
 
 private slots:
+  void on_simulationCheckBox_clicked(bool checked);
+
+private slots:
+  void on_seqNumCheckBox_clicked(bool checked);
+
+private slots:
   void on_loadSettingsFromFileButton_clicked();
 
 private slots:
@@ -71,73 +77,81 @@ private:
   void parsePacketTrace(QList<DataRegisterPtr> &data, const QString &fileName,
                         const QRegularExpression &reg, QComboBox *t0,
                         QComboBox *t1);
+  void parsePacketErrorsTrace(const QString &fileName,
+                              const QRegularExpression &reg);
 
-  void parseDoubleTrace(QList<DataRegisterPtr> &dataList,
-                        const QString &fileName, const QRegularExpression &reg,
-                        const QString &xlabel, const QString &ylabel,
-                        const QString &seriesLabel, bool plotOver, int index);
-  void computeData(QLineEdit *sendLineEdit,
+    void parseDoubleTrace(QList<DataRegisterPtr> & dataList,
+                          const QString &fileName,
+                          const QRegularExpression &reg, const QString &xlabel,
+                          const QString &ylabel, const QString &seriesLabel,
+                          bool plotOver, int index);
+    void computeData(QLineEdit * sendLineEdit,
 
-                   QLineEdit *txGapLineEdit, QLineEdit *txGapSdLineEdit,
+                     QLineEdit * txGapLineEdit, QLineEdit * txGapSdLineEdit,
 
-                   QLineEdit *recvLineEdit, QLineEdit *failsLineEdit,
-                   QLineEdit *errLineEdit, QLineEdit *lostLineEdit,
+                     QLineEdit * recvLineEdit, QLineEdit * failsLineEdit,
+                     QLineEdit * errLineEdit, QLineEdit * lostLineEdit,
 
-                   QLineEdit *rxGapLineEdit, QLineEdit *rxGapSdLineEdit,
+                     QLineEdit * rxGapLineEdit, QLineEdit * rxGapSdLineEdit,
 
-                   QLineEdit *rxDataRateLineEdit, QLineEdit *txDataRateLineEdit,
+                     QLineEdit * rxDataRateLineEdit,
+                     QLineEdit * txDataRateLineEdit,
 
-                   QList<DataRegisterPtr> &txDataList,
-                   QList<DataRegisterPtr> &rxDataList,
+                     QList<DataRegisterPtr> & txDataList,
+                     QList<DataRegisterPtr> & rxDataList,
 
-                   QList<DataRegisterPtr> &errDataList,
+                     QList<DataRegisterPtr> & errDataList,
 
-                   QList<DataRegisterPtr> &txDataListFiltered,
-                   QList<DataRegisterPtr> &rxDataListFiltered);
-  Ui::MainWindow *ui;
-  QString appTxFileName, appRxFileName, dlTxFileName, dlRxFileName,
-      dlDistancesFileName;
-  QRegularExpression dlTxPattern, dlErrPattern, dlRxPattern, _dlDistancePattern;
+                     QList<DataRegisterPtr> & txDataListFiltered,
+                     QList<DataRegisterPtr> & rxDataListFiltered);
+    Ui::MainWindow *ui;
+    QString appTxFileName, appRxFileName, dlTxFileName, dlRxFileName,
+        dlDistancesFileName;
+    QRegularExpression dlTxPattern, dlErrPattern, dlRxPattern,
+        _dlDistancePattern;
 
-  QList<QString> appTxList;
-  QString _txTransportDefaultDir, _rxTransportDefaultDir, _distanceDefaultDir;
-  QList<DataRegisterPtr> dlRxDataList, dlTxDataList, appErrDataList,
-      dlErrDataList, _distancesDataList;
+    QList<QString> appTxList;
+    QString _txTransportDefaultDir, _rxTransportDefaultDir, _distanceDefaultDir;
+    QList<DataRegisterPtr> dlRxDataList, dlTxDataList, appErrDataList,
+        dlErrDataList, dlPropErrDataList, dlColErrDataList, dlMultErrDataList,
+        _distancesDataList;
 
-  double txGap, txGapSd;
-  int totalFallos;
-  QList<DataRegisterPtr> errors;
-  double rxGap, rxGapSd;
-  double rxDataRate, txDataRate;
-  double pduSize, pduSizeSd;
-  double btt, bttSd;
+    double txGap, txGapSd;
+    int totalFallos;
+    QList<DataRegisterPtr> errors;
+    double rxGap, rxGapSd;
+    double rxDataRate, txDataRate;
+    double pduSize, pduSizeSd;
+    double btt, bttSd;
 
-  int GetPktSizeOffset();
-  int GetPktSizeIndex();
-  int GetDistanceIndex();
-  int GetDateTimeIndex();
-  int GetDecimalsIndex();
-  int GetRelativeValueIndex();
-  int GetSeqIndex();
-  bool GetPlotOver();
-  QString GetTransportTag();
+    int GetPktSizeOffset();
+    int GetPktSizeIndex();
+    int GetDistanceIndex();
+    int GetDateTimeIndex();
+    int GetDecimalsIndex();
+    int GetRelativeValueIndex();
+    int GetSeqIndex();
+    bool GetPlotOver();
+    QString GetTransportTag();
 
-  bool TimeIsRelative();
-  void SetRelativeTime(bool);
+    bool TimeIsRelative();
+    void SetRelativeTime(bool);
 
-  void loadDefaultSettings();
-  void saveCurrentSettingsAsDefault();
-  DataRegisterPtr GetDataRegisterFromId(const QString &id,
-                                        const QList<DataRegisterPtr> &rlist);
+    void loadDefaultSettings();
+    void saveCurrentSettingsAsDefault();
+    DataRegisterPtr GetDataRegisterFromId(const QString &id,
+                                          const QList<DataRegisterPtr> &rlist);
 
-  void closeEvent(QCloseEvent *event);
+    void closeEvent(QCloseEvent * event);
 
-  QString _defaultSettingsFile;
-  QString _lastSettingsFileDir;
+    QString _defaultSettingsFile;
+    QString _lastSettingsFileDir;
 
-  int GetMaxPrefixIndex();
-  void SaveCurrentSettings(const QString &path);
-  void LoadSettingsFile(const QString &path);
-};
+    int GetMaxPrefixIndex();
+    void SaveCurrentSettings(const QString &path);
+    void LoadSettingsFile(const QString &path);
+
+    bool _seqNum, _simulation;
+  };
 
 #endif // MAINWINDOW_H

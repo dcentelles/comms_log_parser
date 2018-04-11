@@ -12,6 +12,26 @@ public:
     explicit DataPlotWindow(QWidget *parent = 0);
     ~DataPlotWindow();
 
+  void Plot(QList<DataRegisterPtr> txPdus,
+            QList<DataRegisterPtr> rxPdus,
+            QList<DataRegisterPtr> propErrors,
+            QList<DataRegisterPtr> colErrors,
+            QList<DataRegisterPtr> multErrors,
+            uint64_t tini, uint64_t tend,
+            const QString & txtitle,
+            const QString & rxtitle,
+            const QString & errtitle);
+
+  void PlotOver(QList<DataRegisterPtr> txPdus,
+            QList<DataRegisterPtr> rxPdus,
+            QList<DataRegisterPtr> propErrors,
+            QList<DataRegisterPtr> colErrors,
+            QList<DataRegisterPtr> multErrors,
+            uint64_t tini, uint64_t tend,
+            const QString & txtitle,
+            const QString & rxtitle,
+            const QString & errtitle);
+
    void Plot(QList<DataRegisterPtr> txPdus,
              QList<DataRegisterPtr> rxPdus,
              QList<DataRegisterPtr> errors,
@@ -27,6 +47,7 @@ public:
              const QString & txtitle,
              const QString & rxtitle,
              const QString & errtitle);
+
 
 private:
     void setDRsToTimeGraph(

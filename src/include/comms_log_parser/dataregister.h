@@ -44,9 +44,6 @@ public:
   static void ComputeEnd2EndDelay(QList<DataRegisterPtr> data, double &tt,
                                   double &ttSd);
 
-  static void ComputeTimePerByte(QList<DataRegisterPtr> data, double &tt,
-                                 double &ttSd);
-
   enum SeqType { UINT8, UINT16, UINT32 };
 
   static SeqType _seqType;
@@ -82,6 +79,12 @@ public:
   inline void SetSecs(double secs) { _secs = secs; }
   inline double GetSecs() { return _secs; }
 
+  inline void SetMillis(double millis) { _millis = millis; }
+  inline double GetMillis() { return _millis; }
+
+  inline void SetMicros(double micros) { _micros = micros; }
+  inline double GetMicros() { return _micros; }
+
   static QDateTime epoch;
   static bool epochSet;
 
@@ -97,7 +100,7 @@ private:
   double _end2EndDelay;
   double _doubleValue;
   uint64_t _nseq, _nanos;
-  double _secs;
+  double _secs, _millis, _micros;
 };
 
 #endif // PAQUETTRANSMISSION_H
