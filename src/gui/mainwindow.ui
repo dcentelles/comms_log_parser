@@ -69,7 +69,7 @@
            </size>
           </property>
           <property name="currentIndex">
-           <number>3</number>
+           <number>4</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -1362,6 +1362,80 @@
             </property>
             <property name="text">
              <string>lsLine</string>
+            </property>
+           </widget>
+          </widget>
+          <widget class="QWidget" name="tab_4">
+           <attribute name="title">
+            <string>Common graph controls</string>
+           </attribute>
+           <widget class="QLabel" name="label_12">
+            <property name="geometry">
+             <rect>
+              <x>310</x>
+              <y>82</y>
+              <width>32</width>
+              <height>26</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Dur.:</string>
+            </property>
+           </widget>
+           <widget class="QDateTimeEdit" name="commonDurationDateTimeEdit">
+            <property name="geometry">
+             <rect>
+              <x>348</x>
+              <y>82</y>
+              <width>122</width>
+              <height>26</height>
+             </rect>
+            </property>
+            <property name="currentSection">
+             <enum>QDateTimeEdit::HourSection</enum>
+            </property>
+            <property name="displayFormat">
+             <string>HH:mm:ss:zzz </string>
+            </property>
+           </widget>
+           <widget class="QDateTimeEdit" name="commont0dateTimeEdit">
+            <property name="geometry">
+             <rect>
+              <x>348</x>
+              <y>50</y>
+              <width>122</width>
+              <height>26</height>
+             </rect>
+            </property>
+            <property name="displayFormat">
+             <string>HH:mm:ss:zzz </string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_33">
+            <property name="geometry">
+             <rect>
+              <x>310</x>
+              <y>50</y>
+              <width>32</width>
+              <height>26</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>T0:</string>
+            </property>
+           </widget>
+           <widget class="QToolButton" name="toolButton">
+            <property name="geometry">
+             <rect>
+              <x>490</x>
+              <y>40</y>
+              <width>81</width>
+              <height>71</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Update
+Graphs</string>
             </property>
            </widget>
           </widget>

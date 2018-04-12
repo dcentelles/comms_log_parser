@@ -19,21 +19,6 @@ DateTimePlotWindow::DateTimePlotWindow(QWidget *parent)
   colors.append(QColor(255, 255, 255));
   _relativeDateTime = false;
   _gf = GraphFillerPtr(new DoubleGraphFiller());
-}
-
-void DateTimePlotWindow::SetGraphFiller(GraphFillerPtr gf) { _gf = gf; }
-GraphFillerPtr DateTimePlotWindow::GetGraphFiller() { return _gf; }
-
-DateTimePlotWindow::~DateTimePlotWindow() { delete ui; }
-
-void DateTimePlotWindow::Plot(QList<DataRegisterPtr> regs, const QString &title,
-                              uint64_t tini, uint64_t tend,
-                              const QString &ylabel, const QString &xlabel,
-                              const QString &tagDesc, QCPGraph::LineStyle lineStyle) {
-  _windowTitle = title;
-  _rxregs = regs;
-
-  setWindowTitle(_windowTitle);
 
   // INICIALIZAR PLOT
   QCustomPlot *plot = ui->plotWidget;
@@ -51,6 +36,24 @@ void DateTimePlotWindow::Plot(QList<DataRegisterPtr> regs, const QString &title,
 
   ui->t0dateTimeEdit->setDisplayFormat("HH:mm:ss:zzz");
   ui->durationDateTimeEdit->setDisplayFormat("mm:ss:zzz");
+}
+
+void DateTimePlotWindow::SetGraphFiller(GraphFillerPtr gf) { _gf = gf; }
+GraphFillerPtr DateTimePlotWindow::GetGraphFiller() { return _gf; }
+
+DateTimePlotWindow::~DateTimePlotWindow() { delete ui; }
+
+void DateTimePlotWindow::Plot(QList<DataRegisterPtr> regs, const QString &title,
+                              uint64_t tini, uint64_t tend,
+                              const QString &ylabel, const QString &xlabel,
+                              const QString &tagDesc,
+                              QCPGraph::LineStyle lineStyle) {
+  _windowTitle = title;
+  _rxregs = regs;
+
+  setWindowTitle(_windowTitle);
+
+  QCustomPlot *plot = ui->plotWidget;
 
   auto t0ms = tini / 1e6;
   auto t1ms = tend / 1e6;
@@ -62,11 +65,6 @@ void DateTimePlotWindow::Plot(QList<DataRegisterPtr> regs, const QString &title,
   plot->xAxis->setRange(t0sec, t1sec);
 
   QDateTime t0dateTime, t1dateTime;
-  // QDataTime max, min;
-  // max = QDateTime::currentDateTime().addYears(2);
-  // min = QDateTime::fromMSecsSinceEpoch(0);
-  //  ui->t0dateTimeEdit->setMaximumDateTime(max);
-  //  ui->t0dateTimeEdit->setMinimumDateTime(min);
 
   t0dateTime = QDateTime::fromMSecsSinceEpoch(t0ms);
   t1dateTime = QDateTime::fromMSecsSinceEpoch(t1ms);
@@ -105,11 +103,6 @@ void DateTimePlotWindow::Plot(QList<DataRegisterPtr> regs, const QString &title,
   uint32_t colorIndex = (plot->graphCount() - 1) % colors.count();
   pen.setColor(colors[colorIndex]);
   graph->setPen(pen);
-
-  //  auto secsBegin = relativeTo.toMSecsSinceEpoch() / 1000.;
-  //  for (int i = 0; i < regs.count(); i++) {
-
-  //    }
   QVector<QCPGraphData> graphData = _gf->fillGraphData(regs);
 
   graph->data()->set(graphData);
@@ -169,9 +162,25 @@ void DateTimePlotWindow::updateXAxisRangeFromInput() {
   auto t0sec = t0.toMSecsSinceEpoch() / 1000.;
   auto durationMs = duration.toMSecsSinceEpoch();
   auto t1sec = t0.addMSecs(durationMs).toMSecsSinceEpoch() / 1000.;
+  UpdateXRange(t0sec, t1sec);
+}
+
+void DateTimePlotWindow::UpdateXRange(QTime t0, QTime dur) {
+  QDateTime t0DateTime = ui->t0dateTimeEdit->dateTime();
+
+  t0DateTime.setTime(t0);
+  auto t0sec = t0DateTime.toMSecsSinceEpoch() / 1000.;
+  auto t1sec =
+      t0DateTime.addMSecs(dur.msecsSinceStartOfDay()).toMSecsSinceEpoch() /
+      1000.;
+  UpdateXRange(t0sec, t1sec);
+}
+
+void DateTimePlotWindow::UpdateXRange(double t0sec, double t1sec) {
   ui->plotWidget->xAxis->setRange(t0sec, t1sec);
   ui->plotWidget->replot();
 }
+
 void DateTimePlotWindow::on_fixXPushButton_clicked() {
   updateXAxisRangeFromInput();
 }

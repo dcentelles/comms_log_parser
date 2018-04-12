@@ -11,13 +11,19 @@ DataRegister::DataRegister() { init(); }
 DataRegister::DataRegister(int size, double relativeValue) {
   init();
   SetDataSize(size);
-  auto datetime = QDateTime::fromMSecsSinceEpoch(relativeValue * 1e3);
+
+  // Lo de addDays(1).addSecs(-3600) es para que no aparezca la hora 1 (del 1 de
+  // enero de 1970) en los widgets
+  auto datetime =
+      QDateTime::fromMSecsSinceEpoch(0).addDays(1).addSecs(-3600).addMSecs(
+          relativeValue * 1e3);
   SetDateTime(datetime);
   SetRelativeDateTime(datetime);
-  SetSecs(relativeValue);
-  SetMillis(relativeValue * 1e3);
-  SetMicros(relativeValue * 1e6);
-  SetNanos(relativeValue * 1e9);
+  auto msSinceEpoch = datetime.toMSecsSinceEpoch();
+  SetSecs(msSinceEpoch / 1e3 + relativeValue);
+  SetMillis(msSinceEpoch + relativeValue * 1e3);
+  SetMicros(msSinceEpoch * 1e3 + relativeValue * 1e6);
+  SetNanos(msSinceEpoch * 1e6 + relativeValue * 1e9);
 }
 
 DataRegister::DataRegister(int size, const QDateTime &time,
@@ -231,6 +237,18 @@ void DataRegister::GetRxGapAndComputeJitter(QList<DataRegisterPtr> data,
   gap = 0;
   gapSd = 0;
 
+  uint64_t seqMaxValue;
+  switch (_seqType) {
+  case SeqType::UINT8:
+    seqMaxValue = UINT8_MAX;
+    break;
+  case SeqType::UINT16:
+    seqMaxValue = UINT16_MAX;
+    break;
+  case SeqType::UINT32:
+    seqMaxValue = UINT32_MAX;
+    break;
+  }
   if (data.count() > 0) {
     auto t0 = data[0]->GetMillis();
     auto seq0 = data[0]->GetNseq();
@@ -239,7 +257,7 @@ void DataRegister::GetRxGapAndComputeJitter(QList<DataRegisterPtr> data,
     for (int i = 1; i < data.count(); i++) {
       auto reg = data[i];
       auto seq1 = reg->GetNseq();
-      auto next2seq0 = (seq0 + 1) % 255;
+      auto next2seq0 = (seq0 + 1) % seqMaxValue;
       auto t1 = reg->GetMillis();
 
       auto _gap = (t1 - t0);
@@ -268,7 +286,7 @@ void DataRegister::GetRxGapAndComputeJitter(QList<DataRegisterPtr> data,
     for (int i = 1; i < data.count(); i++) {
       auto reg = data[i];
       auto seq1 = reg->GetNseq();
-      auto next2seq0 = (seq0 + 1) % 255;
+      auto next2seq0 = (seq0 + 1) % seqMaxValue;
       auto t1 = reg->GetMillis();
 
       if (next2seq0 == seq1) {

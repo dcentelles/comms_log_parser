@@ -22,6 +22,9 @@ public:
 
   void SetGraphFiller(GraphFillerPtr gf);
   GraphFillerPtr GetGraphFiller();
+  void UpdateXRange(double t0, double t1);
+  void UpdateXRange(QTime t0, QTime dur);
+
 
 private slots:
   void on_fixYPushButton_clicked();

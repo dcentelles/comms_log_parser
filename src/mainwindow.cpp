@@ -36,9 +36,7 @@ void MainWindow::SaveCurrentSettings(const QString &path) {
     seq_size = 32;
   settings.setValue("seq_size", seq_size);
 
-  settings.setValue("packet_size_index", ui->packetSizeIndex_lineEdit->text());
   settings.setValue("packet_size_offset", ui->packetSizeOffsetLineEdit->text());
-  settings.setValue("seq_index", ui->seqNumberIndex_lineEdit->text());
 
   settings.setValue("time_value_pattern", ui->timeValueRegexLineEdit->text());
   settings.setValue("time_value_xlabel", ui->timeValueXLabel->text());
@@ -95,11 +93,8 @@ void MainWindow::LoadSettingsFile(const QString &path) {
   else if (seq_size == 32)
     ui->uint32_t_radioButton->setChecked(true);
 
-  ui->packetSizeIndex_lineEdit->setText(
-      settings.value("packet_size_index").toString());
   ui->packetSizeOffsetLineEdit->setText(
       settings.value("packet_size_offset").toString());
-  ui->seqNumberIndex_lineEdit->setText(settings.value("seq_index").toString());
 
   ui->timeValueRegexLineEdit->setText(
       settings.value("time_value_pattern").toString());
@@ -132,7 +127,8 @@ void MainWindow::LoadSettingsFile(const QString &path) {
   _simulation = settings.value("transport_simulation").toBool();
   ui->simulationCheckBox->setChecked(_simulation);
 
-  _timeValueLineStyle = (QCPGraph::LineStyle) settings.value("time_value_linestyle").toUInt();
+  _timeValueLineStyle =
+      (QCPGraph::LineStyle)settings.value("time_value_linestyle").toUInt();
   switch (_timeValueLineStyle) {
   case QCPGraph::LineStyle::lsLine:
     ui->lsLineRadioButton->setChecked(true);
@@ -145,6 +141,8 @@ void MainWindow::LoadSettingsFile(const QString &path) {
     ;
     break;
   }
+  updateTimeValueParser();
+  updateTransportParser();
 }
 void MainWindow::loadDefaultSettings() {
   LoadSettingsFile(_defaultSettingsFile);
@@ -243,7 +241,9 @@ void MainWindow::init() {
   loadDefaultSettings();
   updateTransportParser();
   ui->plotOverCheckBox->setChecked(false);
-  _lastPlotWindow = NULL;
+
+  ui->commont0dateTimeEdit->setDisplayFormat("HH:mm:ss:zzz");
+  ui->commonDurationDateTimeEdit->setDisplayFormat("mm:ss:zzz");
 }
 
 void MainWindow::parseDoubleTrace(QList<DataRegisterPtr> &coll,
@@ -488,6 +488,7 @@ void MainWindow::on_dl_rxBrowseButton_clicked() {
 
 void MainWindow::on_dl_parseTimesButton_clicked() {
   updateTransportParser();
+  _lastWithSeqNum = _seqNum;
   parsePacketTrace(dlTxDataList, dlTxFileName, dlTxPattern, ui->dl_txT0ComboBox,
                    ui->dl_txT1ComboBox);
 
@@ -553,7 +554,10 @@ void MainWindow::computeData(
   updateLineEditText(lostLineEdit,
                      QString::number(totalFallos - errors.count()));
 
-  DataRegister::GetRxGapAndComputeJitter(rxDataListFiltered, rxGap, rxGapSd);
+  if (_lastWithSeqNum)
+    DataRegister::GetRxGapAndComputeJitter(rxDataListFiltered, rxGap, rxGapSd);
+  else
+    DataRegister::GetGapData(rxDataListFiltered, rxGap, rxGapSd);
 
   updateLineEditText(rxGapLineEdit, QString::number(rxGap));
   updateLineEditText(rxGapSdLineEdit, QString::number(rxGapSd));
@@ -585,34 +589,36 @@ void MainWindow::computeData(
   updateLineEditText(ui->dl_packetSizeLineEdit, QString::number(pduSize));
   updateLineEditText(ui->dl_packetSizeSdLineEdit, QString::number(pduSizeSd));
 
-  // Plot Jitter
-  std::shared_ptr<DateTimePlotWindow> jitterPlot;
-  if (jitterPlotList.size() == 0 || !GetPlotOver()) {
-    jitterPlot = std::shared_ptr<DateTimePlotWindow>(new DateTimePlotWindow());
-    jitterPlot->SetGraphFiller(GraphFillerPtr(new JitterGraphFiller()));
-    jitterPlotList.push_front(jitterPlot);
-  } else {
-    jitterPlot = jitterPlotList.front();
-  }
-
-  jitterPlot->show();
-  jitterPlot->Plot(rxDataListFiltered, "Jitter", _t0, _t1, "Jitter",
-                   "Reception time", tagDesc);
   // Transmission time
-  if (_seqNum && rxDataListFiltered.size() > 0) {
+  if (_lastWithSeqNum && rxDataListFiltered.size() > 0) {
+    // Plot Jitter
+    std::shared_ptr<DateTimePlotWindow> jitterPlot;
+    if (jitterPlotList.size() == 0 || !GetPlotOver()) {
+      jitterPlot =
+          std::shared_ptr<DateTimePlotWindow>(new DateTimePlotWindow());
+      jitterPlot->SetGraphFiller(GraphFillerPtr(new JitterGraphFiller()));
+      jitterPlotList.push_front(jitterPlot);
+    } else {
+      jitterPlot = jitterPlotList.front();
+    }
+
+    jitterPlot->show();
+    jitterPlot->Plot(rxDataListFiltered, "Jitter", _t0, _t1, "Jitter",
+                     "Reception time", tagDesc);
+
+    // Plot End2End delay gaussian
     DataRegister::ComputeEnd2EndDelay(rxDataListFiltered, btt, bttSd);
 
     updateLineEditText(ui->dl_transmissionTime, QString::number(btt));
     updateLineEditText(ui->dl_transmissionTimeSD, QString::number(bttSd));
 
     // PLOT gaussian
-    // TT
     NormalPlot *ttPlot = new NormalPlot();
     ttPlot->show();
 
     ttPlot->Plot("End 2 End Delay", btt, bttSd, 100, 0.001, "ms");
 
-    // Plot end 2 end delay
+    // Plot End2End delay
     std::shared_ptr<DateTimePlotWindow> e2ePlot;
     if (e2ePlotList.size() == 0 || !GetPlotOver()) {
       e2ePlot = std::shared_ptr<DateTimePlotWindow>(new DateTimePlotWindow());
@@ -652,18 +658,20 @@ void MainWindow::on_dl_plotButton_clicked() {
   auto rxTitle = ui->rxTitleLineEdit->text();
   auto erTitle = ui->erTitleLineEdit->text();
 
-  if (GetPlotOver() && _lastPlotWindow != NULL) {
+  if (GetPlotOver() && _lastPktTracePlotWindow) {
     if (!_simulation)
-      _lastPlotWindow->PlotOver(dlTxDataList, dlRxDataList, dlErrDataList, _t0,
-                                _t1, txTitle, rxTitle, erTitle);
+      _lastPktTracePlotWindow->PlotOver(dlTxDataList, dlRxDataList,
+                                        dlErrDataList, _t0, _t1, txTitle,
+                                        rxTitle, erTitle);
     else
-      _lastPlotWindow->PlotOver(dlTxDataList, dlRxDataList, dlPropErrDataList,
-                                dlColErrDataList, dlMultErrDataList, _t0, _t1,
-                                txTitle, rxTitle, erTitle);
+      _lastPktTracePlotWindow->PlotOver(
+          dlTxDataList, dlRxDataList, dlPropErrDataList, dlColErrDataList,
+          dlMultErrDataList, _t0, _t1, txTitle, rxTitle, erTitle);
   } else {
-    DataPlotWindow *dwRx;
+    DataPlotWindowPtr dwRx;
 
-    dwRx = new DataPlotWindow();
+    dwRx = DataPlotWindowPtr(new DataPlotWindow());
+    _pktTracePlotList.push_back(dwRx);
 
     dwRx->show();
     /*
@@ -697,7 +705,7 @@ void MainWindow::on_dl_plotButton_clicked() {
       dwRx->Plot(dlTxDataList, dlRxDataList, dlPropErrDataList,
                  dlColErrDataList, dlMultErrDataList, _t0, _t1, txTitle,
                  rxTitle, erTitle);
-    _lastPlotWindow = dwRx;
+    _lastPktTracePlotWindow = dwRx;
   }
 }
 
@@ -768,4 +776,23 @@ void MainWindow::on_lsStepLeftRafioButton_clicked() {
 
 void MainWindow::on_lsStepRightRadioButton_clicked() {
   _timeValueLineStyle = QCPGraph::lsStepRight;
+}
+
+void MainWindow::on_toolButton_clicked() {
+
+  QTime t0 = ui->commont0dateTimeEdit->time();
+  QTime duration = ui->commonDurationDateTimeEdit->time();
+
+  for (auto plotw : e2ePlotList) {
+    plotw->UpdateXRange(t0, duration);
+  }
+  for (auto plotw : jitterPlotList) {
+    plotw->UpdateXRange(t0, duration);
+  }
+  for (auto plotw : _timeValuePlotList) {
+    plotw->UpdateXRange(t0, duration);
+  }
+  for (auto plotw : _pktTracePlotList) {
+    plotw->UpdateXRange(t0, duration);
+  }
 }

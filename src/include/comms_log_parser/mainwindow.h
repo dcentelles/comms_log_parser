@@ -26,6 +26,9 @@ public:
   ~MainWindow();
 
 private slots:
+  void on_toolButton_clicked();
+
+private slots:
   void on_lsStepRightRadioButton_clicked();
 
 private slots:
@@ -77,7 +80,8 @@ private slots:
 
 private:
   uint64_t _t0, _t1;
-  DataPlotWindow *_lastPlotWindow;
+  DataPlotWindowPtr _lastPktTracePlotWindow;
+  std::list<std::shared_ptr<DateTimePlotWindow>> _pktTracePlotList;
   std::list<std::shared_ptr<DateTimePlotWindow>> e2ePlotList;
   std::list<std::shared_ptr<DateTimePlotWindow>> jitterPlotList;
   std::list<std::shared_ptr<DateTimePlotWindow>> _timeValuePlotList;
@@ -162,7 +166,7 @@ private:
     void SaveCurrentSettings(const QString &path);
     void LoadSettingsFile(const QString &path);
 
-    bool _seqNum, _simulation;
+    bool _seqNum, _lastWithSeqNum, _simulation;
     QCPGraph::LineStyle _timeValueLineStyle;
   };
 

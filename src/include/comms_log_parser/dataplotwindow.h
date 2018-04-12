@@ -59,4 +59,6 @@ private:
             );
 };
 
+typedef std::shared_ptr<DataPlotWindow> DataPlotWindowPtr;
+
 #endif // DATAPLOTWINDOW_H
