@@ -257,24 +257,21 @@ void DataRegister::GetRxGapAndComputeJitter(QList<DataRegisterPtr> data,
     for (int i = 1; i < data.count(); i++) {
       auto reg = data[i];
       auto seq1 = reg->GetNseq();
-      auto next2seq0 = (seq0 + 1) % seqMaxValue;
       auto t1 = reg->GetMillis();
 
       auto _gap = (t1 - t0);
-      if (next2seq0 == seq1) {
-        gap += _gap;
-        count++;
-      }
-
       // jitter graph example in: http://nile.wpi.edu/NS
       auto seqdiff = seq1 - seq0;
       if (seqdiff == 0)
         seqdiff = 1;
-      if (seqdiff > 0) {
-        reg->_jitter = _gap / seqdiff;
-        reg->_jitterValid = true;
-      } else
-        reg->_jitterValid = false;
+      else if (seqdiff < 0) {
+        // diff < 0
+        seqdiff = seqMaxValue + seqdiff;
+      }
+      reg->_jitter = _gap / seqdiff;
+      reg->_jitterValid = true;
+      gap += reg->_jitter;
+      count++;
 
       t0 = t1;
       seq0 = seq1;
@@ -286,14 +283,21 @@ void DataRegister::GetRxGapAndComputeJitter(QList<DataRegisterPtr> data,
     for (int i = 1; i < data.count(); i++) {
       auto reg = data[i];
       auto seq1 = reg->GetNseq();
-      auto next2seq0 = (seq0 + 1) % seqMaxValue;
       auto t1 = reg->GetMillis();
 
-      if (next2seq0 == seq1) {
-        auto _gap = (t1 - t0);
-        auto diff = _gap - gap;
-        gapSd += diff * diff;
+      auto _gap = (t1 - t0);
+      // jitter graph example in: http://nile.wpi.edu/NS
+      auto seqdiff = seq1 - seq0;
+      if (seqdiff == 0)
+        seqdiff = 1;
+      else if (seqdiff < 0) {
+        // diff < 0
+        seqdiff = seqMaxValue + seqdiff;
       }
+      _gap = _gap / seqdiff;
+      auto diff = _gap - gap;
+      gapSd += diff * diff;
+      count++;
 
       t0 = t1;
       seq0 = seq1;
