@@ -6,15 +6,17 @@ JitterGraphFiller::JitterGraphFiller() {}
 QVector<QCPGraphData>
 JitterGraphFiller::fillGraphData(const QList<DataRegisterPtr> &regs) {
 
-  QVector<QCPGraphData> graphData(regs.count());
+  QVector<QCPGraphData> graphData;
+  QCPGraphData gd;
 
-  for (int i = 0; i < graphData.count(); i++) {
-    auto dr = regs[i];
+  for (auto it = regs.begin(); it != regs.end(); it++) {
+    auto dr = *it;
     if (dr->JitterValud()) {
       auto secSinceEpoch = dr->GetSecs();
-      auto secs = secSinceEpoch;// - secsBegin;
-      graphData[i].key = secs;
-      graphData[i].value = dr->GetJitter();
+      auto secs = secSinceEpoch; // - secsBegin;
+      gd.key = secs;
+      gd.value = dr->GetJitter();
+      graphData.append(gd);
     }
   }
   return graphData;

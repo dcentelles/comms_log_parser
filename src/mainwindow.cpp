@@ -206,7 +206,7 @@ void MainWindow::updateTimeValueParser() {
   QString logTimeFormat = ui->transportTimePattern->text();
   auto timeValuePattern = ui->timeValueRegexLineEdit->text();
   _timeValuePattern.setPattern(
-      QString("^%1.*%2").arg(logTimeFormat, timeValuePattern));
+      QString("^%1%2").arg(logTimeFormat, timeValuePattern));
 }
 
 void MainWindow::updateTransportParser() {
@@ -214,15 +214,15 @@ void MainWindow::updateTransportParser() {
 
   auto txPattern = ui->txRegexLineEdit->text();
 
-  dlTxPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat, txPattern));
+  dlTxPattern.setPattern(QString("^%1%2").arg(logTimeFormat, txPattern));
 
   auto rxPattern = ui->rxRegexLineEdit->text();
 
-  dlRxPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat, rxPattern));
+  dlRxPattern.setPattern(QString("^%1%2").arg(logTimeFormat, rxPattern));
 
   auto errPattern = ui->errRegexLineEdit->text();
 
-  dlErrPattern.setPattern(QString("^%1.*%2").arg(logTimeFormat, errPattern));
+  dlErrPattern.setPattern(QString("^%1%2").arg(logTimeFormat, errPattern));
 
   if (ui->uint8_t_radioButton->isChecked())
     DataRegister::SetSeqType(DataRegister::SeqType::UINT8);

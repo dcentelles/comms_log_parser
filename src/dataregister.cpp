@@ -12,18 +12,25 @@ DataRegister::DataRegister(int size, double relativeValue) {
   init();
   SetDataSize(size);
 
-  // Lo de addDays(1).addSecs(-3600) es para que no aparezca la hora 1 (del 1 de
-  // enero de 1970) en los widgets
-  auto datetime =
-      QDateTime::fromMSecsSinceEpoch(0).addDays(1).addSecs(-3600).addMSecs(
-          relativeValue * 1e3);
-  SetDateTime(datetime);
-  SetRelativeDateTime(datetime);
-  auto msSinceEpoch = datetime.toMSecsSinceEpoch();
-  SetSecs(msSinceEpoch / 1e3 + relativeValue);
-  SetMillis(msSinceEpoch + relativeValue * 1e3);
-  SetMicros(msSinceEpoch * 1e3 + relativeValue * 1e6);
-  SetNanos(msSinceEpoch * 1e6 + relativeValue * 1e9);
+  //    // Lo de addDays(1).addSecs(-3600) es para que no aparezca la hora 1
+  //    (del
+  //    //1 de
+  //    // enero de 1970) en los widgets
+  //    auto datetime =
+  //        QDateTime::fromMSecsSinceEpoch(0).addDays(1).addSecs(-3600).addMSecs(
+  //            relativeValue * 1e3);
+  //    SetDateTime(datetime);
+  //    SetRelativeDateTime(datetime);
+  //    auto msSinceEpoch = datetime.toMSecsSinceEpoch();
+  //    SetSecs(msSinceEpoch / 1e3);
+  //    SetMillis(msSinceEpoch);
+  //    SetMicros(msSinceEpoch * 1e3);
+  //    SetNanos(msSinceEpoch * 1e6);
+
+  SetSecs(relativeValue);
+  SetMillis(relativeValue * 1e3);
+  SetMicros(relativeValue * 1e6);
+  SetNanos(relativeValue * 1e9);
 }
 
 DataRegister::DataRegister(int size, const QDateTime &time,

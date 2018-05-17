@@ -166,13 +166,15 @@ void DateTimePlotWindow::updateXAxisRangeFromInput() {
 }
 
 void DateTimePlotWindow::UpdateXRange(QTime t0, QTime dur) {
-  QDateTime t0DateTime = ui->t0dateTimeEdit->dateTime();
+  QDateTime ct0 = ui->t0dateTimeEdit->dateTime();
+  QDateTime cdur = ui->durationDateTimeEdit->dateTime();
 
-  t0DateTime.setTime(t0);
-  auto t0sec = t0DateTime.toMSecsSinceEpoch() / 1000.;
+  QDateTime xMax = ct0.addMSecs(cdur.toMSecsSinceEpoch());
+
+  xMax.setTime(t0);
+  auto t0sec = xMax.toMSecsSinceEpoch() / 1000.;
   auto t1sec =
-      t0DateTime.addMSecs(dur.msecsSinceStartOfDay()).toMSecsSinceEpoch() /
-      1000.;
+      xMax.addMSecs(dur.msecsSinceStartOfDay()).toMSecsSinceEpoch() / 1000.;
   UpdateXRange(t0sec, t1sec);
 }
 
