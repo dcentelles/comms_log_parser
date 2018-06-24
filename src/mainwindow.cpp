@@ -335,6 +335,17 @@ void MainWindow::parsePacketTrace(QList<DataRegisterPtr> &coll,
           QString sdecimals = match.captured(decimalsIndex);
           QDateTime dateTime =
               QDateTime::fromString(dateTimeStr, dateTimeFormat);
+//          if (!dateTime.isValid()) {
+//            QString dateTimeStr2 = "1970/02/02 " + dateTimeStr;
+//            QString dateTimeFormat2 = "yyyy/MM/dd " + dateTimeFormat;
+//            dateTime = QDateTime::fromString(dateTimeStr2, dateTimeFormat2);
+//          }
+          if (!dateTime.isValid()) {
+            QString dateTimeFormat2 = dateTimeFormat; //"hh:mm:ss";
+            QTime time = QTime::fromString(dateTimeStr, dateTimeFormat2);
+            QDate date;
+            dateTime = QDateTime(date, time);
+          }
           if (!DataRegister::epochSet) {
             DataRegister::epoch = dateTime.addDays(-1).addSecs(3600);
             DataRegister::epochSet = true;
