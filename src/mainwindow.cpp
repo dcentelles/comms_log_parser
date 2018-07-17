@@ -319,12 +319,20 @@ void MainWindow::parsePacketTrace(QList<DataRegisterPtr> &coll,
     QTextStream stream(&data);
     QString line;
     coll.clear();
+    uint32_t vseq = 0;
     while (stream.readLineInto(&line)) {
       auto match = reg.match(line);
       if (match.hasMatch()) {
         uint32_t size, nseq = 0;
-        if (_seqNum)
-          nseq = match.captured("seqnum").toInt();
+        if (_seqNum) {
+          auto m = match.captured("seqnum");
+          if (m.size() > 0)
+            nseq = m.toInt();
+          else {
+            nseq = vseq++;
+            qWarning("seq num not matched. Setting virtual seq. num");
+          }
+        }
         size = match.captured("size").toInt();
         if (relativeTime) {
           double relativeValue = match.captured(relativeValueIndex).toDouble();
@@ -335,11 +343,13 @@ void MainWindow::parsePacketTrace(QList<DataRegisterPtr> &coll,
           QString sdecimals = match.captured(decimalsIndex);
           QDateTime dateTime =
               QDateTime::fromString(dateTimeStr, dateTimeFormat);
-//          if (!dateTime.isValid()) {
-//            QString dateTimeStr2 = "1970/02/02 " + dateTimeStr;
-//            QString dateTimeFormat2 = "yyyy/MM/dd " + dateTimeFormat;
-//            dateTime = QDateTime::fromString(dateTimeStr2, dateTimeFormat2);
-//          }
+          //          if (!dateTime.isValid()) {
+          //            QString dateTimeStr2 = "1970/02/02 " + dateTimeStr;
+          //            QString dateTimeFormat2 = "yyyy/MM/dd " +
+          //            dateTimeFormat;
+          //            dateTime = QDateTime::fromString(dateTimeStr2,
+          //            dateTimeFormat2);
+          //          }
           if (!dateTime.isValid()) {
             QString dateTimeFormat2 = dateTimeFormat; //"hh:mm:ss";
             QTime time = QTime::fromString(dateTimeStr, dateTimeFormat2);
@@ -354,6 +364,8 @@ void MainWindow::parsePacketTrace(QList<DataRegisterPtr> &coll,
                                              dateTime, sdecimals);
         }
         dataRegister->SetNseq(nseq);
+        if (!_seqNum)
+          dataRegister->disableLink = true;
         coll.append(dataRegister);
       }
     }
@@ -428,7 +440,8 @@ void MainWindow::parsePacketErrorsTrace(const QString &fileName,
           else if (errorType == "PERR")
             dlPropErrDataList.append(dataRegister);
         }
-
+        if (!_seqNum)
+          dataRegister->disableLink = true;
         dlErrDataList.append(dataRegister);
       }
     }

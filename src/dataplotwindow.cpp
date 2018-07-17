@@ -30,7 +30,7 @@ void DataPlotWindow::DrawDRsLinksToTimeGraph(QCustomPlot *plot,
     auto link = pdus.at(idx);
     auto linked = link->GetLinkedRegister();
 
-    if (linked) {
+    if (linked && !linked->disableLink) {
 
       auto linkTime = link->GetSecs();
       auto linkedTime = linked->GetSecs();
@@ -150,16 +150,17 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
 
   // CREAR GRAFICOS Y ASIGNAR DATOS
 
+  auto idx = plot->graphCount();
   // create graph and assign data to it:
   plot->addGraph(); // Paquetes enviados
   plot->addGraph(); // Paquetes recibidos
   plot->addGraph(); // Paquetes recibidos con error
 
-  auto txGraph = plot->graph(3);
+  auto txGraph = plot->graph(idx);
   txGraph->setName(txtitle);
-  auto rxGraph = plot->graph(4);
+  auto rxGraph = plot->graph(idx + 1);
   rxGraph->setName(rxtitle);
-  auto errGraph = plot->graph(5);
+  auto errGraph = plot->graph(idx + 2);
   errGraph->setName(errtitle);
 
   setDRsToTimeGraph(txGraph, txPdus);
@@ -174,9 +175,29 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
   pen.setColor(QColor(255, 0, 0));
   errGraph->setPen(pen);
 
-  txGraph->setScatterStyle(QCPScatterStyle::ssSquare);
-  rxGraph->setScatterStyle(QCPScatterStyle::ssSquare);
-  errGraph->setScatterStyle(QCPScatterStyle::ssSquare);
+  auto styleNum = idx / 3;
+  QCPScatterStyle style;
+  switch (styleNum) {
+  case 1:
+    style = QCPScatterStyle::ssSquare;
+    break;
+  case 2:
+    style = QCPScatterStyle::ssDiamond;
+    break;
+  case 3:
+    style = QCPScatterStyle::ssDisc;
+    break;
+  case 4:
+    style = QCPScatterStyle::ssCrossSquare;
+    break;
+  case 5:
+    style = QCPScatterStyle::ssCrossCircle;
+    break;
+  }
+
+  txGraph->setScatterStyle(style);
+  rxGraph->setScatterStyle(style);
+  errGraph->setScatterStyle(style);
 
   DrawDRsLinksToTimeGraph(plot, txPdus);
 
@@ -298,6 +319,8 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
 
   // CREAR GRAFICOS Y ASIGNAR DATOS
 
+  auto idx = plot->graphCount();
+
   // create graph and assign data to it:
   plot->addGraph(); // Paquetes enviados
   plot->addGraph(); // Paquetes recibidos
@@ -305,15 +328,15 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
   plot->addGraph(); // Paquetes recibidos con error
   plot->addGraph(); // Paquetes recibidos con error
 
-  auto txGraph = plot->graph(5);
+  auto txGraph = plot->graph(idx);
   txGraph->setName(txtitle);
-  auto rxGraph = plot->graph(6);
+  auto rxGraph = plot->graph(idx + 1);
   rxGraph->setName(rxtitle);
-  auto propErrGraph = plot->graph(7);
+  auto propErrGraph = plot->graph(idx + 2);
   propErrGraph->setName(errtitle + "(PROP)");
-  auto colErrGraph = plot->graph(8);
+  auto colErrGraph = plot->graph(idx + 3);
   colErrGraph->setName(errtitle + "(COL)");
-  auto multErrGraph = plot->graph(9);
+  auto multErrGraph = plot->graph(idx + 4);
   multErrGraph->setName(errtitle + "(MULT)");
 
   setDRsToTimeGraph(txGraph, txPdus);
@@ -334,11 +357,31 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
   pen.setColor(QColor(255, 153, 51));
   multErrGraph->setPen(pen);
 
-  txGraph->setScatterStyle(QCPScatterStyle::ssStar);
-  rxGraph->setScatterStyle(QCPScatterStyle::ssStar);
-  propErrGraph->setScatterStyle(QCPScatterStyle::ssStar);
-  colErrGraph->setScatterStyle(QCPScatterStyle::ssStar);
-  multErrGraph->setScatterStyle(QCPScatterStyle::ssStar);
+  auto styleNum = idx / 5;
+  QCPScatterStyle style;
+  switch (styleNum) {
+  case 1:
+    style = QCPScatterStyle::ssSquare;
+    break;
+  case 2:
+    style = QCPScatterStyle::ssDiamond;
+    break;
+  case 3:
+    style = QCPScatterStyle::ssDisc;
+    break;
+  case 4:
+    style = QCPScatterStyle::ssCrossSquare;
+    break;
+  case 5:
+    style = QCPScatterStyle::ssCrossCircle;
+    break;
+  }
+
+  txGraph->setScatterStyle(style);
+  rxGraph->setScatterStyle(style);
+  propErrGraph->setScatterStyle(style);
+  colErrGraph->setScatterStyle(style);
+  multErrGraph->setScatterStyle(style);
 
   DrawDRsLinksToTimeGraph(plot, txPdus);
 

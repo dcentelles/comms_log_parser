@@ -87,6 +87,7 @@ public:
 
   static QDateTime epoch;
   static bool epochSet;
+  bool disableLink = false;
 
 private:
   QString _dateTimeFormat;

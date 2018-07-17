@@ -22,6 +22,14 @@ DateTimePlotWindow::DateTimePlotWindow(QWidget *parent)
 
   // INICIALIZAR PLOT
   QCustomPlot *plot = ui->plotWidget;
+  plot->setInteraction(QCP::iSelectPlottables, true);
+  plot->setInteraction(QCP::iSelectAxes, true);
+  plot->setInteraction(QCP::iSelectItems, true);
+  plot->setInteraction(QCP::iSelectLegend, true);
+  plot->setInteraction(QCP::iSelectOther, true);
+  plot->setInteraction(QCP::iMultiSelect, true);
+  plot->setInteraction(QCP::iRangeDrag, true);
+  plot->setInteraction(QCP::iRangeZoom, true);
   plot->setLocale(QLocale(QLocale::Spanish, QLocale::Spain));
 
   QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
