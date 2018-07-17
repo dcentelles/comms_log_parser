@@ -729,6 +729,7 @@ void MainWindow::formatPlot(std::shared_ptr<DateTimePlotWindow> dwRx,
                                           // allowed
     ticker = fixedTicker;
   }
+  dwRx->GetYAxis()->setTicker(ticker);
   dwRx->GetXAxis()->setTicker(ticker);
   if (_absoluteXAxis) {
     dwRx->GetXAxis()->setTickLabelRotation(45);

@@ -58,8 +58,8 @@ DataRegister::DataRegister(int size, const QDateTime &time,
   uint64_t snanosInt = snanos.toUInt();
   SetNanos(millisSinceEpoch * 1e6 + snanosInt);
   SetSecs(GetNanos() / 1e9);
-  SetMillis(GetNanos() / 1e3);
-  SetMicros(GetNanos() / 1e6);
+  SetMillis(GetNanos() / 1e6);
+  SetMicros(GetNanos() / 1e3);
 }
 
 void DataRegister::init() {
