@@ -26,6 +26,9 @@ public:
   ~MainWindow();
 
 private slots:
+  void on_timeOffseLineEdit_textChanged(const QString &arg1);
+
+private slots:
   void on_toolButton_clicked();
 
 private slots:
@@ -171,6 +174,8 @@ private:
     bool _absoluteXAxis;
 
     void formatPlot(std::shared_ptr<DateTimePlotWindow> dwRx, const QString & ylabel, const QString & xlabel);
+    void enableDefaultLegend(std::shared_ptr<DateTimePlotWindow> dwRx);
+    int baseFontSize = 14;
   };
 
 #endif // MAINWINDOW_H

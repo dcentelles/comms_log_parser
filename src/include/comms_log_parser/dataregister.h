@@ -89,6 +89,8 @@ public:
   static bool epochSet;
   bool disableLink = false;
 
+  static double timeOffset;
+
 private:
   QString _dateTimeFormat;
   DataRegisterPtr _link;

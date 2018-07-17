@@ -27,6 +27,7 @@ public:
   QCPAxis *GetXAxis();
   QCPAxis *GetYAxis();
   QCPLegend *GetLegend();
+  QCustomPlot * GetPlot();
 
 private slots:
   void on_fixYPushButton_clicked();

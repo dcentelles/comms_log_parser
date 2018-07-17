@@ -3,6 +3,7 @@
 
 QDateTime DataRegister::epoch;
 bool DataRegister::epochSet = false;
+double DataRegister::timeOffset = 0;
 
 DataRegister::SeqType DataRegister::_seqType = UINT8;
 
@@ -10,6 +11,7 @@ DataRegister::DataRegister() { init(); }
 
 DataRegister::DataRegister(int size, double relativeValue) {
   init();
+  relativeValue += timeOffset;
   SetDataSize(size);
 
   //    // Lo de addDays(1).addSecs(-3600) es para que no aparezca la hora 1
@@ -36,6 +38,7 @@ DataRegister::DataRegister(int size, double relativeValue) {
 DataRegister::DataRegister(int size, const QDateTime &time,
                            const QString &sdecimals) {
   init();
+  auto time2 = time.addMSecs(timeOffset*1000);
   SetDataSize(size);
   int nd = sdecimals.size();
   int left = nd >= 3 ? 3 : nd;
@@ -43,9 +46,9 @@ DataRegister::DataRegister(int size, const QDateTime &time,
   while (smillis.size() < 3)
     smillis.append('0');
   uint32_t millis = smillis.toUInt();
-  SetDateTime(time.addMSecs(millis));
+  SetDateTime(time2.addMSecs(millis));
   // epoch = QDateTime::fromMSecsSinceEpoch(0);
-  auto millisSinceEpoch = epoch.msecsTo(time);
+  auto millisSinceEpoch = epoch.msecsTo(time2);
   auto dateTime = QDateTime::fromMSecsSinceEpoch(millisSinceEpoch);
   dateTime = dateTime.addMSecs(millis);
   SetRelativeDateTime(dateTime);

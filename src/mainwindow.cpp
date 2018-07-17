@@ -294,6 +294,7 @@ void MainWindow::parseDoubleTrace(QList<DataRegisterPtr> &coll,
       _timeValuePlotList.push_front(plot);
     } else {
       plot = _timeValuePlotList.front();
+      enableDefaultLegend(plot);
     }
     plot->show();
     uint64_t t0, t1;
@@ -625,11 +626,12 @@ void MainWindow::computeData(
           std::shared_ptr<DateTimePlotWindow>(new DateTimePlotWindow());
       jitterPlot->SetGraphFiller(GraphFillerPtr(new JitterGraphFiller()));
 
-      formatPlot(jitterPlot, "Jitter", "Reception time");
+      formatPlot(jitterPlot, "Jitter (ms)", "Time");
 
       jitterPlotList.push_front(jitterPlot);
     } else {
       jitterPlot = jitterPlotList.front();
+      enableDefaultLegend(jitterPlot);
     }
 
     jitterPlot->show();
@@ -652,10 +654,11 @@ void MainWindow::computeData(
     if (e2ePlotList.size() == 0 || !GetPlotOver()) {
       e2ePlot = std::shared_ptr<DateTimePlotWindow>(new DateTimePlotWindow());
       e2ePlot->SetGraphFiller(GraphFillerPtr(new End2EndGraphFiller()));
-      formatPlot(e2ePlot, "End-End delay (ms)", "Reception time");
+      formatPlot(e2ePlot, "End-End delay (ms)", "Time");
       e2ePlotList.push_front(e2ePlot);
     } else {
       e2ePlot = e2ePlotList.front();
+      enableDefaultLegend(e2ePlot);
     }
     e2ePlot->show();
     e2ePlot->Plot(rxDataListFiltered, "End-End delay", _t0, _t1, tagDesc);
@@ -682,6 +685,33 @@ void MainWindow::on_dl_rxT1ComboBox_currentIndexChanged(const QString &arg1) {
   ui->dl_rxT1->insert(arg1);
 }
 
+void MainWindow::enableDefaultLegend(std::shared_ptr<DateTimePlotWindow> dwRx) {
+  if (dwRx->GetPlot()->plotLayout()->hasElement(1, 0))
+    return;
+  dwRx->GetLegend()->setVisible(true);
+  dwRx->GetLegend()->setBrush(QColor(255, 255, 255, 150));
+  dwRx->GetLegend()->setFont(QFont(QFont().family(), baseFontSize));
+  dwRx->GetLegend()->setFillOrder(QCPLegend::foColumnsFirst);
+
+  // put legent below
+  // (http://www.qcustomplot.com/documentation/thelayoutsystem.html)
+  QCPLayoutGrid *subLayout = new QCPLayoutGrid;
+  dwRx->GetPlot()->plotLayout()->addElement(1, 0, subLayout);
+  subLayout->setMargins(QMargins(5, 0, 5, 5));
+  dwRx->GetLegend()->setBorderPen(Qt::NoPen);
+  subLayout->addElement(0, 0, new QCPLayoutElement);
+  subLayout->addElement(0, 1, dwRx->GetLegend());
+  subLayout->addElement(0, 2, new QCPLayoutElement);
+  // change the fill order of the legend, so it's filled left to right in
+  // columns:
+  dwRx->GetLegend()->setFillOrder(QCPLegend::foColumnsFirst);
+  // dwRx->GetLegend()->autoMargins();
+  // set legend's row stretch factor very small so it ends up with minimum
+  // height:
+  dwRx->GetPlot()->plotLayout()->setRowStretchFactor(1, 0.001);
+  // dwRx->GetLegend()->setMargins(QMargins(55, 0, 55, 0));
+}
+
 void MainWindow::formatPlot(std::shared_ptr<DateTimePlotWindow> dwRx,
                             const QString &ylabel, const QString &xlabel) {
 
@@ -691,7 +721,8 @@ void MainWindow::formatPlot(std::shared_ptr<DateTimePlotWindow> dwRx,
     dateTicker->setDateTimeFormat("HH:mm:ss:zzz");
     ticker = dateTicker;
   } else {
-    QSharedPointer<QCPAxisTickerFixedCustom> fixedTicker(new QCPAxisTickerFixedCustom);
+    QSharedPointer<QCPAxisTickerFixedCustom> fixedTicker(
+        new QCPAxisTickerFixedCustom);
     fixedTicker->setScaleStrategy(
         QCPAxisTickerFixed::ssMultiples); // and no scaling of the tickstep
                                           // (like multiples or powers) is
@@ -709,12 +740,6 @@ void MainWindow::formatPlot(std::shared_ptr<DateTimePlotWindow> dwRx,
     dwRx->GetYAxis()->setLabel(ylabel);
   }
 
-  int baseFontSize = 14;
-  // show legend with slightly transparent background brush:
-  dwRx->GetLegend()->setVisible(true);
-  dwRx->GetLegend()->setBrush(QColor(255, 255, 255, 150));
-  dwRx->GetLegend()->setFont(QFont(QFont().family(), baseFontSize));
-
   // set a more compact font size for bottom and left axis tick labels:
   dwRx->GetXAxis()->setTickLabelFont(QFont(QFont().family(), baseFontSize));
   dwRx->GetYAxis()->setTickLabelFont(QFont(QFont().family(), baseFontSize));
@@ -728,6 +753,7 @@ void MainWindow::on_dl_plotButton_clicked() {
   auto erTitle = ui->erTitleLineEdit->text();
 
   if (GetPlotOver() && _lastPktTracePlotWindow) {
+    enableDefaultLegend(_lastPktTracePlotWindow);
     if (!_simulation)
       _lastPktTracePlotWindow->PlotOver(dlTxDataList, dlRxDataList,
                                         dlErrDataList, _t0, _t1, txTitle,
@@ -842,4 +868,8 @@ void MainWindow::on_toolButton_clicked() {
   for (auto plotw : _pktTracePlotList) {
     plotw->UpdateXRange(t0, duration);
   }
+}
+
+void MainWindow::on_timeOffseLineEdit_textChanged(const QString &arg1) {
+  DataRegister::timeOffset = arg1.toDouble();
 }

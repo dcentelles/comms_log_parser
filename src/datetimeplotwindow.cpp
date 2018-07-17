@@ -49,6 +49,7 @@ DateTimePlotWindow::DateTimePlotWindow(QWidget *parent)
 QCPAxis *DateTimePlotWindow::GetXAxis() { return ui->plotWidget->xAxis; }
 QCPAxis *DateTimePlotWindow::GetYAxis() { return ui->plotWidget->yAxis; }
 QCPLegend *DateTimePlotWindow::GetLegend() { return ui->plotWidget->legend; }
+QCustomPlot *DateTimePlotWindow::GetPlot() { return ui->plotWidget; }
 
 void DateTimePlotWindow::SetGraphFiller(GraphFillerPtr gf) { _gf = gf; }
 GraphFillerPtr DateTimePlotWindow::GetGraphFiller() { return _gf; }
@@ -84,7 +85,6 @@ void DateTimePlotWindow::Plot(QList<DataRegisterPtr> regs, const QString &title,
   auto msdiff = t0dateTime.msecsTo(t1dateTime);
   QDateTime duration = QDateTime::fromMSecsSinceEpoch(msdiff);
   ui->durationDateTimeEdit->setDateTime(duration);
-
 
   plot->setInteraction(QCP::iRangeDrag, true);
   plot->setInteraction(QCP::iRangeZoom, true);
