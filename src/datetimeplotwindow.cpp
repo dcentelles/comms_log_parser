@@ -46,6 +46,10 @@ DateTimePlotWindow::DateTimePlotWindow(QWidget *parent)
   ui->durationDateTimeEdit->setDisplayFormat("mm:ss:zzz");
 }
 
+QCPAxis *DateTimePlotWindow::GetXAxis() { return ui->plotWidget->xAxis; }
+QCPAxis *DateTimePlotWindow::GetYAxis() { return ui->plotWidget->yAxis; }
+QCPLegend *DateTimePlotWindow::GetLegend() { return ui->plotWidget->legend; }
+
 void DateTimePlotWindow::SetGraphFiller(GraphFillerPtr gf) { _gf = gf; }
 GraphFillerPtr DateTimePlotWindow::GetGraphFiller() { return _gf; }
 
@@ -53,7 +57,6 @@ DateTimePlotWindow::~DateTimePlotWindow() { delete ui; }
 
 void DateTimePlotWindow::Plot(QList<DataRegisterPtr> regs, const QString &title,
                               uint64_t tini, uint64_t tend,
-                              const QString &ylabel, const QString &xlabel,
                               const QString &tagDesc,
                               QCPGraph::LineStyle lineStyle) {
   _windowTitle = title;
@@ -82,17 +85,10 @@ void DateTimePlotWindow::Plot(QList<DataRegisterPtr> regs, const QString &title,
   QDateTime duration = QDateTime::fromMSecsSinceEpoch(msdiff);
   ui->durationDateTimeEdit->setDateTime(duration);
 
-  // show legend with slightly transparent background brush:
-  plot->legend->setVisible(true);
-  plot->legend->setBrush(QColor(255, 255, 255, 150));
-  plot->legend->setFont(QFont(QFont().family(), 6));
 
   plot->setInteraction(QCP::iRangeDrag, true);
   plot->setInteraction(QCP::iRangeZoom, true);
   updateZoomSettingsFromUi();
-
-  plot->xAxis->setLabel(xlabel);
-  plot->yAxis->setLabel(ylabel);
 
   auto lower = plot->yAxis->range().lower;
   auto upper = plot->yAxis->range().upper;

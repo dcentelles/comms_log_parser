@@ -17,14 +17,16 @@ public:
   explicit DateTimePlotWindow(QWidget *parent = 0);
   ~DateTimePlotWindow();
   void Plot(QList<DataRegisterPtr> rxregs, const QString &title, uint64_t tini,
-            uint64_t tend, const QString &ylabel, const QString &xlabel, const QString &tagDesc,
+            uint64_t tend, const QString &tagDesc,
             QCPGraph::LineStyle lineStyle = QCPGraph::lsLine);
 
   void SetGraphFiller(GraphFillerPtr gf);
   GraphFillerPtr GetGraphFiller();
   void UpdateXRange(double t0, double t1);
   void UpdateXRange(QTime t0, QTime dur);
-
+  QCPAxis *GetXAxis();
+  QCPAxis *GetYAxis();
+  QCPLegend *GetLegend();
 
 private slots:
   void on_fixYPushButton_clicked();

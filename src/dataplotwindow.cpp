@@ -62,18 +62,8 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
   QCustomPlot *plot = ui->plotWidget;
   plot->setLocale(QLocale(QLocale::Spanish, QLocale::Spain));
 
-  QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
-  dateTicker->setDateTimeFormat("HH:mm:ss:zzz");
-
-  plot->xAxis->setTicker(dateTicker);
-  plot->xAxis->setTickLabelRotation(45);
-
   if (txPdus.count() == 0)
     return;
-
-  // set a more compact font size for bottom and left axis tick labels:
-  plot->xAxis->setTickLabelFont(QFont(QFont().family(), 6));
-  plot->yAxis->setTickLabelFont(QFont(QFont().family(), 8));
 
   auto t0 = tini / 1e9;
   auto t1 = tend / 1e9;
@@ -81,17 +71,9 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
   plot->xAxis->setRange(t0, t1);
   plot->yAxis->setRange(0, 1200);
 
-  // show legend with slightly transparent background brush:
-  plot->legend->setVisible(true);
-  plot->legend->setBrush(QColor(255, 255, 255, 150));
-  plot->legend->setFont(QFont(QFont().family(), 6));
-
   plot->setInteraction(QCP::iRangeDrag, true);
   plot->setInteraction(QCP::iRangeZoom, true);
   updateZoomSettingsFromUi();
-
-  plot->xAxis->setLabel("Time");
-  plot->yAxis->setLabel("PDU size (bytes)");
 
   // CREAR GRAFICOS Y ASIGNAR DATOS
 
@@ -137,10 +119,6 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
 
   if (txPdus.count() == 0)
     return;
-
-  // set a more compact font size for bottom and left axis tick labels:
-  plot->xAxis->setTickLabelFont(QFont(QFont().family(), 6));
-  plot->yAxis->setTickLabelFont(QFont(QFont().family(), 8));
 
   auto t0 = tini / 1e9;
   auto t1 = tend / 1e9;
@@ -217,18 +195,8 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
   QCustomPlot *plot = ui->plotWidget;
   plot->setLocale(QLocale(QLocale::Spanish, QLocale::Spain));
 
-  QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
-  dateTicker->setDateTimeFormat("HH:mm:ss:zzz");
-
-  plot->xAxis->setTicker(dateTicker);
-  plot->xAxis->setTickLabelRotation(45);
-
   if (txPdus.count() == 0)
     return;
-
-  // set a more compact font size for bottom and left axis tick labels:
-  plot->xAxis->setTickLabelFont(QFont(QFont().family(), 6));
-  plot->yAxis->setTickLabelFont(QFont(QFont().family(), 8));
 
   auto t0 = tini / 1e9;
   auto t1 = tend / 1e9;
@@ -236,17 +204,9 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
   plot->xAxis->setRange(t0, t1);
   plot->yAxis->setRange(0, 1200);
 
-  // show legend with slightly transparent background brush:
-  plot->legend->setVisible(true);
-  plot->legend->setBrush(QColor(255, 255, 255, 150));
-  plot->legend->setFont(QFont(QFont().family(), 6));
-
   plot->setInteraction(QCP::iRangeDrag, true);
   plot->setInteraction(QCP::iRangeZoom, true);
   updateZoomSettingsFromUi();
-
-  plot->xAxis->setLabel("Time");
-  plot->yAxis->setLabel("PDU size (bytes)");
 
   // CREAR GRAFICOS Y ASIGNAR DATOS
 
@@ -306,10 +266,6 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
 
   if (txPdus.count() == 0)
     return;
-
-  // set a more compact font size for bottom and left axis tick labels:
-  plot->xAxis->setTickLabelFont(QFont(QFont().family(), 6));
-  plot->yAxis->setTickLabelFont(QFont(QFont().family(), 8));
 
   auto t0 = tini / 1e9;
   auto t1 = tend / 1e9;

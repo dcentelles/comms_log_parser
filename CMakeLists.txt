@@ -60,6 +60,7 @@ add_library(${${PROJECT_NAME}_LIB}
         src/qcustomplot.cpp
         src/normalplot.cpp
         src/doublegraphfiller.cpp
+        src/qcpaxistickerfixedcustom.cpp
         ${hmi_SRC}
         ${hmi_UI}
 	)

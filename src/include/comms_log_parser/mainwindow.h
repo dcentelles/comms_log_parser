@@ -168,6 +168,9 @@ private:
 
     bool _seqNum, _lastWithSeqNum, _simulation;
     QCPGraph::LineStyle _timeValueLineStyle;
+    bool _absoluteXAxis;
+
+    void formatPlot(std::shared_ptr<DateTimePlotWindow> dwRx, const QString & ylabel, const QString & xlabel);
   };
 
 #endif // MAINWINDOW_H

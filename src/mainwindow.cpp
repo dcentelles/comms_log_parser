@@ -6,6 +6,7 @@
 #include <comms_log_parser/jittergraphfiller.h>
 #include <comms_log_parser/mainwindow.h>
 #include <comms_log_parser/normalplot.h>
+#include <comms_log_parser/qcpaxistickerfixedcustom.h>
 #include <ui_mainwindow.h>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -233,9 +234,10 @@ void MainWindow::updateTransportParser() {
 }
 
 void MainWindow::init() {
-  // Force absolute DateTime.
-  DataRegister::epoch = QDateTime::fromMSecsSinceEpoch(0);
-  DataRegister::epochSet = true;
+  //  // Force absolute DateTime.
+  //  DataRegister::epoch = QDateTime::fromMSecsSinceEpoch(0);
+  //  DataRegister::epochSet = true;
+  _absoluteXAxis = false;
 
   _defaultSettingsFile = QApplication::applicationDirPath() + "/default.ini";
   loadDefaultSettings();
@@ -288,6 +290,7 @@ void MainWindow::parseDoubleTrace(QList<DataRegisterPtr> &coll,
     if (_timeValuePlotList.size() == 0 || !plotOver) {
       plot = std::shared_ptr<DateTimePlotWindow>(new DateTimePlotWindow());
       plot->SetGraphFiller(GraphFillerPtr(new DoubleGraphFiller()));
+      formatPlot(plot, ylabel, xlabel);
       _timeValuePlotList.push_front(plot);
     } else {
       plot = _timeValuePlotList.front();
@@ -297,8 +300,8 @@ void MainWindow::parseDoubleTrace(QList<DataRegisterPtr> &coll,
     if (coll.size() > 0) {
       t0 = coll[0]->GetNanos();
       t1 = coll[coll.size() - 1]->GetNanos();
-      plot->Plot(coll, "Time-Value", t0, t1, ylabel, xlabel, seriesLabel,
-                 _timeValueLineStyle);
+      formatPlot(plot, ylabel, xlabel);
+      plot->Plot(coll, "Time-Value", t0, t1, seriesLabel, _timeValueLineStyle);
     }
   }
 }
@@ -621,14 +624,16 @@ void MainWindow::computeData(
       jitterPlot =
           std::shared_ptr<DateTimePlotWindow>(new DateTimePlotWindow());
       jitterPlot->SetGraphFiller(GraphFillerPtr(new JitterGraphFiller()));
+
+      formatPlot(jitterPlot, "Jitter", "Reception time");
+
       jitterPlotList.push_front(jitterPlot);
     } else {
       jitterPlot = jitterPlotList.front();
     }
 
     jitterPlot->show();
-    jitterPlot->Plot(rxDataListFiltered, "Jitter", _t0, _t1, "Jitter",
-                     "Reception time", tagDesc);
+    jitterPlot->Plot(rxDataListFiltered, "Jitter", _t0, _t1, tagDesc);
 
     // Plot End2End delay gaussian
     DataRegister::ComputeEnd2EndDelay(rxDataListFiltered, btt, bttSd);
@@ -647,13 +652,13 @@ void MainWindow::computeData(
     if (e2ePlotList.size() == 0 || !GetPlotOver()) {
       e2ePlot = std::shared_ptr<DateTimePlotWindow>(new DateTimePlotWindow());
       e2ePlot->SetGraphFiller(GraphFillerPtr(new End2EndGraphFiller()));
+      formatPlot(e2ePlot, "End-End delay (ms)", "Reception time");
       e2ePlotList.push_front(e2ePlot);
     } else {
       e2ePlot = e2ePlotList.front();
     }
     e2ePlot->show();
-    e2ePlot->Plot(rxDataListFiltered, "End-End delay", _t0, _t1,
-                  "end-end delay (ms)", "Reception time", tagDesc);
+    e2ePlot->Plot(rxDataListFiltered, "End-End delay", _t0, _t1, tagDesc);
   }
 }
 
@@ -677,6 +682,46 @@ void MainWindow::on_dl_rxT1ComboBox_currentIndexChanged(const QString &arg1) {
   ui->dl_rxT1->insert(arg1);
 }
 
+void MainWindow::formatPlot(std::shared_ptr<DateTimePlotWindow> dwRx,
+                            const QString &ylabel, const QString &xlabel) {
+
+  QSharedPointer<QCPAxisTicker> ticker;
+  if (_absoluteXAxis) {
+    QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
+    dateTicker->setDateTimeFormat("HH:mm:ss:zzz");
+    ticker = dateTicker;
+  } else {
+    QSharedPointer<QCPAxisTickerFixedCustom> fixedTicker(new QCPAxisTickerFixedCustom);
+    fixedTicker->setScaleStrategy(
+        QCPAxisTickerFixed::ssMultiples); // and no scaling of the tickstep
+                                          // (like multiples or powers) is
+                                          // allowed
+    ticker = fixedTicker;
+  }
+  dwRx->GetXAxis()->setTicker(ticker);
+  if (_absoluteXAxis) {
+    dwRx->GetXAxis()->setTickLabelRotation(45);
+    dwRx->GetXAxis()->setLabel(xlabel);
+    dwRx->GetYAxis()->setLabel(ylabel);
+  } else {
+    dwRx->GetXAxis()->setTickLabelRotation(0);
+    dwRx->GetXAxis()->setLabel(xlabel + " (s)");
+    dwRx->GetYAxis()->setLabel(ylabel);
+  }
+
+  int baseFontSize = 14;
+  // show legend with slightly transparent background brush:
+  dwRx->GetLegend()->setVisible(true);
+  dwRx->GetLegend()->setBrush(QColor(255, 255, 255, 150));
+  dwRx->GetLegend()->setFont(QFont(QFont().family(), baseFontSize));
+
+  // set a more compact font size for bottom and left axis tick labels:
+  dwRx->GetXAxis()->setTickLabelFont(QFont(QFont().family(), baseFontSize));
+  dwRx->GetYAxis()->setTickLabelFont(QFont(QFont().family(), baseFontSize));
+  dwRx->GetXAxis()->setLabelFont(QFont(QFont().family(), baseFontSize));
+  dwRx->GetYAxis()->setLabelFont(QFont(QFont().family(), baseFontSize));
+}
+
 void MainWindow::on_dl_plotButton_clicked() {
   auto txTitle = ui->txTitleLineEdit->text();
   auto rxTitle = ui->rxTitleLineEdit->text();
@@ -697,30 +742,8 @@ void MainWindow::on_dl_plotButton_clicked() {
     dwRx = DataPlotWindowPtr(new DataPlotWindow());
     _pktTracePlotList.push_back(dwRx);
 
+    formatPlot(dwRx, "PDU Size (bytes)", "Time");
     dwRx->show();
-    /*
-    auto rxt0 = QDateTime::fromString (ui->dl_rxT0->text(),
-                                    DataRegister::timeFormat);
-    auto rxt1 = QDateTime::fromString (ui->dl_rxT1->text(),
-                                    DataRegister::timeFormat);
-    auto txt0 = QDateTime::fromString (ui->dl_txT0->text(),
-                                    DataRegister::timeFormat);
-    auto txt1 = QDateTime::fromString (ui->dl_txT1->text(),
-                                    DataRegister::timeFormat);
-
-    //Escogemos el intervalo mayor que engloba a todas las muestras de interés:
-    QDateTime t0, t1;
-    t0 = txt0 <= rxt0 ? txt0 : rxt0;
-    t1 = rxt1 >= txt1 ? rxt1 : txt1;
-    */
-
-    /*
-     * Pasamos todas las muestras del log, pero con el intervalo obtenido para
-     * visualizar
-     * ese intervalo primero. El usuario podrá interactuar en la línea de tiempo
-     * del plot
-     * para ver otras muestras que esten fuera del intervalo
-     */
 
     if (!_simulation)
       dwRx->Plot(dlTxDataList, dlRxDataList, dlErrDataList, _t0, _t1, txTitle,
