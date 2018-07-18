@@ -400,6 +400,7 @@ void MainWindow::parsePacketErrorsTrace(const QString &fileName,
     QString dateTimeFormat = ui->transportDateTimeFormat->text();
     QTextStream stream(&data);
     QString line;
+    dlErrDataList.clear();
     dlPropErrDataList.clear();
     dlColErrDataList.clear();
     dlMultErrDataList.clear();
