@@ -150,6 +150,7 @@ private:
     int GetRelativeValueIndex();
     int GetSeqIndex();
     bool GetPlotOver();
+    bool GetPlotErrors();
     QString GetTransportTag();
 
     bool TimeIsRelative();
@@ -175,7 +176,7 @@ private:
 
     void formatPlot(std::shared_ptr<DateTimePlotWindow> dwRx, const QString & ylabel, const QString & xlabel);
     void enableDefaultLegend(std::shared_ptr<DateTimePlotWindow> dwRx);
-    int baseFontSize = 14;
+    int baseFontSize = 12;
   };
 
 #endif // MAINWINDOW_H

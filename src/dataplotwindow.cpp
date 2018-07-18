@@ -56,7 +56,8 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
                           QList<DataRegisterPtr> rxPdus,
                           QList<DataRegisterPtr> errors, uint64_t tini,
                           uint64_t tend, const QString &txtitle,
-                          const QString &rxtitle, const QString &errtitle) {
+                          const QString &rxtitle, const QString &errtitle,
+                          bool addErr) {
   // INICIALIZAR PLOT
 
   QCustomPlot *plot = ui->plotWidget;
@@ -65,6 +66,7 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
   if (txPdus.count() == 0)
     return;
 
+  plotCount = 0;
   auto t0 = tini / 1e9;
   auto t1 = tend / 1e9;
 
@@ -77,29 +79,30 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
 
   // CREAR GRAFICOS Y ASIGNAR DATOS
 
+  QPen pen;
   // create graph and assign data to it:
   plot->addGraph(); // Paquetes enviados
-  plot->addGraph(); // Paquetes recibidos
-  plot->addGraph(); // Paquetes recibidos con error
-
   auto txGraph = plot->graph(0);
   txGraph->setName(txtitle);
-  auto rxGraph = plot->graph(1);
-  rxGraph->setName(rxtitle);
-  auto errGraph = plot->graph(2);
-  errGraph->setName(errtitle);
-
   setDRsToTimeGraph(txGraph, txPdus);
-  setDRsToTimeGraph(rxGraph, rxPdus);
-  setDRsToTimeGraph(errGraph, errors);
-
-  QPen pen;
   pen.setColor(QColor(0, 0, 255));
   txGraph->setPen(pen);
+
+  plot->addGraph(); // Paquetes recibidos
+  auto rxGraph = plot->graph(1);
+  rxGraph->setName(rxtitle);
+  setDRsToTimeGraph(rxGraph, rxPdus);
   pen.setColor(QColor(0, 255, 0));
   rxGraph->setPen(pen);
-  pen.setColor(QColor(255, 0, 0));
-  errGraph->setPen(pen);
+
+  if (addErr) {
+    plot->addGraph(); // Paquetes recibidos con error
+    auto errGraph = plot->graph(2);
+    errGraph->setName(errtitle);
+    setDRsToTimeGraph(errGraph, errors);
+    pen.setColor(QColor(255, 0, 0));
+    errGraph->setPen(pen);
+  }
 
   DrawDRsLinksToTimeGraph(plot, txPdus);
 
@@ -114,46 +117,21 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
                               QList<DataRegisterPtr> rxPdus,
                               QList<DataRegisterPtr> errors, uint64_t tini,
                               uint64_t tend, const QString &txtitle,
-                              const QString &rxtitle, const QString &errtitle) {
+                              const QString &rxtitle, const QString &errtitle,
+                              bool addErr) {
   QCustomPlot *plot = ui->plotWidget;
 
   if (txPdus.count() == 0)
     return;
 
+  plotCount += 1;
   auto t0 = tini / 1e9;
   auto t1 = tend / 1e9;
 
   plot->xAxis->setRange(t0, t1);
   plot->yAxis->setRange(0, 1200);
 
-  // CREAR GRAFICOS Y ASIGNAR DATOS
-
-  auto idx = plot->graphCount();
-  // create graph and assign data to it:
-  plot->addGraph(); // Paquetes enviados
-  plot->addGraph(); // Paquetes recibidos
-  plot->addGraph(); // Paquetes recibidos con error
-
-  auto txGraph = plot->graph(idx);
-  txGraph->setName(txtitle);
-  auto rxGraph = plot->graph(idx + 1);
-  rxGraph->setName(rxtitle);
-  auto errGraph = plot->graph(idx + 2);
-  errGraph->setName(errtitle);
-
-  setDRsToTimeGraph(txGraph, txPdus);
-  setDRsToTimeGraph(rxGraph, rxPdus);
-  setDRsToTimeGraph(errGraph, errors);
-
-  QPen pen;
-  pen.setColor(QColor(0, 0, 255));
-  txGraph->setPen(pen);
-  pen.setColor(QColor(0, 255, 0));
-  rxGraph->setPen(pen);
-  pen.setColor(QColor(255, 0, 0));
-  errGraph->setPen(pen);
-
-  auto styleNum = idx / 3;
+  auto styleNum = plotCount;
   QCPScatterStyle style;
   switch (styleNum) {
   case 1:
@@ -173,9 +151,36 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
     break;
   }
 
+  // CREAR GRAFICOS Y ASIGNAR DATOS
+
+  auto idx = plot->graphCount();
+  QPen pen;
+  // create graph and assign data to it:
+  plot->addGraph(); // Paquetes enviados
+  auto txGraph = plot->graph(idx);
+  txGraph->setName(txtitle);
+  setDRsToTimeGraph(txGraph, txPdus);
+  pen.setColor(QColor(0, 0, 255));
+  txGraph->setPen(pen);
   txGraph->setScatterStyle(style);
+
+  plot->addGraph(); // Paquetes recibidos
+  auto rxGraph = plot->graph(idx + 1);
+  rxGraph->setName(rxtitle);
+  setDRsToTimeGraph(rxGraph, rxPdus);
+  pen.setColor(QColor(0, 255, 0));
+  rxGraph->setPen(pen);
   rxGraph->setScatterStyle(style);
-  errGraph->setScatterStyle(style);
+
+  if (addErr) {
+    plot->addGraph(); // Paquetes recibidos con error
+    auto errGraph = plot->graph(idx + 2);
+    errGraph->setName(errtitle);
+    setDRsToTimeGraph(errGraph, errors);
+    pen.setColor(QColor(255, 0, 0));
+    errGraph->setPen(pen);
+    errGraph->setScatterStyle(style);
+  }
 
   DrawDRsLinksToTimeGraph(plot, txPdus);
 
@@ -198,6 +203,7 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
   if (txPdus.count() == 0)
     return;
 
+  plotCount = 0;
   auto t0 = tini / 1e9;
   auto t1 = tend / 1e9;
 
@@ -267,6 +273,7 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
   if (txPdus.count() == 0)
     return;
 
+  plotCount += 1;
   auto t0 = tini / 1e9;
   auto t1 = tend / 1e9;
 
@@ -313,7 +320,7 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
   pen.setColor(QColor(255, 153, 51));
   multErrGraph->setPen(pen);
 
-  auto styleNum = idx / 5;
+  auto styleNum = plotCount;
   QCPScatterStyle style;
   switch (styleNum) {
   case 1:

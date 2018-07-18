@@ -6,57 +6,38 @@
 #include <qcustomplot.h>
 #include <ui_datetimeplotwindow.h>
 
-class DataPlotWindow : public DateTimePlotWindow
-{
+class DataPlotWindow : public DateTimePlotWindow {
 public:
-    explicit DataPlotWindow(QWidget *parent = 0);
-    ~DataPlotWindow();
+  explicit DataPlotWindow(QWidget *parent = 0);
+  ~DataPlotWindow();
 
-  void Plot(QList<DataRegisterPtr> txPdus,
-            QList<DataRegisterPtr> rxPdus,
-            QList<DataRegisterPtr> propErrors,
-            QList<DataRegisterPtr> colErrors,
-            QList<DataRegisterPtr> multErrors,
-            uint64_t tini, uint64_t tend,
-            const QString & txtitle,
-            const QString & rxtitle,
-            const QString & errtitle);
+  void Plot(QList<DataRegisterPtr> txPdus, QList<DataRegisterPtr> rxPdus,
+            QList<DataRegisterPtr> propErrors, QList<DataRegisterPtr> colErrors,
+            QList<DataRegisterPtr> multErrors, uint64_t tini, uint64_t tend,
+            const QString &txtitle, const QString &rxtitle,
+            const QString &errtitle);
 
-  void PlotOver(QList<DataRegisterPtr> txPdus,
-            QList<DataRegisterPtr> rxPdus,
-            QList<DataRegisterPtr> propErrors,
-            QList<DataRegisterPtr> colErrors,
-            QList<DataRegisterPtr> multErrors,
-            uint64_t tini, uint64_t tend,
-            const QString & txtitle,
-            const QString & rxtitle,
-            const QString & errtitle);
+  void PlotOver(QList<DataRegisterPtr> txPdus, QList<DataRegisterPtr> rxPdus,
+                QList<DataRegisterPtr> propErrors,
+                QList<DataRegisterPtr> colErrors,
+                QList<DataRegisterPtr> multErrors, uint64_t tini, uint64_t tend,
+                const QString &txtitle, const QString &rxtitle,
+                const QString &errtitle);
 
-   void Plot(QList<DataRegisterPtr> txPdus,
-             QList<DataRegisterPtr> rxPdus,
-             QList<DataRegisterPtr> errors,
-             uint64_t tini, uint64_t tend,
-             const QString & txtitle,
-             const QString & rxtitle,
-             const QString & errtitle);
+  void Plot(QList<DataRegisterPtr> txPdus, QList<DataRegisterPtr> rxPdus,
+            QList<DataRegisterPtr> errors, uint64_t tini, uint64_t tend,
+            const QString &txtitle, const QString &rxtitle,
+            const QString &errtitle, bool addErr = true);
 
-   void PlotOver(QList<DataRegisterPtr> txPdus,
-             QList<DataRegisterPtr> rxPdus,
-             QList<DataRegisterPtr> errors,
-             uint64_t tini, uint64_t tend,
-             const QString & txtitle,
-             const QString & rxtitle,
-             const QString & errtitle);
-
+  void PlotOver(QList<DataRegisterPtr> txPdus, QList<DataRegisterPtr> rxPdus,
+                QList<DataRegisterPtr> errors, uint64_t tini, uint64_t tend,
+                const QString &txtitle, const QString &rxtitle,
+                const QString &errtitle, bool addErr = true);
 
 private:
-    void setDRsToTimeGraph(
-                          QCPGraph * graph,
-                          QList<DataRegisterPtr> drs);
-    void DrawDRsLinksToTimeGraph(
-            QCustomPlot * plot,
-            QList<DataRegisterPtr> pdus
-            );
+  void setDRsToTimeGraph(QCPGraph *graph, QList<DataRegisterPtr> drs);
+  void DrawDRsLinksToTimeGraph(QCustomPlot *plot, QList<DataRegisterPtr> pdus);
+  int plotCount = 0;
 };
 
 typedef std::shared_ptr<DataPlotWindow> DataPlotWindowPtr;

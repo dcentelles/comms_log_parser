@@ -203,6 +203,8 @@ QString MainWindow::GetTransportTag() {
 
 bool MainWindow::GetPlotOver() { return ui->plotOverCheckBox->isChecked(); }
 
+bool MainWindow::GetPlotErrors() { return ui->plotErrorsCheckBox->isChecked(); }
+
 void MainWindow::updateTimeValueParser() {
   QString logTimeFormat = ui->transportTimePattern->text();
   auto timeValuePattern = ui->timeValueRegexLineEdit->text();
@@ -234,9 +236,10 @@ void MainWindow::updateTransportParser() {
 }
 
 void MainWindow::init() {
-  //  // Force absolute DateTime.
-  //  DataRegister::epoch = QDateTime::fromMSecsSinceEpoch(0);
-  //  DataRegister::epochSet = true;
+  // Force absolute DateTime.
+  DataRegister::epoch = DataRegister::epoch =
+      QDateTime(QDate(2018, 6, 1)); // QDateTime::fromMSecsSinceEpoch(0);
+  DataRegister::epochSet = true;
   _absoluteXAxis = false;
 
   _defaultSettingsFile = QApplication::applicationDirPath() + "/default.ini";
@@ -276,9 +279,10 @@ void MainWindow::parseDoubleTrace(QList<DataRegisterPtr> &coll,
           QString sdecimals = match.captured(decimalsIndex);
           QDateTime dateTime =
               QDateTime::fromString(dateTimeStr, dateTimeFormat);
-          if (!DataRegister::epochSet) {
-            DataRegister::epoch = dateTime.addDays(-1).addSecs(3600);
-            DataRegister::epochSet = true;
+          if (dateTime.date().year() <
+              1970) // when parsing time format year is 1900
+          {
+            dateTime.setDate(DataRegister::epoch.date());
           }
           dataRegister = DataRegister::Build(0, dateTime, sdecimals);
         }
@@ -347,22 +351,10 @@ void MainWindow::parsePacketTrace(QList<DataRegisterPtr> &coll,
           QString sdecimals = match.captured(decimalsIndex);
           QDateTime dateTime =
               QDateTime::fromString(dateTimeStr, dateTimeFormat);
-          //          if (!dateTime.isValid()) {
-          //            QString dateTimeStr2 = "1970/02/02 " + dateTimeStr;
-          //            QString dateTimeFormat2 = "yyyy/MM/dd " +
-          //            dateTimeFormat;
-          //            dateTime = QDateTime::fromString(dateTimeStr2,
-          //            dateTimeFormat2);
-          //          }
-          if (!dateTime.isValid()) {
-            QString dateTimeFormat2 = dateTimeFormat; //"hh:mm:ss";
-            QTime time = QTime::fromString(dateTimeStr, dateTimeFormat2);
-            QDate date;
-            dateTime = QDateTime(date, time);
-          }
-          if (!DataRegister::epochSet) {
-            DataRegister::epoch = dateTime.addDays(-1).addSecs(3600);
-            DataRegister::epochSet = true;
+          if (dateTime.date().year() <
+              1970) // when parsing time format year is 1900
+          {
+            dateTime.setDate(DataRegister::epoch.date());
           }
           dataRegister = DataRegister::Build(size + GetPktSizeOffset(),
                                              dateTime, sdecimals);
@@ -427,9 +419,10 @@ void MainWindow::parsePacketErrorsTrace(const QString &fileName,
           QString sdecimals = match.captured(decimalsIndex);
           QDateTime dateTime =
               QDateTime::fromString(dateTimeStr, dateTimeFormat);
-          if (!DataRegister::epochSet) {
-            DataRegister::epoch = dateTime.addDays(-1).addSecs(3600);
-            DataRegister::epochSet = true;
+          if (dateTime.date().year() <
+              1970) // when parsing time format year is 1900
+          {
+            dateTime.setDate(DataRegister::epoch.date());
           }
           dataRegister = DataRegister::Build(size + GetPktSizeOffset(),
                                              dateTime, sdecimals);
@@ -758,7 +751,7 @@ void MainWindow::on_dl_plotButton_clicked() {
     if (!_simulation)
       _lastPktTracePlotWindow->PlotOver(dlTxDataList, dlRxDataList,
                                         dlErrDataList, _t0, _t1, txTitle,
-                                        rxTitle, erTitle);
+                                        rxTitle, erTitle, GetPlotErrors());
     else
       _lastPktTracePlotWindow->PlotOver(
           dlTxDataList, dlRxDataList, dlPropErrDataList, dlColErrDataList,
@@ -774,7 +767,7 @@ void MainWindow::on_dl_plotButton_clicked() {
 
     if (!_simulation)
       dwRx->Plot(dlTxDataList, dlRxDataList, dlErrDataList, _t0, _t1, txTitle,
-                 rxTitle, erTitle);
+                 rxTitle, erTitle, GetPlotErrors());
     else
       dwRx->Plot(dlTxDataList, dlRxDataList, dlPropErrDataList,
                  dlColErrDataList, dlMultErrDataList, _t0, _t1, txTitle,

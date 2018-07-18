@@ -102,7 +102,7 @@ private:
   double _jitterValid;
   double _end2EndDelay;
   double _doubleValue;
-  uint64_t _nseq, _nanos;
+  uint64_t _nseq, _nanos, _nanosSinceSecond;
   double _secs, _millis, _micros;
 };
 

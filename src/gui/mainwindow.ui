@@ -69,7 +69,7 @@
            </size>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -1137,6 +1137,19 @@
               <width>181</width>
               <height>25</height>
              </rect>
+            </property>
+           </widget>
+           <widget class="QCheckBox" name="plotErrorsCheckBox">
+            <property name="geometry">
+             <rect>
+              <x>750</x>
+              <y>370</y>
+              <width>151</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Plot Errors</string>
             </property>
            </widget>
           </widget>

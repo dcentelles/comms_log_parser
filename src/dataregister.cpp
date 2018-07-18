@@ -1,3 +1,4 @@
+#include <QDebug>
 #include <comms_log_parser/dataregister.h>
 #include <qmath.h>
 
@@ -38,7 +39,7 @@ DataRegister::DataRegister(int size, double relativeValue) {
 DataRegister::DataRegister(int size, const QDateTime &time,
                            const QString &sdecimals) {
   init();
-  auto time2 = time.addMSecs(timeOffset*1000);
+  auto time2 = time.addMSecs(timeOffset * 1000);
   SetDataSize(size);
   int nd = sdecimals.size();
   int left = nd >= 3 ? 3 : nd;
@@ -55,11 +56,18 @@ DataRegister::DataRegister(int size, const QDateTime &time,
   QString snanos = sdecimals;
   while (snanos.size() < 9)
     snanos.append('0');
-  uint64_t snanosInt = snanos.toUInt();
-  SetNanos(millisSinceEpoch * 1e6 + snanosInt);
+  _nanosSinceSecond = snanos.toUInt();
+  SetNanos(millisSinceEpoch * 1e6 + _nanosSinceSecond);
   SetSecs(GetNanos() / 1e9);
   SetMillis(GetNanos() / 1e6);
   SetMicros(GetNanos() / 1e3);
+
+  // check precission
+  uint64_t getNanosValue = GetNanos();
+  uint64_t setNanosValue = millisSinceEpoch * 1e6 + _nanosSinceSecond;
+  if (getNanosValue != setNanosValue) {
+    qWarning() << "PRECISSION ISSUE. CONSIDER TO USE AN EARLIER EPOCH!!";
+  }
 }
 
 void DataRegister::init() {
