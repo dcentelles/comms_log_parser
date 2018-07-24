@@ -10,25 +10,17 @@ DataRegister::SeqType DataRegister::_seqType = UINT8;
 
 DataRegister::DataRegister() { init(); }
 
+void DataRegister::UpdateTimeFromNanos(uint64_t nanos) {
+  SetNanos(nanos);
+  SetMicros(nanos / 1e3);
+  SetMillis(nanos / 1e6);
+  SetSecs(nanos / 1e9);
+}
+
 DataRegister::DataRegister(int size, double relativeValue) {
   init();
   relativeValue += timeOffset;
   SetDataSize(size);
-
-  //    // Lo de addDays(1).addSecs(-3600) es para que no aparezca la hora 1
-  //    (del
-  //    //1 de
-  //    // enero de 1970) en los widgets
-  //    auto datetime =
-  //        QDateTime::fromMSecsSinceEpoch(0).addDays(1).addSecs(-3600).addMSecs(
-  //            relativeValue * 1e3);
-  //    SetDateTime(datetime);
-  //    SetRelativeDateTime(datetime);
-  //    auto msSinceEpoch = datetime.toMSecsSinceEpoch();
-  //    SetSecs(msSinceEpoch / 1e3);
-  //    SetMillis(msSinceEpoch);
-  //    SetMicros(msSinceEpoch * 1e3);
-  //    SetNanos(msSinceEpoch * 1e6);
 
   SetSecs(relativeValue);
   SetMillis(relativeValue * 1e3);

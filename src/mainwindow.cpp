@@ -9,6 +9,53 @@
 #include <comms_log_parser/qcpaxistickerfixedcustom.h>
 #include <ui_mainwindow.h>
 
+// static uint64_t minTime = UINT64_MAX;
+
+// void getMinTime(uint64_t &minNanos, QList<DataRegisterPtr> &regList) {
+//  for (auto reg : regList) {
+//    if (reg->GetNanos() < minNanos)
+//      minNanos;
+//  }
+//}
+// void substractTime(uint64_t &minNanos, QList<DataRegisterPtr> &regList) {
+//  for (auto reg : regList) {
+//    if (reg->GetNanos() < minNanos)
+//      minNanos;
+//  }
+//}
+
+// uint64_t reduceTime(QList<QList<DataRegisterPtr>> &lists) {
+//  if (minTime != -1) {
+//    for (auto regList : lists) {
+//      getMinTime(minTime, regList);
+//    }
+//    for (auto regList : lists) {
+//      getMinTime(minTime, regList);
+//    }
+//    for (auto regList : lists) {
+//      substractTime(minTime, regList);
+//    }
+//  }
+//  return minTime;
+//}
+
+// void MainWindow::updateMinTime(double seconds) {
+//  ui->timeOffseLineEdit->setText(QString::number(seconds));
+//  DataRegister::timeOffset = seconds;
+//}
+
+void MainWindow::setMinSecond(uint64_t second) {
+  minSecond = second;
+  ui->minTimeLineEdit->setText(QString::number(second));
+}
+void MainWindow::checkMinTime(DataRegisterPtr reg) {
+  uint64_t second = std::floor(reg->GetSecs());
+  if (second < minSecond) {
+    setMinSecond(second);
+    qDebug() << reg->GetSecs();
+  }
+}
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
@@ -236,6 +283,7 @@ void MainWindow::updateTransportParser() {
 }
 
 void MainWindow::init() {
+  setMinSecond(UINT64_MAX);
   // Force absolute DateTime.
   DataRegister::epoch = DataRegister::epoch =
       QDateTime(QDate(2018, 6, 1)); // QDateTime::fromMSecsSinceEpoch(0);
@@ -287,6 +335,7 @@ void MainWindow::parseDoubleTrace(QList<DataRegisterPtr> &coll,
           dataRegister = DataRegister::Build(0, dateTime, sdecimals);
         }
         dataRegister->SetDoubleValue(value);
+        checkMinTime(dataRegister);
         coll.append(dataRegister);
       }
     }
@@ -362,6 +411,7 @@ void MainWindow::parsePacketTrace(QList<DataRegisterPtr> &coll,
         dataRegister->SetNseq(nseq);
         if (!_seqNum)
           dataRegister->disableLink = true;
+        checkMinTime(dataRegister);
         coll.append(dataRegister);
       }
     }
@@ -440,6 +490,7 @@ void MainWindow::parsePacketErrorsTrace(const QString &fileName,
         }
         if (!_seqNum)
           dataRegister->disableLink = true;
+        checkMinTime(dataRegister);
         dlErrDataList.append(dataRegister);
       }
     }
@@ -866,5 +917,15 @@ void MainWindow::on_toolButton_clicked() {
 }
 
 void MainWindow::on_timeOffseLineEdit_textChanged(const QString &arg1) {
-  DataRegister::timeOffset = arg1.toDouble();
+  DataRegister::timeOffset = -arg1.toDouble();
 }
+
+void MainWindow::on_toolButton_2_clicked() {
+  ui->timeOffseLineEdit->setText(ui->minTimeLineEdit->text());
+}
+
+void MainWindow::on_minTimeLineEdit_textEdited(const QString &arg1) {
+  minSecond = std::floor(arg1.toDouble());
+}
+
+void MainWindow::on_pushButton_clicked() { setMinSecond(UINT64_MAX); }

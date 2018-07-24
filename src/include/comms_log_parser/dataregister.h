@@ -53,6 +53,7 @@ public:
   void SetDataSize(int);
   void SetDateTime(const QDateTime &);
   void SetRelativeDateTime(const QDateTime &);
+  void UpdateTimeFromNanos(uint64_t nanos);
 
   int GetDataSize();
   QString GetDateTimeAsString(const QString &format);
