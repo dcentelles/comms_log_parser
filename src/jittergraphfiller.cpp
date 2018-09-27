@@ -11,7 +11,7 @@ JitterGraphFiller::fillGraphData(const QList<DataRegisterPtr> &regs) {
 
   for (auto it = regs.begin(); it != regs.end(); it++) {
     auto dr = *it;
-    if (dr->JitterValud()) {
+    if (dr->JitterValid()) {
       auto secSinceEpoch = dr->GetSecs();
       auto secs = secSinceEpoch; // - secsBegin;
       gd.key = secs;

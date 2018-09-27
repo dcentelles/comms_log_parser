@@ -65,7 +65,7 @@ DataRegister::DataRegister(int size, const QDateTime &time,
 void DataRegister::init() {
   //  timeFormat = "yyyy-MM-dd HH:mm:ss.zzz";
   _nseq = -1;
-  _jitterValid = false;
+  _ns2JitterValid = false;
 }
 
 void DataRegister::SetDataSize(int size) { dataSize = size; }
@@ -178,11 +178,15 @@ void DataRegister::ComputeLinks(QList<DataRegisterPtr> txl,
   }
 }
 
-void DataRegister::ComputeEnd2EndDelay(QList<DataRegisterPtr> rxl, double &btt,
-                                       double &bttSd) {
+void DataRegister::ComputeEnd2EndDelayAndJitter(QList<DataRegisterPtr> rxl,
+                                                double &btt, double &bttSd, double & jitterMean) {
   btt = 0;
   bttSd = 0;
   int count = 0;
+  bool first = true;
+  double lastEnd2EndDelay;
+  jitterMean = 0;
+  int jitterCount = 0;
   for (auto rx : rxl) {
     auto tx = rx->GetLinkedRegister();
     if (tx) {
@@ -195,8 +199,22 @@ void DataRegister::ComputeEnd2EndDelay(QList<DataRegisterPtr> rxl, double &btt,
       btt += _btt;
       rx->_end2EndDelay = _btt;
       count++;
+      if (first)
+        first = false;
+      else {
+        double jitter = fabs(_btt - lastEnd2EndDelay);
+        rx->_jitter = jitter;
+        tx->_jitter = jitter;
+        rx->_jitterValid = true;
+        tx->_jitterValid = true;
+        jitterMean += jitter;
+        jitterCount += 1;
+      }
+
+      lastEnd2EndDelay = _btt;
     }
   }
+  jitterMean = jitterMean / jitterCount;
 
   btt /= count;
   for (auto rx : rxl) {
@@ -242,8 +260,8 @@ void DataRegister::GetGapData(QList<DataRegisterPtr> data, double &gap,
   }
 }
 
-void DataRegister::GetRxGapAndComputeJitter(QList<DataRegisterPtr> data,
-                                            double &gap, double &gapSd) {
+void DataRegister::GetRxGapAndComputeNS2Jitter(QList<DataRegisterPtr> data,
+                                               double &gap, double &gapSd) {
   gap = 0;
   gapSd = 0;
 
@@ -278,9 +296,9 @@ void DataRegister::GetRxGapAndComputeJitter(QList<DataRegisterPtr> data,
         // diff < 0
         seqdiff = seqMaxValue + seqdiff;
       }
-      reg->_jitter = _gap / seqdiff;
-      reg->_jitterValid = true;
-      gap += reg->_jitter;
+      reg->_ns2Jitter = _gap / seqdiff;
+      reg->_ns2JitterValid = true;
+      gap += reg->_ns2Jitter;
       count++;
 
       t0 = t1;

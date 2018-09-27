@@ -516,7 +516,7 @@ void MainWindow::updateLineEditText(QLineEdit *le, const QString &txt) {
 
 void MainWindow::on_dl_computeButton_clicked() {
   QList<DataRegisterPtr> txDataListFiltered, rxDataListFiltered;
-
+  getT0Tn(_t0, _t1);
   computeData(
 
       ui->dl_sendLineEdit,
@@ -559,6 +559,16 @@ void MainWindow::on_dl_rxBrowseButton_clicked() {
   }
 }
 
+void MainWindow::getT0Tn(uint64_t &t0, uint64_t &tn) {
+  if (dlTxDataList.size() && dlRxDataList.size()) {
+    auto t0reg = GetDataRegisterFromId(ui->dl_txT0->text(), dlTxDataList);
+    auto tnreg = GetDataRegisterFromId(ui->dl_rxT1->text(), dlRxDataList);
+
+    t0 = t0reg->GetNanos();
+    tn = tnreg->GetNanos();
+  }
+}
+
 void MainWindow::on_dl_parseTimesButton_clicked() {
   updateTransportParser();
   _lastWithSeqNum = _seqNum;
@@ -569,14 +579,7 @@ void MainWindow::on_dl_parseTimesButton_clicked() {
                    ui->dl_rxT1ComboBox);
 
   parsePacketErrorsTrace(dlRxFileName, dlErrPattern);
-
-  if (dlTxDataList.size() && dlRxDataList.size()) {
-    auto t0reg = GetDataRegisterFromId(ui->dl_txT0->text(), dlTxDataList);
-    auto tnreg = GetDataRegisterFromId(ui->dl_rxT1->text(), dlRxDataList);
-
-    _t0 = t0reg->GetNanos();
-    _t1 = tnreg->GetNanos();
-  }
+  getT0Tn(_t0, _t1);
 }
 
 void MainWindow::computeData(
@@ -628,7 +631,7 @@ void MainWindow::computeData(
                      QString::number(totalFallos - errors.count()));
 
   if (_lastWithSeqNum)
-    DataRegister::GetRxGapAndComputeJitter(rxDataListFiltered, rxGap, rxGapSd);
+    DataRegister::GetRxGapAndComputeNS2Jitter(rxDataListFiltered, rxGap, rxGapSd);
   else
     DataRegister::GetGapData(rxDataListFiltered, rxGap, rxGapSd);
 
@@ -682,9 +685,10 @@ void MainWindow::computeData(
     jitterPlot->show();
     jitterPlot->Plot(rxDataListFiltered, "Jitter", _t0, _t1, tagDesc);
 
+    double jitter;
     // Plot End2End delay gaussian
-    DataRegister::ComputeEnd2EndDelay(rxDataListFiltered, btt, bttSd);
-
+    DataRegister::ComputeEnd2EndDelayAndJitter(rxDataListFiltered, btt, bttSd, jitter);
+    updateLineEditText(ui->dl_jitter, QString::number(jitter));
     updateLineEditText(ui->dl_transmissionTime, QString::number(btt));
     updateLineEditText(ui->dl_transmissionTimeSD, QString::number(bttSd));
 

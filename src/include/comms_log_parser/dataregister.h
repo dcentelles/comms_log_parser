@@ -33,7 +33,7 @@ public:
   static void GetGapData(QList<DataRegisterPtr> data, double &gap,
                          double &gapSd);
 
-  static void GetRxGapAndComputeJitter(QList<DataRegisterPtr> data, double &gap,
+  static void GetRxGapAndComputeNS2Jitter(QList<DataRegisterPtr> data, double &gap,
                                        double &gapSd);
 
   static void GetDataRate(QList<DataRegisterPtr> data, double &dataRate);
@@ -41,8 +41,8 @@ public:
   static void GetPDUSize(QList<DataRegisterPtr> data, double &packetSize,
                          double &packetSizeSd);
 
-  static void ComputeEnd2EndDelay(QList<DataRegisterPtr> data, double &tt,
-                                  double &ttSd);
+  static void ComputeEnd2EndDelayAndJitter(QList<DataRegisterPtr> data, double &tt,
+                                  double &ttSd, double &jitter);
 
   enum SeqType { UINT8, UINT16, UINT32 };
 
@@ -65,8 +65,11 @@ public:
   void SetLinkedRegister(DataRegisterPtr);
   inline double GetEnd2EndDelay() { return _end2EndDelay; } // ms
 
+  inline double GetNS2Jitter() { return _ns2Jitter; }
+  inline bool NS2JitterValid() { return _ns2JitterValid; }
+
   inline double GetJitter() { return _jitter; }
-  inline double JitterValud() { return _jitterValid; }
+  inline bool JitterValid() { return _jitterValid; }
 
   inline void SetDoubleValue(double v) { _doubleValue = v; }
   inline double GetDoubleValue() { return _doubleValue; }
@@ -99,8 +102,8 @@ private:
   QDateTime _absoluteDateTime, _relativeDateTime;
   int dataSize;
   int _ptt;
-  double _jitter;
-  double _jitterValid;
+  double _ns2Jitter, _jitter;
+  bool _ns2JitterValid, _jitterValid;
   double _end2EndDelay;
   double _doubleValue;
   uint64_t _nseq, _nanos, _nanosSinceSecond;

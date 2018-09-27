@@ -191,6 +191,8 @@ private:
     void checkMinTime(DataRegisterPtr reg);
     void setMinSecond(uint64_t second);
     uint64_t minSecond;
+
+    void getT0Tn(uint64_t &t0, uint64_t &tn);
   };
 
 #endif // MAINWINDOW_H

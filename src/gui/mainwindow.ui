@@ -69,7 +69,7 @@
            </size>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -1092,6 +1092,23 @@ From min time</string>
                </item>
                <item row="3" column="1">
                 <widget class="QLineEdit" name="dl_transmissionTimeSD">
+                 <property name="minimumSize">
+                  <size>
+                   <width>70</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="0">
+                <widget class="QLabel" name="label_36">
+                 <property name="text">
+                  <string>Jitter (ms):</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="1">
+                <widget class="QLineEdit" name="dl_jitter">
                  <property name="minimumSize">
                   <size>
                    <width>70</width>
