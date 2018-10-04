@@ -631,7 +631,8 @@ void MainWindow::computeData(
                      QString::number(totalFallos - errors.count()));
 
   if (_lastWithSeqNum)
-    DataRegister::GetRxGapAndComputeNS2Jitter(rxDataListFiltered, rxGap, rxGapSd);
+    DataRegister::GetRxGapAndComputeNS2Jitter(rxDataListFiltered, rxGap,
+                                              rxGapSd);
   else
     DataRegister::GetGapData(rxDataListFiltered, rxGap, rxGapSd);
 
@@ -669,7 +670,8 @@ void MainWindow::computeData(
   if (_lastWithSeqNum && rxDataListFiltered.size() > 0) {
     double jitter;
     // Plot End2End delay gaussian
-    DataRegister::ComputeEnd2EndDelayAndJitter(rxDataListFiltered, btt, bttSd, jitter);
+    DataRegister::ComputeEnd2EndDelayAndJitter(rxDataListFiltered, btt, bttSd,
+                                               jitter);
     updateLineEditText(ui->dl_jitter, QString::number(jitter));
     updateLineEditText(ui->dl_transmissionTime, QString::number(btt));
     updateLineEditText(ui->dl_transmissionTimeSD, QString::number(bttSd));
@@ -711,7 +713,6 @@ void MainWindow::computeData(
 
     jitterPlot->show();
     jitterPlot->Plot(rxDataListFiltered, "Jitter", _t0, _t1, tagDesc);
-
   }
 }
 
@@ -804,19 +805,21 @@ void MainWindow::on_dl_plotButton_clicked() {
   auto erTitle = ui->erTitleLineEdit->text();
 
   if (GetPlotOver() && _lastPktTracePlotWindow) {
-    enableDefaultLegend(_lastPktTracePlotWindow);
     if (!_simulation)
-      _lastPktTracePlotWindow->PlotOver(dlTxDataList, dlRxDataList,
-                                        dlErrDataList, _t0, _t1, txTitle,
-                                        rxTitle, erTitle, GetPlotErrors());
+      _lastPktTracePlotWindow->PlotOver(
+          dlTxDataList, dlRxDataList, dlErrDataList, _t0, _t1, txTitle, rxTitle,
+          erTitle, ui->plotLinksCheckBox->isChecked(), GetPlotErrors());
     else
       _lastPktTracePlotWindow->PlotOver(
           dlTxDataList, dlRxDataList, dlPropErrDataList, dlColErrDataList,
-          dlMultErrDataList, _t0, _t1, txTitle, rxTitle, erTitle);
+          dlMultErrDataList, _t0, _t1, txTitle, rxTitle, erTitle,
+          ui->plotLinksCheckBox->isChecked());
   } else {
     DataPlotWindowPtr dwRx;
 
     dwRx = DataPlotWindowPtr(new DataPlotWindow());
+
+    enableDefaultLegend(dwRx);
     _pktTracePlotList.push_back(dwRx);
 
     formatPlot(dwRx, "PDU Size (bytes)", "Time");
@@ -824,11 +827,12 @@ void MainWindow::on_dl_plotButton_clicked() {
 
     if (!_simulation)
       dwRx->Plot(dlTxDataList, dlRxDataList, dlErrDataList, _t0, _t1, txTitle,
-                 rxTitle, erTitle, GetPlotErrors());
+                 rxTitle, erTitle, ui->plotLinksCheckBox->isChecked(),
+                 GetPlotErrors());
     else
       dwRx->Plot(dlTxDataList, dlRxDataList, dlPropErrDataList,
                  dlColErrDataList, dlMultErrDataList, _t0, _t1, txTitle,
-                 rxTitle, erTitle);
+                 rxTitle, erTitle, ui->plotLinksCheckBox->isChecked());
     _lastPktTracePlotWindow = dwRx;
   }
 }
@@ -934,3 +938,5 @@ void MainWindow::on_minTimeLineEdit_textEdited(const QString &arg1) {
 }
 
 void MainWindow::on_pushButton_clicked() { setMinSecond(UINT64_MAX); }
+
+void MainWindow::on_plotLinksCheckBox_toggled(bool checked) {}

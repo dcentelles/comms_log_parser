@@ -179,7 +179,8 @@ void DataRegister::ComputeLinks(QList<DataRegisterPtr> txl,
 }
 
 void DataRegister::ComputeEnd2EndDelayAndJitter(QList<DataRegisterPtr> rxl,
-                                                double &btt, double &bttSd, double & jitterMean) {
+                                                double &btt, double &bttSd,
+                                                double &jitterMean) {
   btt = 0;
   bttSd = 0;
   int count = 0;
@@ -199,9 +200,11 @@ void DataRegister::ComputeEnd2EndDelayAndJitter(QList<DataRegisterPtr> rxl,
       btt += _btt;
       rx->_end2EndDelay = _btt;
       count++;
-      if (first)
+      if (first) {
         first = false;
-      else {
+        rx->_jitterValid = false;
+        tx->_jitterValid = false;
+      } else {
         double jitter = fabs(_btt - lastEnd2EndDelay);
         rx->_jitter = jitter;
         tx->_jitter = jitter;
@@ -282,6 +285,7 @@ void DataRegister::GetRxGapAndComputeNS2Jitter(QList<DataRegisterPtr> data,
     auto seq0 = data[0]->GetNseq();
 
     int count = 0;
+    data[0]->_ns2JitterValid = false;
     for (int i = 1; i < data.count(); i++) {
       auto reg = data[i];
       auto seq1 = reg->GetNseq();

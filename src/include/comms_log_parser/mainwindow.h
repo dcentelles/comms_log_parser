@@ -26,6 +26,9 @@ public:
   ~MainWindow();
 
 private slots:
+  void on_plotLinksCheckBox_toggled(bool checked);
+
+private slots:
   void on_pushButton_clicked();
 
 private slots:

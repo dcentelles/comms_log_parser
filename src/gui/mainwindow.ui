@@ -1241,6 +1241,19 @@ From min time</string>
              <string>Plot Errors</string>
             </property>
            </widget>
+           <widget class="QCheckBox" name="plotLinksCheckBox">
+            <property name="geometry">
+             <rect>
+              <x>750</x>
+              <y>400</y>
+              <width>151</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Plot links</string>
+            </property>
+           </widget>
           </widget>
           <widget class="QWidget" name="tab_2">
            <attribute name="title">

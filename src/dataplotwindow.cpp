@@ -57,7 +57,7 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
                           QList<DataRegisterPtr> errors, uint64_t tini,
                           uint64_t tend, const QString &txtitle,
                           const QString &rxtitle, const QString &errtitle,
-                          bool addErr) {
+                          bool plotLinks, bool addErr) {
   // INICIALIZAR PLOT
 
   QCustomPlot *plot = ui->plotWidget;
@@ -104,7 +104,8 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
     errGraph->setPen(pen);
   }
 
-  DrawDRsLinksToTimeGraph(plot, txPdus);
+  if(plotLinks)
+    DrawDRsLinksToTimeGraph(plot, txPdus);
 
   // DIBUJAR
   plot->replot();
@@ -117,7 +118,7 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
                               QList<DataRegisterPtr> rxPdus,
                               QList<DataRegisterPtr> errors, uint64_t tini,
                               uint64_t tend, const QString &txtitle,
-                              const QString &rxtitle, const QString &errtitle,
+                              const QString &rxtitle, const QString &errtitle, bool plotLinks,
                               bool addErr) {
   QCustomPlot *plot = ui->plotWidget;
 
@@ -182,7 +183,8 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
     errGraph->setScatterStyle(style);
   }
 
-  DrawDRsLinksToTimeGraph(plot, txPdus);
+  if(plotLinks)
+    DrawDRsLinksToTimeGraph(plot, txPdus);
 
   // DIBUJAR
   plot->replot();
@@ -194,7 +196,7 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
                           QList<DataRegisterPtr> colErrors,
                           QList<DataRegisterPtr> multErrors, uint64_t tini,
                           uint64_t tend, const QString &txtitle,
-                          const QString &rxtitle, const QString &errtitle) {
+                          const QString &rxtitle, const QString &errtitle, bool plotLinks) {
   // INICIALIZAR PLOT
 
   QCustomPlot *plot = ui->plotWidget;
@@ -252,7 +254,8 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
   pen.setColor(QColor(255, 153, 51));
   multErrGraph->setPen(pen);
 
-  DrawDRsLinksToTimeGraph(plot, txPdus);
+  if(plotLinks)
+    DrawDRsLinksToTimeGraph(plot, txPdus);
 
   // DIBUJAR
   plot->replot();
@@ -267,7 +270,7 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
                               QList<DataRegisterPtr> colErrors,
                               QList<DataRegisterPtr> multErrors, uint64_t tini,
                               uint64_t tend, const QString &txtitle,
-                              const QString &rxtitle, const QString &errtitle) {
+                              const QString &rxtitle, const QString &errtitle, bool plotLinks) {
   QCustomPlot *plot = ui->plotWidget;
 
   if (txPdus.count() == 0)
@@ -346,7 +349,8 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
   colErrGraph->setScatterStyle(style);
   multErrGraph->setScatterStyle(style);
 
-  DrawDRsLinksToTimeGraph(plot, txPdus);
+  if(plotLinks)
+    DrawDRsLinksToTimeGraph(plot, txPdus);
 
   // DIBUJAR
   plot->replot();
