@@ -667,24 +667,6 @@ void MainWindow::computeData(
 
   // Transmission time
   if (_lastWithSeqNum && rxDataListFiltered.size() > 0) {
-    // Plot Jitter
-    std::shared_ptr<DateTimePlotWindow> jitterPlot;
-    if (jitterPlotList.size() == 0 || !GetPlotOver()) {
-      jitterPlot =
-          std::shared_ptr<DateTimePlotWindow>(new DateTimePlotWindow());
-      jitterPlot->SetGraphFiller(GraphFillerPtr(new JitterGraphFiller()));
-
-      formatPlot(jitterPlot, "Jitter (ms)", "Time");
-
-      jitterPlotList.push_front(jitterPlot);
-    } else {
-      jitterPlot = jitterPlotList.front();
-      enableDefaultLegend(jitterPlot);
-    }
-
-    jitterPlot->show();
-    jitterPlot->Plot(rxDataListFiltered, "Jitter", _t0, _t1, tagDesc);
-
     double jitter;
     // Plot End2End delay gaussian
     DataRegister::ComputeEnd2EndDelayAndJitter(rxDataListFiltered, btt, bttSd, jitter);
@@ -711,6 +693,25 @@ void MainWindow::computeData(
     }
     e2ePlot->show();
     e2ePlot->Plot(rxDataListFiltered, "End-End delay", _t0, _t1, tagDesc);
+
+    // Plot Jitter
+    std::shared_ptr<DateTimePlotWindow> jitterPlot;
+    if (jitterPlotList.size() == 0 || !GetPlotOver()) {
+      jitterPlot =
+          std::shared_ptr<DateTimePlotWindow>(new DateTimePlotWindow());
+      jitterPlot->SetGraphFiller(GraphFillerPtr(new JitterGraphFiller()));
+
+      formatPlot(jitterPlot, "Jitter (ms)", "Time");
+
+      jitterPlotList.push_front(jitterPlot);
+    } else {
+      jitterPlot = jitterPlotList.front();
+      enableDefaultLegend(jitterPlot);
+    }
+
+    jitterPlot->show();
+    jitterPlot->Plot(rxDataListFiltered, "Jitter", _t0, _t1, tagDesc);
+
   }
 }
 
