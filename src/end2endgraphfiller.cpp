@@ -1,5 +1,4 @@
 #include <comms_log_parser/end2endgraphfiller.h>
-#include <ui_end2endplotwindow.h>
 
 End2EndGraphFiller::End2EndGraphFiller() {}
 

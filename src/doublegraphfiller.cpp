@@ -1,5 +1,4 @@
 #include <comms_log_parser/doublegraphfiller.h>
-#include <ui_end2endplotwindow.h>
 
 DoubleGraphFiller::DoubleGraphFiller() {}
 

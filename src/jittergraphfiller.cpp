@@ -1,5 +1,4 @@
 #include <comms_log_parser/jittergraphfiller.h>
-#include <ui_jitterplotwindow.h>
 
 JitterGraphFiller::JitterGraphFiller() {}
 
