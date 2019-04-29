@@ -115,7 +115,7 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
     auto errGraph = plot->graph(2);
     errGraph->setName(errtitle);
     setDRsToTimeGraph(errGraph, errors, yTicksTextLabels, EVENT_RX_PERR);
-    pen.setColor(QColor(255, 0, 0));
+    pen.setColor(QColor(0, 0, 0));
     errGraph->setPen(pen);
   }
 
@@ -194,7 +194,7 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
     auto errGraph = plot->graph(idx + 2);
     errGraph->setName(errtitle);
     setDRsToTimeGraph(errGraph, errors, yTicksTextLabels, EVENT_RX_PERR);
-    pen.setColor(QColor(255, 0, 0));
+    pen.setColor(QColor(0, 0, 0));
     errGraph->setPen(pen);
     errGraph->setScatterStyle(style);
   }
