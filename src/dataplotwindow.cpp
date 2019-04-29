@@ -1,3 +1,4 @@
+#include <comms_log_parser/common.h>
 #include <comms_log_parser/dataplotwindow.h>
 
 DataPlotWindow::DataPlotWindow(QWidget *parent) : DateTimePlotWindow(parent) {}
@@ -5,26 +6,40 @@ DataPlotWindow::DataPlotWindow(QWidget *parent) : DateTimePlotWindow(parent) {}
 DataPlotWindow::~DataPlotWindow() {}
 
 void DataPlotWindow::setDRsToTimeGraph(QCPGraph *graph,
-                                       QList<DataRegisterPtr> drs) {
+                                       QList<DataRegisterPtr> drs,
+                                       bool yTicksTextLabels,
+                                       double newYValue) {
   graph->setScatterStyle(QCPScatterStyle::ssDisc);
   graph->setLineStyle(QCPGraph::lsNone);
 
   QVector<QCPGraphData> dRsGraphData(drs.count());
 
-  for (int i = 0; i < dRsGraphData.count(); i++) {
-    auto dr = drs[i];
-    auto date = dr->GetSecs();
-    // auto secSinceEpoch = (date.toMSecsSinceEpoch () - msT0) / 1000.;
-    auto secSinceEpoch = date;
-    dRsGraphData[i].key = secSinceEpoch;
-    dRsGraphData[i].value = dr->GetDataSize();
+  if (yTicksTextLabels) {
+    for (int i = 0; i < dRsGraphData.count(); i++) {
+      auto dr = drs[i];
+      auto date = dr->GetSecs();
+      // auto secSinceEpoch = (date.toMSecsSinceEpoch () - msT0) / 1000.;
+      auto secSinceEpoch = date;
+      dRsGraphData[i].key = secSinceEpoch;
+      dRsGraphData[i].value = newYValue;
+    }
+  } else {
+    for (int i = 0; i < dRsGraphData.count(); i++) {
+      auto dr = drs[i];
+      auto date = dr->GetSecs();
+      // auto secSinceEpoch = (date.toMSecsSinceEpoch () - msT0) / 1000.;
+      auto secSinceEpoch = date;
+      dRsGraphData[i].key = secSinceEpoch;
+      dRsGraphData[i].value = dr->GetDataSize();
+    }
   }
 
   graph->data()->set(dRsGraphData);
 }
 
 void DataPlotWindow::DrawDRsLinksToTimeGraph(QCustomPlot *plot,
-                                             QList<DataRegisterPtr> pdus) {
+                                             QList<DataRegisterPtr> pdus,
+                                             bool yTicksTextLabels) {
   auto count = pdus.count();
   for (int idx = 0; idx < count; idx++) {
     auto link = pdus.at(idx);
@@ -57,7 +72,7 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
                           QList<DataRegisterPtr> errors, uint64_t tini,
                           uint64_t tend, const QString &txtitle,
                           const QString &rxtitle, const QString &errtitle,
-                          bool plotLinks, bool addErr) {
+                          bool plotLinks, bool addErr, bool yTicksTextLabels) {
   // INICIALIZAR PLOT
 
   QCustomPlot *plot = ui->plotWidget;
@@ -84,14 +99,14 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
   plot->addGraph(); // Paquetes enviados
   auto txGraph = plot->graph(0);
   txGraph->setName(txtitle);
-  setDRsToTimeGraph(txGraph, txPdus);
+  setDRsToTimeGraph(txGraph, txPdus, yTicksTextLabels, EVENT_TX);
   pen.setColor(QColor(0, 0, 255));
   txGraph->setPen(pen);
 
   plot->addGraph(); // Paquetes recibidos
   auto rxGraph = plot->graph(1);
   rxGraph->setName(rxtitle);
-  setDRsToTimeGraph(rxGraph, rxPdus);
+  setDRsToTimeGraph(rxGraph, rxPdus, yTicksTextLabels, EVENT_RX_OK);
   pen.setColor(QColor(0, 255, 0));
   rxGraph->setPen(pen);
 
@@ -99,12 +114,12 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
     plot->addGraph(); // Paquetes recibidos con error
     auto errGraph = plot->graph(2);
     errGraph->setName(errtitle);
-    setDRsToTimeGraph(errGraph, errors);
+    setDRsToTimeGraph(errGraph, errors, yTicksTextLabels, EVENT_RX_PERR);
     pen.setColor(QColor(255, 0, 0));
     errGraph->setPen(pen);
   }
 
-  if(plotLinks)
+  if (plotLinks)
     DrawDRsLinksToTimeGraph(plot, txPdus);
 
   // DIBUJAR
@@ -118,8 +133,9 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
                               QList<DataRegisterPtr> rxPdus,
                               QList<DataRegisterPtr> errors, uint64_t tini,
                               uint64_t tend, const QString &txtitle,
-                              const QString &rxtitle, const QString &errtitle, bool plotLinks,
-                              bool addErr) {
+                              const QString &rxtitle, const QString &errtitle,
+                              bool plotLinks, bool addErr,
+                              bool yTicksTextLabels) {
   QCustomPlot *plot = ui->plotWidget;
 
   if (txPdus.count() == 0)
@@ -160,7 +176,7 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
   plot->addGraph(); // Paquetes enviados
   auto txGraph = plot->graph(idx);
   txGraph->setName(txtitle);
-  setDRsToTimeGraph(txGraph, txPdus);
+  setDRsToTimeGraph(txGraph, txPdus, yTicksTextLabels, EVENT_TX);
   pen.setColor(QColor(0, 0, 255));
   txGraph->setPen(pen);
   txGraph->setScatterStyle(style);
@@ -168,7 +184,7 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
   plot->addGraph(); // Paquetes recibidos
   auto rxGraph = plot->graph(idx + 1);
   rxGraph->setName(rxtitle);
-  setDRsToTimeGraph(rxGraph, rxPdus);
+  setDRsToTimeGraph(rxGraph, rxPdus, yTicksTextLabels, EVENT_RX_OK);
   pen.setColor(QColor(0, 255, 0));
   rxGraph->setPen(pen);
   rxGraph->setScatterStyle(style);
@@ -177,13 +193,13 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
     plot->addGraph(); // Paquetes recibidos con error
     auto errGraph = plot->graph(idx + 2);
     errGraph->setName(errtitle);
-    setDRsToTimeGraph(errGraph, errors);
+    setDRsToTimeGraph(errGraph, errors, yTicksTextLabels, EVENT_RX_PERR);
     pen.setColor(QColor(255, 0, 0));
     errGraph->setPen(pen);
     errGraph->setScatterStyle(style);
   }
 
-  if(plotLinks)
+  if (plotLinks)
     DrawDRsLinksToTimeGraph(plot, txPdus);
 
   // DIBUJAR
@@ -196,7 +212,8 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
                           QList<DataRegisterPtr> colErrors,
                           QList<DataRegisterPtr> multErrors, uint64_t tini,
                           uint64_t tend, const QString &txtitle,
-                          const QString &rxtitle, const QString &errtitle, bool plotLinks) {
+                          const QString &rxtitle, const QString &errtitle,
+                          bool plotLinks, bool yTicksTextLabels) {
   // INICIALIZAR PLOT
 
   QCustomPlot *plot = ui->plotWidget;
@@ -236,11 +253,11 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
   auto multErrGraph = plot->graph(4);
   multErrGraph->setName(errtitle + "(MULT)");
 
-  setDRsToTimeGraph(txGraph, txPdus);
-  setDRsToTimeGraph(rxGraph, rxPdus);
-  setDRsToTimeGraph(propErrGraph, propErrors);
-  setDRsToTimeGraph(colErrGraph, colErrors);
-  setDRsToTimeGraph(multErrGraph, multErrors);
+  setDRsToTimeGraph(txGraph, txPdus, yTicksTextLabels, EVENT_TX);
+  setDRsToTimeGraph(rxGraph, rxPdus, yTicksTextLabels, EVENT_RX_OK);
+  setDRsToTimeGraph(propErrGraph, propErrors, yTicksTextLabels, EVENT_RX_PERR);
+  setDRsToTimeGraph(colErrGraph, colErrors, yTicksTextLabels, EVENT_RX_COL);
+  setDRsToTimeGraph(multErrGraph, multErrors, yTicksTextLabels, EVENT_RX_MULT);
 
   QPen pen;
   pen.setColor(QColor(0, 0, 255));
@@ -254,7 +271,7 @@ void DataPlotWindow::Plot(QList<DataRegisterPtr> txPdus,
   pen.setColor(QColor(255, 153, 51));
   multErrGraph->setPen(pen);
 
-  if(plotLinks)
+  if (plotLinks)
     DrawDRsLinksToTimeGraph(plot, txPdus);
 
   // DIBUJAR
@@ -270,7 +287,8 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
                               QList<DataRegisterPtr> colErrors,
                               QList<DataRegisterPtr> multErrors, uint64_t tini,
                               uint64_t tend, const QString &txtitle,
-                              const QString &rxtitle, const QString &errtitle, bool plotLinks) {
+                              const QString &rxtitle, const QString &errtitle,
+                              bool plotLinks, bool yTicksTextLabels) {
   QCustomPlot *plot = ui->plotWidget;
 
   if (txPdus.count() == 0)
@@ -305,11 +323,11 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
   auto multErrGraph = plot->graph(idx + 4);
   multErrGraph->setName(errtitle + "(MULT)");
 
-  setDRsToTimeGraph(txGraph, txPdus);
-  setDRsToTimeGraph(rxGraph, rxPdus);
-  setDRsToTimeGraph(propErrGraph, propErrors);
-  setDRsToTimeGraph(colErrGraph, colErrors);
-  setDRsToTimeGraph(multErrGraph, multErrors);
+  setDRsToTimeGraph(txGraph, txPdus, yTicksTextLabels, EVENT_TX);
+  setDRsToTimeGraph(rxGraph, rxPdus, yTicksTextLabels, EVENT_RX_OK);
+  setDRsToTimeGraph(propErrGraph, propErrors, yTicksTextLabels, EVENT_RX_PERR);
+  setDRsToTimeGraph(colErrGraph, colErrors, yTicksTextLabels, EVENT_RX_COL);
+  setDRsToTimeGraph(multErrGraph, multErrors, yTicksTextLabels, EVENT_RX_MULT);
 
   QPen pen;
   pen.setColor(QColor(0, 0, 255));
@@ -349,7 +367,7 @@ void DataPlotWindow::PlotOver(QList<DataRegisterPtr> txPdus,
   colErrGraph->setScatterStyle(style);
   multErrGraph->setScatterStyle(style);
 
-  if(plotLinks)
+  if (plotLinks)
     DrawDRsLinksToTimeGraph(plot, txPdus);
 
   // DIBUJAR

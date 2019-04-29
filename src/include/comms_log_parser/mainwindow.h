@@ -111,91 +111,89 @@ private:
   void parsePacketErrorsTrace(const QString &fileName,
                               const QRegularExpression &reg);
 
-    void parseDoubleTrace(QList<DataRegisterPtr> & dataList,
-                          const QString &fileName,
-                          const QRegularExpression &reg, const QString &xlabel,
-                          const QString &ylabel, const QString &seriesLabel,
-                          bool plotOver);
-    void computeData(QLineEdit * sendLineEdit,
+  void parseDoubleTrace(QList<DataRegisterPtr> &dataList,
+                        const QString &fileName, const QRegularExpression &reg,
+                        const QString &xlabel, const QString &ylabel,
+                        const QString &seriesLabel, bool plotOver);
+  void computeData(QLineEdit *sendLineEdit,
 
-                     QLineEdit * txGapLineEdit, QLineEdit * txGapSdLineEdit,
+                   QLineEdit *txGapLineEdit, QLineEdit *txGapSdLineEdit,
 
-                     QLineEdit * recvLineEdit, QLineEdit * failsLineEdit,
-                     QLineEdit * errLineEdit, QLineEdit * lostLineEdit,
+                   QLineEdit *recvLineEdit, QLineEdit *failsLineEdit,
+                   QLineEdit *errLineEdit, QLineEdit *lostLineEdit,
 
-                     QLineEdit * rxGapLineEdit, QLineEdit * rxGapSdLineEdit,
+                   QLineEdit *rxGapLineEdit, QLineEdit *rxGapSdLineEdit,
 
-                     QLineEdit * rxDataRateLineEdit,
-                     QLineEdit * txDataRateLineEdit,
+                   QLineEdit *rxDataRateLineEdit, QLineEdit *txDataRateLineEdit,
 
-                     QList<DataRegisterPtr> & txDataList,
-                     QList<DataRegisterPtr> & rxDataList,
+                   QList<DataRegisterPtr> &txDataList,
+                   QList<DataRegisterPtr> &rxDataList,
 
-                     QList<DataRegisterPtr> & errDataList,
+                   QList<DataRegisterPtr> &errDataList,
 
-                     QList<DataRegisterPtr> & txDataListFiltered,
-                     QList<DataRegisterPtr> & rxDataListFiltered);
-    Ui::MainWindow *ui;
-    QString appTxFileName, appRxFileName, dlTxFileName, dlRxFileName,
-        timeValueFileName;
-    QRegularExpression dlTxPattern, dlErrPattern, dlRxPattern,
-        _timeValuePattern;
+                   QList<DataRegisterPtr> &txDataListFiltered,
+                   QList<DataRegisterPtr> &rxDataListFiltered);
+  Ui::MainWindow *ui;
+  QString appTxFileName, appRxFileName, dlTxFileName, dlRxFileName,
+      timeValueFileName;
+  QRegularExpression dlTxPattern, dlErrPattern, dlRxPattern, _timeValuePattern;
 
-    QList<QString> appTxList;
-    QString _txTransportDefaultDir, _rxTransportDefaultDir, _timeValueDefaultDir;
-    QList<DataRegisterPtr> dlRxDataList, dlTxDataList, appErrDataList,
-        dlErrDataList, dlPropErrDataList, dlColErrDataList, dlMultErrDataList,
-        _timeValueDataList;
+  QList<QString> appTxList;
+  QString _txTransportDefaultDir, _rxTransportDefaultDir, _timeValueDefaultDir;
+  QList<DataRegisterPtr> dlRxDataList, dlTxDataList, appErrDataList,
+      dlErrDataList, dlPropErrDataList, dlColErrDataList, dlMultErrDataList,
+      _timeValueDataList;
 
-    double txGap, txGapSd;
-    int totalFallos;
-    QList<DataRegisterPtr> errors;
-    double rxGap, rxGapSd;
-    double rxDataRate, txDataRate;
-    double pduSize, pduSizeSd;
-    double btt, bttSd;
+  double txGap, txGapSd;
+  int totalFallos;
+  QList<DataRegisterPtr> errors;
+  double rxGap, rxGapSd;
+  double rxDataRate, txDataRate;
+  double pduSize, pduSizeSd;
+  double btt, bttSd;
 
-    int GetPktSizeOffset();
-    int GetPktSizeIndex();
-    int GetDateTimeIndex();
-    int GetDecimalsIndex();
-    int GetRelativeValueIndex();
-    int GetSeqIndex();
-    bool GetPlotOver();
-    bool GetPlotErrors();
-    QString GetTransportTag();
+  int GetPktSizeOffset();
+  int GetPktSizeIndex();
+  int GetDateTimeIndex();
+  int GetDecimalsIndex();
+  int GetRelativeValueIndex();
+  int GetSeqIndex();
+  bool GetPlotOver();
+  bool GetPlotErrors();
+  QString GetTransportTag();
 
-    bool TimeIsRelative();
-    void SetRelativeTime(bool);
+  bool TimeIsRelative();
+  void SetRelativeTime(bool);
 
-    void loadDefaultSettings();
-    void saveCurrentSettingsAsDefault();
-    DataRegisterPtr GetDataRegisterFromId(const QString &id,
-                                          const QList<DataRegisterPtr> &rlist);
+  void loadDefaultSettings();
+  void saveCurrentSettingsAsDefault();
+  DataRegisterPtr GetDataRegisterFromId(const QString &id,
+                                        const QList<DataRegisterPtr> &rlist);
 
-    void closeEvent(QCloseEvent * event);
+  void closeEvent(QCloseEvent *event);
 
-    QString _defaultSettingsFile;
-    QString _lastSettingsFileDir;
+  QString _defaultSettingsFile;
+  QString _lastSettingsFileDir;
 
-    int GetMaxPrefixIndex();
-    void SaveCurrentSettings(const QString &path);
-    void LoadSettingsFile(const QString &path);
+  int GetMaxPrefixIndex();
+  void SaveCurrentSettings(const QString &path);
+  void LoadSettingsFile(const QString &path);
 
-    bool _seqNum, _lastWithSeqNum, _simulation;
-    QCPGraph::LineStyle _timeValueLineStyle;
-    bool _absoluteXAxis;
+  bool _seqNum, _lastWithSeqNum, _simulation;
+  QCPGraph::LineStyle _timeValueLineStyle;
+  bool _absoluteXAxis;
 
-    void formatPlot(std::shared_ptr<DateTimePlotWindow> dwRx, const QString & ylabel, const QString & xlabel);
-    void enableDefaultLegend(std::shared_ptr<DateTimePlotWindow> dwRx);
-    int baseFontSize = 12;
+  void formatPlot(std::shared_ptr<DateTimePlotWindow> dwRx,
+                  const QString &ylabel, const QString &xlabel);
+  void enableDefaultLegend(std::shared_ptr<DateTimePlotWindow> dwRx);
+  int baseFontSize = 12;
 
-    //void updateMinTime(double seconds);
-    void checkMinTime(DataRegisterPtr reg);
-    void setMinSecond(uint64_t second);
-    uint64_t minSecond;
+  // void updateMinTime(double seconds);
+  void checkMinTime(DataRegisterPtr reg);
+  void setMinSecond(uint64_t second);
+  uint64_t minSecond;
 
-    void getT0Tn(uint64_t &t0, uint64_t &tn);
-  };
+  void getT0Tn(uint64_t &t0, uint64_t &tn);
+};
 
 #endif // MAINWINDOW_H

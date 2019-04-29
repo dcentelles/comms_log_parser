@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QSettings>
+#include <comms_log_parser/common.h>
 #include <comms_log_parser/dataplotwindow.h>
 #include <comms_log_parser/end2endgraphfiller.h>
 #include <comms_log_parser/jittergraphfiller.h>
@@ -110,6 +111,8 @@ void MainWindow::SaveCurrentSettings(const QString &path) {
   settings.setValue("transport_with_seqnum", _seqNum ? 1 : 0);
   settings.setValue("transport_simulation", _simulation ? 1 : 0);
   settings.setValue("time_value_linestyle", _timeValueLineStyle);
+  settings.setValue("plot_yticks_events",
+                    ui->yStringTicksCheckBox->isChecked() ? 1 : 0);
 }
 void MainWindow::LoadSettingsFile(const QString &path) {
   QSettings settings(path, QSettings::NativeFormat);
@@ -189,6 +192,8 @@ void MainWindow::LoadSettingsFile(const QString &path) {
     ;
     break;
   }
+  ui->yStringTicksCheckBox->setChecked(
+      settings.value("plot_yticks_events").toBool());
   updateTimeValueParser();
   updateTransportParser();
 }
@@ -780,7 +785,18 @@ void MainWindow::formatPlot(std::shared_ptr<DateTimePlotWindow> dwRx,
                                           // allowed
     ticker = fixedTicker;
   }
-  dwRx->GetYAxis()->setTicker(ticker);
+  if (ui->yStringTicksCheckBox->isChecked()) {
+    // configure left axis text labels:
+    QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText);
+    textTicker->addTick(EVENT_TX, EVENT_STR_TX);
+    textTicker->addTick(EVENT_RX_OK, EVENT_STR_RX_OK);
+    textTicker->addTick(EVENT_RX_PERR, EVENT_STR_RX_PERR);
+    textTicker->addTick(EVENT_RX_COL, EVENT_STR_RX_COL);
+    textTicker->addTick(EVENT_RX_MULT, EVENT_STR_RX_MULT);
+    dwRx->GetYAxis()->setTicker(textTicker);
+  } else {
+    dwRx->GetYAxis()->setTicker(ticker);
+  }
   dwRx->GetXAxis()->setTicker(ticker);
   if (_absoluteXAxis) {
     dwRx->GetXAxis()->setTickLabelRotation(45);
@@ -808,12 +824,14 @@ void MainWindow::on_dl_plotButton_clicked() {
     if (!_simulation)
       _lastPktTracePlotWindow->PlotOver(
           dlTxDataList, dlRxDataList, dlErrDataList, _t0, _t1, txTitle, rxTitle,
-          erTitle, ui->plotLinksCheckBox->isChecked(), GetPlotErrors());
+          erTitle, ui->plotLinksCheckBox->isChecked(), GetPlotErrors(),
+          ui->yStringTicksCheckBox->isChecked());
     else
       _lastPktTracePlotWindow->PlotOver(
           dlTxDataList, dlRxDataList, dlPropErrDataList, dlColErrDataList,
           dlMultErrDataList, _t0, _t1, txTitle, rxTitle, erTitle,
-          ui->plotLinksCheckBox->isChecked());
+          ui->plotLinksCheckBox->isChecked(),
+          ui->yStringTicksCheckBox->isChecked());
   } else {
     DataPlotWindowPtr dwRx;
 
@@ -822,17 +840,21 @@ void MainWindow::on_dl_plotButton_clicked() {
     enableDefaultLegend(dwRx);
     _pktTracePlotList.push_back(dwRx);
 
-    formatPlot(dwRx, "PDU Size (bytes)", "Time");
+    if (ui->yStringTicksCheckBox->isChecked())
+      formatPlot(dwRx, "Event Type", "Time");
+    else
+      formatPlot(dwRx, "PDU Size (bytes)", "Time");
     dwRx->show();
 
     if (!_simulation)
       dwRx->Plot(dlTxDataList, dlRxDataList, dlErrDataList, _t0, _t1, txTitle,
                  rxTitle, erTitle, ui->plotLinksCheckBox->isChecked(),
-                 GetPlotErrors());
+                 GetPlotErrors(), ui->yStringTicksCheckBox->isChecked());
     else
       dwRx->Plot(dlTxDataList, dlRxDataList, dlPropErrDataList,
                  dlColErrDataList, dlMultErrDataList, _t0, _t1, txTitle,
-                 rxTitle, erTitle, ui->plotLinksCheckBox->isChecked());
+                 rxTitle, erTitle, ui->plotLinksCheckBox->isChecked(),
+                 ui->yStringTicksCheckBox->isChecked());
     _lastPktTracePlotWindow = dwRx;
   }
 }

@@ -15,28 +15,34 @@ public:
             QList<DataRegisterPtr> propErrors, QList<DataRegisterPtr> colErrors,
             QList<DataRegisterPtr> multErrors, uint64_t tini, uint64_t tend,
             const QString &txtitle, const QString &rxtitle,
-            const QString &errtitle,  bool plotLinks = true);
+            const QString &errtitle, bool plotLinks = true,
+            bool yTicksTextLabels = true);
 
   void PlotOver(QList<DataRegisterPtr> txPdus, QList<DataRegisterPtr> rxPdus,
                 QList<DataRegisterPtr> propErrors,
                 QList<DataRegisterPtr> colErrors,
                 QList<DataRegisterPtr> multErrors, uint64_t tini, uint64_t tend,
                 const QString &txtitle, const QString &rxtitle,
-                const QString &errtitle, bool plotLinks = true);
+                const QString &errtitle, bool plotLinks = true,
+                bool yTicksTextLabels = true);
 
   void Plot(QList<DataRegisterPtr> txPdus, QList<DataRegisterPtr> rxPdus,
             QList<DataRegisterPtr> errors, uint64_t tini, uint64_t tend,
             const QString &txtitle, const QString &rxtitle,
-            const QString &errtitle,  bool plotLinks = true,  bool addErr = true);
+            const QString &errtitle, bool plotLinks = true, bool addErr = true,
+            bool yTicksTextLabels = true);
 
   void PlotOver(QList<DataRegisterPtr> txPdus, QList<DataRegisterPtr> rxPdus,
                 QList<DataRegisterPtr> errors, uint64_t tini, uint64_t tend,
                 const QString &txtitle, const QString &rxtitle,
-                const QString &errtitle,  bool plotLinks = true, bool addErr = true);
+                const QString &errtitle, bool plotLinks = true,
+                bool addErr = true, bool yTicksTextLabels = true);
 
 private:
-  void setDRsToTimeGraph(QCPGraph *graph, QList<DataRegisterPtr> drs);
-  void DrawDRsLinksToTimeGraph(QCustomPlot *plot, QList<DataRegisterPtr> pdus);
+  void setDRsToTimeGraph(QCPGraph *graph, QList<DataRegisterPtr> drs,
+                         bool yTicksTextLabels, double newYValue = 0);
+  void DrawDRsLinksToTimeGraph(QCustomPlot *plot, QList<DataRegisterPtr> pdus,
+                               bool yTicksTextLabels = true);
   int plotCount = 0;
 };
 

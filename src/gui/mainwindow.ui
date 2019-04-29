@@ -41,7 +41,7 @@
          <x>0</x>
          <y>0</y>
          <width>880</width>
-         <height>673</height>
+         <height>677</height>
         </rect>
        </property>
        <property name="minimumSize">
@@ -1254,6 +1254,19 @@ From min time</string>
              <string>Plot links</string>
             </property>
            </widget>
+           <widget class="QCheckBox" name="yStringTicksCheckBox">
+            <property name="geometry">
+             <rect>
+              <x>750</x>
+              <y>430</y>
+              <width>101</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Type Y Ticks</string>
+            </property>
+           </widget>
           </widget>
           <widget class="QWidget" name="tab_2">
            <attribute name="title">
@@ -1592,7 +1605,7 @@ Graphs</string>
      <x>0</x>
      <y>0</y>
      <width>900</width>
-     <height>22</height>
+     <height>20</height>
     </rect>
    </property>
   </widget>
