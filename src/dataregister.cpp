@@ -180,14 +180,17 @@ void DataRegister::ComputeLinks(QList<DataRegisterPtr> txl,
 
 void DataRegister::ComputeEnd2EndDelayAndJitter(QList<DataRegisterPtr> rxl,
                                                 double &btt, double &bttSd,
-                                                double &jitterMean) {
+                                                double &jitterMean,
+                                                double &jitterSd,
+                                                double &jitterSd2) {
   btt = 0;
   bttSd = 0;
   int count = 0;
   bool first = true;
   double lastEnd2EndDelay;
-  jitterMean = 0;
+  double jitterSum = 0;
   int jitterCount = 0;
+  double jitter2Sum = 0;
   for (auto rx : rxl) {
     auto tx = rx->GetLinkedRegister();
     if (tx) {
@@ -210,16 +213,21 @@ void DataRegister::ComputeEnd2EndDelayAndJitter(QList<DataRegisterPtr> rxl,
         tx->_jitter = jitter;
         rx->_jitterValid = true;
         tx->_jitterValid = true;
-        jitterMean += jitter;
+        jitterSum += jitter;
         jitterCount += 1;
+        jitter2Sum += jitter * jitter;
       }
 
       lastEnd2EndDelay = _btt;
     }
   }
-  jitterMean = jitterMean / jitterCount;
+  jitterMean = jitterSum / jitterCount;
+  double var = (jitter2Sum - (jitterMean * jitterSum)) / jitterCount;
+  jitterSd = qSqrt(var);
 
   btt /= count;
+  first = true;
+  jitterSd2 = 0;
   for (auto rx : rxl) {
     auto tx = rx->GetLinkedRegister();
     if (tx) {
@@ -227,9 +235,18 @@ void DataRegister::ComputeEnd2EndDelayAndJitter(QList<DataRegisterPtr> rxl,
       double _btt = gap;
       auto diff = _btt - btt;
       bttSd += diff * diff;
+      if (first) {
+        first = false;
+      } else {
+        double jitter = fabs(_btt - lastEnd2EndDelay);
+        double jitter_diff = jitter - jitterMean;
+        jitterSd2 += jitter_diff * jitter_diff;
+      }
+      lastEnd2EndDelay = gap;
     }
   }
   bttSd = qSqrt(bttSd / count);
+  jitterSd2 = qSqrt(jitterSd2 / jitterCount);
 }
 
 void DataRegister::GetGapData(QList<DataRegisterPtr> data, double &gap,

@@ -42,7 +42,7 @@ public:
                          double &packetSizeSd);
 
   static void ComputeEnd2EndDelayAndJitter(QList<DataRegisterPtr> data, double &tt,
-                                  double &ttSd, double &jitter);
+                                  double &ttSd, double &jitter, double &jitterSd, double &jitterSd2);
 
   enum SeqType { UINT8, UINT16, UINT32 };
 

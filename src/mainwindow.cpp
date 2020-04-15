@@ -673,11 +673,13 @@ void MainWindow::computeData(
 
   // Transmission time
   if (_lastWithSeqNum && rxDataListFiltered.size() > 0) {
-    double jitter;
+    double jitter, jitterSd, jitterSd2;
     // Plot End2End delay gaussian
     DataRegister::ComputeEnd2EndDelayAndJitter(rxDataListFiltered, btt, bttSd,
-                                               jitter);
+                                               jitter, jitterSd, jitterSd2);
     updateLineEditText(ui->dl_jitter, QString::number(jitter));
+    updateLineEditText(ui->dl_jitter_sd, QString::number(jitterSd));
+    updateLineEditText(ui->dl_jitter_sd2, QString::number(jitterSd2));
     updateLineEditText(ui->dl_transmissionTime, QString::number(btt));
     updateLineEditText(ui->dl_transmissionTimeSD, QString::number(bttSd));
 
